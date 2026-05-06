@@ -223,7 +223,7 @@
                 </div>
                 <!-- 權限不足的提示訊息 -->
                 <div id="not-elder-message" style="text-align:center; color:#005f20; font-size:14px; margin-bottom:20px; background:#e0f0e5; padding:15px; border-radius:8px; display:none; border: 1px dashed #005f20;">
-                    🔒 <b>分享動態功能</b> 多多參與聚會與投票，累積活躍度升級吧！
+                    🔒 <b>分享動態功能</b> 目前僅限「👑 元老」與「管理員」使用。<br>多多參與聚會與投票，累積活躍度升級吧！
                 </div>
 
                 <div id="home-list"></div>
@@ -762,21 +762,6 @@
         if (postArea) postArea.style.display = canPost ? 'block' : 'none';
         if (notElderMsg) notElderMsg.style.display = canPost ? 'none' : 'block';
 
-        // 檢查並過濾超過 24 小時的非管理員文章
-        const now = Date.now();
-        let needsCleanup = false;
-        postsData = postsData.filter(post => {
-            const isAdmin = adminPhones.includes(post.creatorPhone);
-            if (!isAdmin && (now - post.id > 24 * 60 * 60 * 1000)) {
-                needsCleanup = true;
-                return false;
-            }
-            return true;
-        });
-        
-        // 如果有文章過期，同步儲存以清除雲端資料庫
-        if (needsCleanup) saveAllData();
-
         const list = document.getElementById('home-list'); list.innerHTML = '';
         let allItems = [...postsData].sort((a, b) => b.id - a.id);
         if (allItems.length === 0) { list.innerHTML = '<p style="text-align:center; color:#666;">目前還沒有任何動態喔！</p>'; return; }
@@ -1048,32 +1033,20 @@
                 let actionsHtml = '';
                 if(p !== currentUserPhone) {
                     const unlockBtn = uScore < 60 ? `<button class="promote-btn" style="background-color:#4CAF50;" onclick="unlockUser('${p}', ${uScore})">🔓 解鎖</button>` : '';
-                    const editNameBtn = `<button class="secondary" style="font-size:12px; padding:5px 10px; margin:0 2px;" onclick="changeUserName('${p}')">📝 更名</button>`;
                     const promoteBtn = (!u.manualTier && uStats.tier !== '👑 元老') ? `<button class="promote-btn" onclick="promoteUser('${p}')">🌟 升元老</button>` : '';
                     const adminToggleBtn = adminPhones.includes(p) ? `<button class="secondary" style="font-size:12px; padding:5px 10px; margin:0;" onclick="toggleAdmin('${p}')">撤銷管理</button>` : `<button class="admin-btn" style="width:auto; margin:0 2px; padding:5px 10px; font-size:12px;" onclick="toggleAdmin('${p}')">設為管理</button>`;
                     const editDataBtn = `<button class="secondary" style="font-size:12px; padding:5px 10px; margin:0 2px;" onclick="editUserData('${p}')">✏️ 數據</button>`;
-                    actionsHtml = `<div class="admin-actions">${unlockBtn}${editNameBtn}${editDataBtn}${adminToggleBtn}${promoteBtn}<button class="kick-btn" onclick="kickUser('${p}')">踢除</button></div>`;
+                    actionsHtml = `<div class="admin-actions">${unlockBtn}${editDataBtn}${adminToggleBtn}${promoteBtn}<button class="kick-btn" onclick="kickUser('${p}')">踢除</button></div>`;
                 }
                 usersListHtml += `<div class="admin-user-row"><div style="line-height:1.4;"><strong>${u.name} ${u.customEmoji || ''}</strong> ${isMe} ${adminBadge} ${lockedWarning}<br><span style="font-size:12px; color:#666;">${p} | ${uStats.tier} | 活躍度: ${uScore}</span></div>${actionsHtml}</div>`;
             }
             adminContainer.innerHTML = `
                 <div class="admin-panel"><div class="admin-title">🔑 邀請碼管理</div><div style="display: flex; gap: 10px; margin-bottom: 10px;"><input type="text" id="admin-invite-code" value="${systemInviteCode}" style="margin:0;"><button onclick="changeInviteCode()" style="margin:0; width:auto; white-space:nowrap;">更新密碼</button></div><p style="font-size:12px; color:#666;">更改邀請碼可防堵非相關人士註冊。</p></div>
-                <div class="admin-panel"><div class="admin-title">🛡️ 團隊與權限管理</div><p style="font-size:13px; color:#666; margin-top:0;">若成員活躍度低於 60，可點擊「解鎖」為他補足分數。亦可「編輯數據」調整加入時間與參與數，或幫成員「更名」。</p>${usersListHtml}</div>`;
+                <div class="admin-panel"><div class="admin-title">🛡️ 團隊與權限管理</div><p style="font-size:13px; color:#666; margin-top:0;">若成員活躍度低於 60，可點擊「解鎖」為他補足分數。亦可「編輯數據」調整加入時間與聚會參與數。</p>${usersListHtml}</div>`;
         } else { adminContainer.innerHTML = ''; }
     }
     
     // --- 管理員操作 ---
-    function changeUserName(targetPhone) {
-        const u = allUsers[targetPhone];
-        const newName = prompt(`請輸入 ${u.name} 的新稱呼：`, u.name);
-        if (newName && newName.trim() !== '') {
-            u.name = newName.trim();
-            saveAllData();
-            renderCardView();
-            alert("更名成功！");
-        }
-    }
-    
     function editUserData(targetPhone) {
         const u = allUsers[targetPhone];
         const currentBonus = u.manualAttendBonus || 0;
