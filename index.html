@@ -126,8 +126,8 @@
         .directory-item:hover { border-color: #005f20; background: #f0f8f2; }
         .directory-item .text-avatar { width: 50px; height: 50px; font-size: 20px; }
 
-        /* 卡片燈箱 (Modal) */
-        #user-card-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        /* 卡片燈箱與編輯燈箱 (Modal) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { width: 100%; max-width: 400px; position: relative; }
         .close-modal-btn { position: absolute; top: -15px; right: -5px; background: white; color: #333; border-radius: 50%; width: 32px; height: 32px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10;}
 
@@ -223,7 +223,7 @@
                 </div>
                 <!-- 權限不足的提示訊息 -->
                 <div id="not-elder-message" style="text-align:center; color:#005f20; font-size:14px; margin-bottom:20px; background:#e0f0e5; padding:15px; border-radius:8px; display:none; border: 1px dashed #005f20;">
-                    🔒 <b>分享動態功能</b> 目前僅限「👑 元老」與「管理員」使用。<br>多多參與聚會與投票，累積活躍度升級吧！
+                    🔒 <b>分享動態功能</b> 多多參與聚會與投票，累積活躍度升級吧！
                 </div>
 
                 <div id="home-list"></div>
@@ -317,10 +317,32 @@
 </div>
 
 <!-- 查看別人會員卡的隱藏燈箱 -->
-<div id="user-card-modal" class="hidden">
+<div id="user-card-modal" class="modal-overlay hidden">
     <div class="modal-content">
         <button class="close-modal-btn" onclick="closeUserCard()">✕</button>
         <div id="modal-card-container"></div>
+    </div>
+</div>
+
+<!-- 管理員編輯會員資料的隱藏燈箱 -->
+<div id="edit-user-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="background: white; padding: 20px; border-radius: 8px; border: 3px solid #005f20;">
+        <h3 style="color: #005f20; margin-top: 0; border-bottom: 1px dashed #005f20; padding-bottom: 10px;">✏️ 編輯會員資料</h3>
+        <input type="hidden" id="edit-target-phone">
+        
+        <label style="font-size:14px; font-weight:bold;">顯示名稱：</label>
+        <input type="text" id="edit-user-name" placeholder="輸入新名稱">
+        
+        <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">額外聚會參與次數 (手動加成)：</label>
+        <input type="number" id="edit-user-attend-bonus" min="0">
+        
+        <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">加入日期 (系統資歷)：</label>
+        <input type="date" id="edit-user-join-date">
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="saveUserEdit()" style="flex:1; margin:0;">儲存變更</button>
+            <button onclick="closeEditUserModal()" class="secondary" style="flex:1; margin:0;">取消</button>
+        </div>
     </div>
 </div>
 
@@ -762,6 +784,21 @@
         if (postArea) postArea.style.display = canPost ? 'block' : 'none';
         if (notElderMsg) notElderMsg.style.display = canPost ? 'none' : 'block';
 
+        // 檢查並過濾超過 24 小時的非管理員文章
+        const now = Date.now();
+        let needsCleanup = false;
+        postsData = postsData.filter(post => {
+            const isAdmin = adminPhones.includes(post.creatorPhone);
+            if (!isAdmin && (now - post.id > 24 * 60 * 60 * 1000)) {
+                needsCleanup = true;
+                return false;
+            }
+            return true;
+        });
+        
+        // 如果有文章過期，同步儲存以清除雲端資料庫
+        if (needsCleanup) saveAllData();
+
         const list = document.getElementById('home-list'); list.innerHTML = '';
         let allItems = [...postsData].sort((a, b) => b.id - a.id);
         if (allItems.length === 0) { list.innerHTML = '<p style="text-align:center; color:#666;">目前還沒有任何動態喔！</p>'; return; }
@@ -1035,43 +1072,66 @@
                     const unlockBtn = uScore < 60 ? `<button class="promote-btn" style="background-color:#4CAF50;" onclick="unlockUser('${p}', ${uScore})">🔓 解鎖</button>` : '';
                     const promoteBtn = (!u.manualTier && uStats.tier !== '👑 元老') ? `<button class="promote-btn" onclick="promoteUser('${p}')">🌟 升元老</button>` : '';
                     const adminToggleBtn = adminPhones.includes(p) ? `<button class="secondary" style="font-size:12px; padding:5px 10px; margin:0;" onclick="toggleAdmin('${p}')">撤銷管理</button>` : `<button class="admin-btn" style="width:auto; margin:0 2px; padding:5px 10px; font-size:12px;" onclick="toggleAdmin('${p}')">設為管理</button>`;
-                    const editDataBtn = `<button class="secondary" style="font-size:12px; padding:5px 10px; margin:0 2px;" onclick="editUserData('${p}')">✏️ 數據</button>`;
+                    const editDataBtn = `<button class="secondary" style="font-size:12px; padding:5px 10px; margin:0 2px;" onclick="openEditUserModal('${p}')">✏️ 編輯資料</button>`;
                     actionsHtml = `<div class="admin-actions">${unlockBtn}${editDataBtn}${adminToggleBtn}${promoteBtn}<button class="kick-btn" onclick="kickUser('${p}')">踢除</button></div>`;
                 }
                 usersListHtml += `<div class="admin-user-row"><div style="line-height:1.4;"><strong>${u.name} ${u.customEmoji || ''}</strong> ${isMe} ${adminBadge} ${lockedWarning}<br><span style="font-size:12px; color:#666;">${p} | ${uStats.tier} | 活躍度: ${uScore}</span></div>${actionsHtml}</div>`;
             }
             adminContainer.innerHTML = `
                 <div class="admin-panel"><div class="admin-title">🔑 邀請碼管理</div><div style="display: flex; gap: 10px; margin-bottom: 10px;"><input type="text" id="admin-invite-code" value="${systemInviteCode}" style="margin:0;"><button onclick="changeInviteCode()" style="margin:0; width:auto; white-space:nowrap;">更新密碼</button></div><p style="font-size:12px; color:#666;">更改邀請碼可防堵非相關人士註冊。</p></div>
-                <div class="admin-panel"><div class="admin-title">🛡️ 團隊與權限管理</div><p style="font-size:13px; color:#666; margin-top:0;">若成員活躍度低於 60，可點擊「解鎖」為他補足分數。亦可「編輯數據」調整加入時間與聚會參與數。</p>${usersListHtml}</div>`;
+                <div class="admin-panel"><div class="admin-title">🛡️ 團隊與權限管理</div><p style="font-size:13px; color:#666; margin-top:0;">若成員活躍度低於 60，可點擊「解鎖」為他補足分數。亦可「編輯資料」調整名稱、加入時間與參與數。</p>${usersListHtml}</div>`;
         } else { adminContainer.innerHTML = ''; }
     }
     
-    // --- 管理員操作 ---
-    function editUserData(targetPhone) {
-        const u = allUsers[targetPhone];
-        const currentBonus = u.manualAttendBonus || 0;
-        const newBonusStr = prompt(`請輸入要「額外增加」的聚會參與次數 (目前：${currentBonus})：\n(若輸入 0 則不額外加成)`, currentBonus);
-        if (newBonusStr !== null) {
-            const newBonus = parseInt(newBonusStr) || 0;
-            u.manualAttendBonus = newBonus;
-            
-            // 處理日期變更
-            const currentDateStr = new Date(u.joinDate).toISOString().split('T')[0];
-            const newDateStr = prompt(`請設定該用戶的「加入日期」(格式：YYYY-MM-DD)\n(目前：${currentDateStr})：`, currentDateStr);
-            if (newDateStr !== null) {
-                const parsedDate = new Date(newDateStr);
-                if (!isNaN(parsedDate.getTime())) {
-                    u.joinDate = parsedDate.getTime();
-                } else {
-                    alert("日期格式錯誤，已略過日期更新。");
-                }
-            }
-            saveAllData();
-            renderCardView();
-            alert("數據已成功更新！");
-        }
+    // --- 管理員編輯會員資料 (Modal 控制) ---
+    function openEditUserModal(phone) {
+        const u = allUsers[phone];
+        if(!u) return;
+        
+        document.getElementById('edit-target-phone').value = phone;
+        document.getElementById('edit-user-name').value = u.name;
+        document.getElementById('edit-user-attend-bonus').value = u.manualAttendBonus || 0;
+        
+        // 轉換時間戳為 YYYY-MM-DD 格式
+        const d = new Date(u.joinDate);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        document.getElementById('edit-user-join-date').value = `${year}-${month}-${day}`;
+        
+        document.getElementById('edit-user-modal').classList.remove('hidden');
     }
 
+    function closeEditUserModal() {
+        document.getElementById('edit-user-modal').classList.add('hidden');
+    }
+
+    function saveUserEdit() {
+        const phone = document.getElementById('edit-target-phone').value;
+        const u = allUsers[phone];
+        if(!u) return;
+
+        const newName = document.getElementById('edit-user-name').value.trim();
+        const newBonus = parseInt(document.getElementById('edit-user-attend-bonus').value) || 0;
+        const newDateStr = document.getElementById('edit-user-join-date').value;
+
+        if (newName !== '') u.name = newName;
+        u.manualAttendBonus = newBonus;
+
+        if (newDateStr) {
+            const parsedDate = new Date(newDateStr);
+            if (!isNaN(parsedDate.getTime())) {
+                u.joinDate = parsedDate.getTime();
+            }
+        }
+
+        saveAllData();
+        renderCardView();
+        closeEditUserModal();
+        alert("📝 會員資料已成功更新！");
+    }
+
+    // --- 其他管理員操作 ---
     function unlockUser(targetPhone, currentScore) {
         if(confirm(`確定要幫此人解鎖嗎？系統將為他補足活躍度至 60 分。`)) {
             const needed = 60 - currentScore;
@@ -1095,6 +1155,3 @@
 </script>
 </body>
 </html>
-
-
-
