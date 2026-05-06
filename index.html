@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>台東老闆專屬聚會</title>
-    <!-- 引入 Firebase 雲端大腦 -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <style>
@@ -176,7 +175,11 @@
 
         /* 卡片燈箱與編輯燈箱 (Modal) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.8); backdrop-filter: blur(3px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { width: 100%; max-width: 420px; position: relative; }
+        .modal-content { width: 100%; max-width: 420px; position: relative; max-height: 90vh; overflow-y: auto; border-radius: 16px; }
+        /* 隱藏彈出視窗卷軸但保留滑動 */
+        .modal-content::-webkit-scrollbar { display: none; }
+        .modal-content { -ms-overflow-style: none; scrollbar-width: none; }
+
         .close-modal-btn { position: absolute; top: -15px; right: -5px; background: white; color: #1a252f; border-radius: 50%; width: 36px; height: 36px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; transition: 0.2s; }
         .close-modal-btn:hover { transform: scale(1.1); background: #f0f4f8; }
 
@@ -196,10 +199,8 @@
 </head>
 <body>
 
-<!-- 提示訊息容器 -->
 <div id="toast-container"></div>
 
-<!-- 開機載入畫面 -->
 <div id="loading-screen">
     <div>連線至台東雲端大腦...</div>
     <div class="spinner"></div>
@@ -217,7 +218,6 @@
     </div>
 
     <div class="content">
-        <!-- 登入區 -->
         <div id="login-section" class="hidden">
             <h2 style="color: #005086; font-weight: 900;">台東老闆專屬聚會</h2>
             <p style="font-size: 15px; color: #556068;">首次登入需輸入邀請碼，已註冊的老闆只要輸入電話即可快速登入。</p>
@@ -230,7 +230,6 @@
             <button onclick="login()" style="margin-top: 20px;">進入系統</button>
         </div>
 
-        <!-- 註冊區 -->
         <div id="profile-section" class="hidden">
             <h2 style="color: #005086; font-weight: 900;">設定基本資料</h2>
             <p style="font-size: 15px; color: #556068;">歡迎加入！請輸入您的稱呼，系統將為您建立專屬會員卡。</p>
@@ -238,7 +237,6 @@
             <button onclick="saveProfile()" style="margin-top: 20px;">儲存並進入</button>
         </div>
 
-        <!-- 鎖定帳號專區 -->
         <div id="locked-section" class="hidden" style="text-align: center; padding: 40px 20px;">
             <h1 style="font-size: 65px; margin-bottom: 10px;">🔒</h1>
             <h2 style="color: #d32f2f; font-weight: 900;">帳號已鎖定</h2>
@@ -250,7 +248,6 @@
             <button class="secondary" onclick="logout()" style="margin-top: 30px;">登出帳號</button>
         </div>
 
-        <!-- 主畫面容器 -->
         <div id="main-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px;">
                 <div style="display: flex; align-items: center;">
@@ -260,9 +257,7 @@
                 <button style="width: auto; padding: 8px 18px; font-size: 14px; margin:0;" class="secondary" onclick="logout()">登出</button>
             </div>
             
-            <!-- 首頁動態 -->
             <div id="home-view">
-                <!-- 公告牆 -->
                 <div id="announcement-board" class="announcement-board">
                     <div class="announcement-title">
                         <span style="color: #005086;">📌 老闆公告牆</span>
@@ -277,7 +272,6 @@
                     <input type="file" id="post-image-input" accept="image/*">
                     <button onclick="submitPost()" style="margin-top: 15px;">發佈動態</button>
                 </div>
-                <!-- 權限不足的提示訊息 -->
                 <div id="not-elder-message" style="text-align:center; color:#005086; font-size:15px; margin-bottom:20px; background:#eaf4fc; padding:18px; border-radius:12px; display:none; border: 1px dashed #0081C9; font-weight: 700;">
                     🔒 <b>分享動態功能</b> 多多參與聚會與投票，累積活躍度升級吧！
                 </div>
@@ -285,13 +279,11 @@
                 <div id="home-list"></div>
             </div>
 
-            <!-- 找老闆 (名單/搜尋) -->
             <div id="directory-view" class="hidden">
                 <input type="text" id="search-user-input" placeholder="🔍 搜尋名稱、自我介紹或Emoji..." onkeyup="renderDirectory()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: #e1e8ed; margin-bottom: 20px;">
                 <div id="directory-list"></div>
             </div>
 
-            <!-- 其他分頁 (聚會與投票) -->
             <div id="events-view" class="hidden">
                 <div style="display:flex; gap:12px;">
                     <button onclick="showCreateForm('event')" style="flex:1;">＋ 發起聚會</button>
@@ -301,7 +293,6 @@
                 <div id="events-list"></div><div id="polls-list"></div>
             </div>
             
-            <!-- 店休總覽 -->
             <div id="closures-view" class="hidden">
                 <h3 style="color: #005086; font-weight: 900; font-size: 20px; border-bottom: 3px solid #005086; padding-bottom: 8px; display: inline-block;">📍 固定店休一覽</h3>
                 <div class="custom-style-panel" id="regular-closures-list" style="margin-top: 10px;"></div>
@@ -310,7 +301,6 @@
                 <div class="custom-style-panel" id="temp-closures-list" style="background-color:#fffaf0; border: 1px solid #fbeee0; margin-top: 10px;"></div>
             </div>
 
-            <!-- 會員卡與後台區塊 -->
             <div id="card-view" class="hidden">
                 <div id="my-membership-card"></div>
                 
@@ -346,13 +336,25 @@
                 </div>
 
                 <div class="custom-style-panel">
-                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">📝 編輯店家資訊</h4>
-                    <label style="font-size:15px; font-weight:800;">自我介紹 / 店家簡介：</label>
+                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">📝 店家資訊、社群與名片圖片</h4>
+                    
+                    <label style="font-size:15px; font-weight:800; margin-top:10px; display:block;">Threads 個人檔案連結：</label>
+                    <input type="text" id="card-threads-input" placeholder="請貼上您的 Threads 網址 (https://www.threads.net/...)">
+                    
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">自我介紹 / 店家簡介：</label>
                     <textarea id="card-bio-input" placeholder="介紹一下您的店或自己吧..." style="height: 90px;"></textarea>
+                    
                     <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">Google Map 地標 (連結 或 嵌入碼)：</label>
                     <input type="text" id="card-map-input" placeholder="請貼上 Google地圖的分享連結 或 <iframe> 嵌入碼">
-                    <p style="font-size:13px; color:#7f8c8d; margin-top:6px; margin-bottom:0; font-weight: 600;">💡 提示：若貼上「分享連結」，會顯示按鈕；若貼上「嵌入地圖(iframe)」，則會直接顯示地圖畫面喔！</p>
-                    <button onclick="saveShopInfo()" style="margin-top:20px;">儲存店家資訊</button>
+                    
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">📸 上傳專屬圖文名片/海報：</label>
+                    <input type="file" id="card-custom-image-input" accept="image/*">
+                    <p style="font-size:13px; color:#7f8c8d; margin-top:6px; margin-bottom:0; font-weight: 600;">💡 上傳後會精美呈現於您的會員卡最下方！</p>
+                    
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button onclick="saveShopInfo()" style="flex:2; margin:0; background: linear-gradient(135deg, #2196F3, #1565C0);">儲存資訊與圖片</button>
+                        <button onclick="clearCardImage()" class="secondary" style="flex:1; margin:0;">清除圖片</button>
+                    </div>
                 </div>
 
                 <div class="custom-style-panel">
@@ -377,7 +379,6 @@
             </div>
         </div>
 
-        <!-- 隱藏表單區 -->
         <div id="create-event-section" class="hidden">
             <h2 style="color: #005086; font-weight: 900;">發起新聚會</h2>
             <input type="text" id="event-title" placeholder="聚會名稱 (例: 週末喝一杯)">
@@ -423,7 +424,6 @@
     </div>
 </div>
 
-<!-- 查看別人會員卡的隱藏燈箱 -->
 <div id="user-card-modal" class="modal-overlay hidden">
     <div class="modal-content" id="user-card-modal-content">
         <button class="close-modal-btn" onclick="closeUserCard()">✕</button>
@@ -431,7 +431,6 @@
     </div>
 </div>
 
-<!-- 管理員編輯會員資料的隱藏燈箱 -->
 <div id="edit-user-modal" class="modal-overlay hidden">
     <div class="modal-content" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25);">
         <h3 style="color: #005086; margin-top: 0; border-bottom: 2px dashed #cfd9e0; padding-bottom: 15px; font-weight: 900; font-size: 20px;">✏️ 編輯會員資料</h3>
@@ -510,7 +509,6 @@
         if (!user) return 0;
         let score = 70 + (user.manualBonus || 0);
 
-        // 【修正】聚會積分必須等「已截止 (isClosed)」才會結算發放
         eventsData.forEach(evt => {
             if (evt.isClosed) {
                 const status = evt.attendees ? evt.attendees[phone] : null;
@@ -520,7 +518,6 @@
             }
         });
 
-        // 投票積分一樣是等「已截止」才發放
         pollsData.forEach(poll => {
             if (poll.pollType === 'points' || !poll.pollType) { 
                 if (poll.isClosed) {
@@ -733,7 +730,7 @@
         const name = document.getElementById('name-input').value.trim(); const phone = localStorage.getItem('taitung_current_phone');
         if (!name) { alert("請輸入稱呼！"); return; }
         if (adminPhones.length === 0) { adminPhones.push(phone); }
-        allUsers[phone] = { phone: phone, name: name, joinDate: Date.now(), customColor: '#005086', customEmoji: '✨', manualTier: null, closedDays: [], tempClosedDates: [], bio: '', mapUrl: '', manualBonus: 0, manualAttendBonus: 0, notifications: [], cardEffect: 'none', cardBgImage: null };
+        allUsers[phone] = { phone: phone, name: name, joinDate: Date.now(), customColor: '#005086', customEmoji: '✨', manualTier: null, closedDays: [], tempClosedDates: [], bio: '', mapUrl: '', threadsUrl: '', manualBonus: 0, manualAttendBonus: 0, notifications: [], cardEffect: 'none', cardBgImage: null, cardImage: null };
         currentUserPhone = phone; 
         saveAllData(); 
         showMain();
@@ -837,6 +834,16 @@
             }
         }
 
+        let threadsHtml = '';
+        if (user.threadsUrl) {
+            threadsHtml = `<div style="margin-top: 15px; text-align:center; z-index:2; position:relative;"><a href="${user.threadsUrl}" target="_blank" style="color: #fff; background: linear-gradient(135deg, #111, #333); text-decoration: none; font-weight: 900; padding: 12px 24px; border-radius: 30px; display: flex; align-items:center; justify-content:center; gap:8px; font-size:15px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); text-shadow: none; border: 1px solid rgba(255,255,255,0.2); transition:0.2s;"><span style="font-size:18px;">@</span> 追蹤我的 Threads</a></div>`;
+        }
+
+        let customImageHtml = '';
+        if (user.cardImage) {
+            customImageHtml = `<div style="margin-top: 18px; z-index:2; position:relative; text-align:center;"><img src="${user.cardImage}" style="max-width:100%; border-radius:12px; box-shadow:0 6px 15px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.15); display:block;"></div>`;
+        }
+
         return `
             <div class="membership-card ${effectClass}" style="${bgStyle} margin-bottom: 0;">
                 <div class="member-tier-display" style="flex-wrap:wrap;">${stats.tier} ${highActivityBadge}</div>
@@ -847,6 +854,8 @@
                 <div class="member-info-row" style="color:#ffd700; margin-top:18px; border:none; padding-bottom:0;"><span>📍 固定店休</span><span>${closedDaysStr}</span></div>
                 ${bioHtml}
                 ${mapHtml}
+                ${threadsHtml}
+                ${customImageHtml}
             </div>`;
     }
 
@@ -935,9 +944,36 @@
     }
 
     function saveShopInfo() {
-        allUsers[currentUserPhone].bio = document.getElementById('card-bio-input').value.trim();
-        allUsers[currentUserPhone].mapUrl = document.getElementById('card-map-input').value.trim();
-        saveAllData(); renderCardView(); alert("📝 店家資訊更新成功！");
+        const u = allUsers[currentUserPhone];
+        u.bio = document.getElementById('card-bio-input').value.trim();
+        u.mapUrl = document.getElementById('card-map-input').value.trim();
+        u.threadsUrl = document.getElementById('card-threads-input').value.trim();
+        
+        const fileInput = document.getElementById('card-custom-image-input');
+        if (fileInput.files[0]) {
+            compressImage(fileInput.files[0], (base64Img) => {
+                u.cardImage = base64Img;
+                finalizeSaveShopInfo();
+            });
+        } else {
+            finalizeSaveShopInfo();
+        }
+    }
+
+    function finalizeSaveShopInfo() {
+        saveAllData(); 
+        renderCardView(); 
+        alert("📝 資訊與專屬名片更新成功！");
+    }
+
+    function clearCardImage() {
+        if(confirm("確定要移除您的專屬圖片名片嗎？")) {
+            allUsers[currentUserPhone].cardImage = null;
+            document.getElementById('card-custom-image-input').value = '';
+            saveAllData();
+            renderCardView();
+            alert("專屬名片圖片已移除！");
+        }
     }
 
     // --- 發文系統 ---
@@ -946,10 +982,10 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = new Image(); img.onload = function() {
-                const canvas = document.createElement('canvas'); const MAX_WIDTH = 600; let width = img.width; let height = img.height;
+                const canvas = document.createElement('canvas'); const MAX_WIDTH = 800; let width = img.width; let height = img.height;
                 if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                 canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/jpeg', 0.7));
+                ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/jpeg', 0.8));
             }; img.src = e.target.result;
         }; reader.readAsDataURL(file);
     }
@@ -1068,7 +1104,7 @@
         
         if(type === 'event') { 
             const item = eventsData.find(e => e.id === id);
-            if (item && item.isClosed) { // 只有已截止的才保留積分
+            if (item && item.isClosed) { 
                 Object.keys(allUsers).forEach(phone => {
                     const u = allUsers[phone];
                     let pts = 0;
@@ -1084,7 +1120,7 @@
         } 
         else if(type === 'poll') { 
             const item = pollsData.find(p => p.id === id);
-            if (item && item.isClosed) { // 只有已截止的才保留積分
+            if (item && item.isClosed) { 
                 if (item.pollType === 'points' || !item.pollType) {
                     Object.keys(allUsers).forEach(phone => {
                         const u = allUsers[phone];
@@ -1449,6 +1485,7 @@
         document.getElementById('card-effect-select').value = me.cardEffect || 'none';
         document.getElementById('card-bio-input').value = me.bio || '';
         document.getElementById('card-map-input').value = me.mapUrl || '';
+        document.getElementById('card-threads-input').value = me.threadsUrl || '';
 
         const checkboxes = document.querySelectorAll('#closed-days-checkboxes input'); checkboxes.forEach(cb => { cb.checked = me.closedDays && me.closedDays.includes(cb.value); });
         let tempListHtml = '';
