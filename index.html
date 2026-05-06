@@ -440,11 +440,11 @@
         <label style="font-size:15px; font-weight:800;">顯示名稱：</label>
         <input type="text" id="edit-user-name" placeholder="輸入新名稱">
         
-        <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">額外聚會參與次數 (手動加成)：</label>
+        <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">額外聚會參與次數 (直接設定總次數)：</label>
         <input type="number" id="edit-user-attend-bonus" min="0">
         
-        <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">額外活躍分數 (手動加成)：</label>
-        <input type="number" id="edit-user-score-bonus">
+        <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">手動增減活躍分數 (目前累計加分: <span id="current-score-bonus" style="color:#0081C9;">0</span>)：</label>
+        <input type="number" id="edit-user-score-bonus" placeholder="輸入正數加分，負數扣分 (例: 5 或 -3)">
         
         <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">加入日期 (系統資歷)：</label>
         <input type="date" id="edit-user-join-date">
@@ -510,20 +510,26 @@
         if (!user) return 0;
         let score = 70 + (user.manualBonus || 0);
 
+        // 【修正】聚會積分必須等「已截止 (isClosed)」才會結算發放
         eventsData.forEach(evt => {
-            const status = evt.attendees ? evt.attendees[phone] : null;
-            if (status === 'attend') score += 5;
-            else if (status === 'absent') score += 3;
-            else if (!status && evt.isClosed && evt.id >= user.joinDate) score -= 3;
+            if (evt.isClosed) {
+                const status = evt.attendees ? evt.attendees[phone] : null;
+                if (status === 'attend') score += 5;
+                else if (status === 'absent') score += 3;
+                else if (!status && evt.id >= user.joinDate) score -= 3;
+            }
         });
 
+        // 投票積分一樣是等「已截止」才發放
         pollsData.forEach(poll => {
             if (poll.pollType === 'points' || !poll.pollType) { 
-                const userVote = poll.votes ? poll.votes.find(v => v.phone === phone) : null;
-                if (userVote) {
-                    score += 3; 
-                } else if (!userVote && poll.isClosed && poll.id >= user.joinDate) {
-                    score -= 3;                           
+                if (poll.isClosed) {
+                    const userVote = poll.votes ? poll.votes.find(v => v.phone === phone) : null;
+                    if (userVote) {
+                        score += 3; 
+                    } else if (!userVote && poll.id >= user.joinDate) {
+                        score -= 3;                           
+                    }
                 }
             } 
         });
@@ -1050,18 +1056,54 @@
     }
 
     function closeItem(type, id) {
-        if(!confirm("確定要截止嗎？截止後大家就不能再報名或投票囉！")) return;
+        if(!confirm("確定要截止嗎？截止後大家就不能再報名或投票囉！(系統將會同步結算積分)")) return;
         if(type === 'event') { const item = eventsData.find(e => e.id === id); if(item) item.isClosed = true; saveAllData(); } 
         else if (type === 'poll') { const item = pollsData.find(p => p.id === id); if(item) item.isClosed = true; saveAllData(); }
         switchTab(currentTab);
     }
+    
+    // --- 【修正】刪除時永久保存積分邏輯 (僅保存已截止的活動) ---
     function deleteItem(type, id) {
-        if(!confirm("確定要刪除這篇文章/活動嗎？")) return;
-        if(type === 'event') { eventsData = eventsData.filter(e => e.id !== id); } 
-        else if(type === 'poll') { pollsData = pollsData.filter(p => p.id !== id); }
+        if(!confirm("確定要刪除這篇文章/活動嗎？\n(若為已截止的聚會或投票，刪除後大家已結算的積分將永久保留)")) return;
+        
+        if(type === 'event') { 
+            const item = eventsData.find(e => e.id === id);
+            if (item && item.isClosed) { // 只有已截止的才保留積分
+                Object.keys(allUsers).forEach(phone => {
+                    const u = allUsers[phone];
+                    let pts = 0;
+                    const status = item.attendees ? item.attendees[phone] : null;
+                    if (status === 'attend') pts = 5;
+                    else if (status === 'absent') pts = 3;
+                    else if (!status && item.id >= u.joinDate) pts = -3;
+                    
+                    if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
+                });
+            }
+            eventsData = eventsData.filter(e => e.id !== id); 
+        } 
+        else if(type === 'poll') { 
+            const item = pollsData.find(p => p.id === id);
+            if (item && item.isClosed) { // 只有已截止的才保留積分
+                if (item.pollType === 'points' || !item.pollType) {
+                    Object.keys(allUsers).forEach(phone => {
+                        const u = allUsers[phone];
+                        const userVote = item.votes ? item.votes.find(v => v.phone === phone) : null;
+                        let pts = 0;
+                        if (userVote) pts = 3;
+                        else if (!userVote && item.id >= u.joinDate) pts = -3;
+                        
+                        if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
+                    });
+                }
+            }
+            pollsData = pollsData.filter(p => p.id !== id); 
+        }
         else if(type === 'post') { postsData = postsData.filter(p => p.id !== id); }
+        
         saveAllData(); switchTab(currentTab);
     }
+
     function deleteComment(type, itemId, commentIndex) {
         if(!confirm("確定要刪除這則留言嗎？")) return;
         let dataArray;
@@ -1445,7 +1487,8 @@
         document.getElementById('edit-target-phone').value = phone;
         document.getElementById('edit-user-name').value = u.name;
         document.getElementById('edit-user-attend-bonus').value = u.manualAttendBonus || 0;
-        document.getElementById('edit-user-score-bonus').value = u.manualBonus || 0;
+        document.getElementById('edit-user-score-bonus').value = '';
+        document.getElementById('current-score-bonus').innerText = u.manualBonus || 0;
         
         // 轉換時間戳為 YYYY-MM-DD 格式
         const d = new Date(u.joinDate);
@@ -1468,12 +1511,15 @@
 
         const newName = document.getElementById('edit-user-name').value.trim();
         const newBonus = parseInt(document.getElementById('edit-user-attend-bonus').value) || 0;
-        const newScoreBonus = parseInt(document.getElementById('edit-user-score-bonus').value) || 0;
+        const newScoreBonusInput = document.getElementById('edit-user-score-bonus').value;
         const newDateStr = document.getElementById('edit-user-join-date').value;
 
         if (newName !== '') u.name = newName;
         u.manualAttendBonus = newBonus;
-        u.manualBonus = newScoreBonus;
+        
+        if (newScoreBonusInput !== '') {
+            u.manualBonus = (u.manualBonus || 0) + parseInt(newScoreBonusInput);
+        }
 
         if (newDateStr) {
             const parsedDate = new Date(newDateStr);
