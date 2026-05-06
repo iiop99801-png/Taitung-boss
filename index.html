@@ -110,9 +110,41 @@
         /* 電子會員卡 */
         .membership-card { color: white; border-radius: 12px; padding: 25px 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); margin-bottom: 20px; position: relative; overflow: hidden; transition: background 0.3s ease; }
         .membership-card::after { content: '台東開店人生'; position: absolute; font-size: 60px; color: rgba(255,255,255,0.06); top: 10px; right: -20px; font-weight: 900; line-height: 1; white-space: nowrap; pointer-events: none;}
-        .member-tier-display { font-size: 24px; font-weight: bold; color: #ffd700; margin-bottom: 15px; display: flex; align-items: center; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
-        .member-info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);}
+        .member-tier-display { font-size: 24px; font-weight: bold; color: #ffd700; margin-bottom: 15px; display: flex; align-items: center; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); z-index: 2; position: relative;}
+        .member-info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); z-index: 2; position: relative;}
         
+        /* 會員卡動態特效 CSS */
+        @keyframes shimmer-sweep {
+            0% { transform: translateX(-100%) skewX(-15deg); }
+            100% { transform: translateX(200%) skewX(-15deg); }
+        }
+        .effect-shimmer::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-15deg); animation: shimmer-sweep 3s infinite; pointer-events: none; z-index: 1;
+        }
+        @keyframes breathe-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+            50% { box-shadow: 0 0 25px rgba(255,215,0,0.9), 0 0 10px white inset; }
+        }
+        .effect-glow { animation: breathe-glow 2.5s infinite; border: 1px solid rgba(255,215,0,0.5); }
+        @keyframes animated-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .effect-gradient { background-size: 300% 300% !important; animation: animated-gradient 5s ease infinite; }
+
+        /* 3D 翻轉動畫 CSS */
+        @keyframes flipIn {
+            0% { transform: perspective(800px) rotateY(-90deg); opacity: 0; }
+            100% { transform: perspective(800px) rotateY(0deg); opacity: 1; }
+        }
+        .flip-animate {
+            animation: flipIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            transform-style: preserve-3d;
+        }
+
         .custom-style-panel { background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
         .admin-panel { border: 2px solid #005f20; border-radius: 8px; padding: 15px; background-color: #fff; margin-bottom: 20px;}
         .admin-title { color: #005f20; font-weight: bold; margin-bottom: 15px; font-size: 18px; border-bottom: 1px dashed #005f20; padding-bottom: 10px;}
@@ -131,6 +163,10 @@
         .modal-content { width: 100%; max-width: 400px; position: relative; }
         .close-modal-btn { position: absolute; top: -15px; right: -5px; background: white; color: #333; border-radius: 50%; width: 32px; height: 32px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10;}
 
+        /* 提示訊息 (Toast) */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px; }
+        .toast-msg { background: #ff9800; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.3s ease-in-out; display: flex; align-items: center; gap: 8px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);}
+
         /* 比例圖 */
         .ratio-bar { width: 100%; height: 10px; border-radius: 5px; background-color: #ddd; display: flex; overflow: hidden; margin-bottom: 5px; }
         .ratio-attend { background-color: #005f20; height: 100%; transition: width 0.3s; }
@@ -142,6 +178,9 @@
     </style>
 </head>
 <body>
+
+<!-- 提示訊息容器 -->
+<div id="toast-container"></div>
 
 <!-- 開機載入畫面 -->
 <div id="loading-screen">
@@ -257,7 +296,37 @@
             <div id="card-view" class="hidden">
                 <div id="my-membership-card"></div>
                 
-                <!-- 編輯店家資訊 -->
+                <div class="custom-style-panel">
+                    <h4 style="margin-top:0; color:#005f20; border-bottom:1px solid #ccc; padding-bottom:8px;">🎨 自訂會員卡風格</h4>
+                    <div style="display:flex; gap:10px;">
+                        <div style="flex:1;">
+                            <label style="font-size:14px; font-weight:bold;">卡片主色調：</label>
+                            <input type="color" id="card-color-picker" value="#005f20">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:14px; font-weight:bold;">表情 (Emoji)：</label>
+                            <input type="text" id="card-emoji-input" placeholder="例如: 🦖 或 ☕" maxlength="2" value="✨">
+                        </div>
+                    </div>
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">專屬卡片動態特效：</label>
+                    <select id="card-effect-select">
+                        <option value="none">無特效</option>
+                        <option value="shimmer">✨ 流光掃過</option>
+                        <option value="glow">🌟 呼吸光暈</option>
+                        <option value="gradient">🌈 動態漸層</option>
+                    </select>
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">上傳自訂背景圖片 (選填)：</label>
+                    <input type="file" id="card-bg-input" accept="image/*">
+                    <p style="font-size:12px; color:#666; margin-top:0; margin-bottom:5px;">💡 會自動融合您的主色調呈現高質感濾鏡！</p>
+                    
+                    <div style="display:flex; gap:10px; margin-top:15px;">
+                        <button onclick="saveCardStyle()" style="flex:2; margin:0;">儲存風格與特效</button>
+                        <button onclick="clearCardBg()" class="secondary" style="flex:1; margin:0;">清除背景</button>
+                    </div>
+                </div>
+
                 <div class="custom-style-panel">
                     <h4 style="margin-top:0; color:#005f20; border-bottom:1px solid #ccc; padding-bottom:8px;">📝 編輯店家資訊</h4>
                     <label style="font-size:14px; font-weight:bold;">自我介紹 / 店家簡介：</label>
@@ -285,13 +354,7 @@
                     <div id="temp-close-list" style="margin-top:10px; font-size:13px; color:#555;"></div>
                     <button onclick="saveClosureSettings()" style="margin-top:15px; background-color:#d35400;">儲存店休設定</button>
                 </div>
-                <div class="custom-style-panel">
-                    <h4 style="margin-top:0; color:#005f20; border-bottom:1px solid #ccc; padding-bottom:8px;">🎨 自訂會員卡風格</h4>
-                    <label style="font-size:14px; font-weight:bold;">卡片主色調：</label><input type="color" id="card-color-picker" value="#005f20">
-                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">專屬表情符號 (Emoji)：</label>
-                    <input type="text" id="card-emoji-input" placeholder="例如: 🦖 或 ☕" maxlength="2" value="✨">
-                    <button onclick="saveCardStyle()" style="margin-top:15px;">儲存風格</button>
-                </div>
+                
                 <div id="admin-panel-container"></div>
             </div>
         </div>
@@ -307,9 +370,26 @@
             <h2>建立新投票</h2>
             <input type="text" id="poll-question" placeholder="投票問題 (例: 聚會想吃什麼？)">
             <textarea id="poll-options" placeholder="輸入選項 (請換行分隔)&#10;例如：&#10;披薩&#10;熱炒&#10;烤肉" style="height: 100px;"></textarea>
+            
+            <div style="display:flex; gap:10px; margin-bottom: 10px;">
+                <div style="flex:1;">
+                    <label style="font-size:13px; font-weight:bold;">投票類型：</label>
+                    <select id="poll-type" onchange="togglePollType()">
+                        <option value="general">一般投票 (不計分)</option>
+                        <option value="points" id="opt-poll-points">積分投票 (計分)</option>
+                    </select>
+                </div>
+            </div>
+
             <div style="display:flex; gap:10px;">
-                <div style="flex:1;"><label style="font-size:13px; font-weight:bold;">選項設定：</label><select id="poll-multiple"><option value="single">單選</option><option value="multiple">多選</option></select></div>
-                <div style="flex:1;"><label style="font-size:13px; font-weight:bold;">匿名設定：</label><select id="poll-mode"><option value="realname">📝 實名</option><option value="anonymous">🕵️‍♂️ 匿名</option></select></div>
+                <div style="flex:1;">
+                    <label style="font-size:13px; font-weight:bold;">選項設定：</label>
+                    <select id="poll-multiple"><option value="single">單選</option><option value="multiple">多選</option></select>
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:13px; font-weight:bold;">匿名設定：</label>
+                    <select id="poll-mode"><option value="realname">📝 實名</option><option value="anonymous">🕵️‍♂️ 匿名</option></select>
+                </div>
             </div>
             <button onclick="submitPoll()" style="margin-top: 20px;">發布投票</button><button class="secondary" onclick="cancelCreate()">取消</button>
         </div>
@@ -318,7 +398,7 @@
 
 <!-- 查看別人會員卡的隱藏燈箱 -->
 <div id="user-card-modal" class="modal-overlay hidden">
-    <div class="modal-content">
+    <div class="modal-content" id="user-card-modal-content">
         <button class="close-modal-btn" onclick="closeUserCard()">✕</button>
         <div id="modal-card-container"></div>
     </div>
@@ -375,6 +455,20 @@
     let currentTab = 'home'; 
     let isDataLoaded = false;
 
+    // --- 提示訊息 (Toast) 顯示功能 ---
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-msg';
+        toast.innerHTML = `🔔 <span>${msg}</span>`;
+        document.getElementById('toast-container').appendChild(toast);
+        
+        setTimeout(() => toast.style.opacity = '1', 10);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    }
+
     // --- 活躍度計算函數 ---
     function calculateUserScore(phone) {
         const user = allUsers[phone];
@@ -389,11 +483,23 @@
             else if (!status && evt.isClosed && evt.id >= user.joinDate) score -= 2;
         });
 
-        // 計算投票分數
+        // 計算投票分數 (僅針對 積分投票 處理)
         pollsData.forEach(poll => {
-            const voted = poll.votes ? poll.votes.some(v => v.phone === phone) : false;
-            if (voted) score += 5;
-            else if (!voted && poll.isClosed && poll.id >= user.joinDate) score -= 2;
+            if (poll.pollType === 'points') {
+                const userVote = poll.votes ? poll.votes.find(v => v.phone === phone) : null;
+                if (userVote) {
+                    const optIndex = poll.options.indexOf(userVote.option);
+                    if (optIndex === 0) score += 5;       // 選第1個選項 +5分
+                    else score += 2;                      // 選其他選項 +2分
+                } else if (!userVote && poll.isClosed && poll.id >= user.joinDate) {
+                    score -= 2;                           // 完全沒參與 -2分
+                }
+            } else if (!poll.pollType) {
+                // 為了不讓舊版投票扣分，無類型的舊投票有投就給+5，沒投且過期-2
+                const userVote = poll.votes ? poll.votes.find(v => v.phone === phone) : null;
+                if (userVote) score += 5;
+                else if (!userVote && poll.isClosed && poll.id >= user.joinDate) score -= 2;
+            }
         });
 
         return score;
@@ -416,6 +522,16 @@
                 }
             }
         });
+
+        // 檢查並顯示別人給我的新通知 (回覆留言)
+        if (currentUserPhone && allUsers[currentUserPhone]) {
+            const myUser = allUsers[currentUserPhone];
+            if (myUser.notifications && myUser.notifications.length > 0) {
+                myUser.notifications.forEach(msg => showToast(msg));
+                myUser.notifications = [];
+                saveAllData(); // 顯示後立刻清空雲端上的通知紀錄
+            }
+        }
 
         if (!isDataLoaded) {
             isDataLoaded = true;
@@ -535,7 +651,7 @@
         const name = document.getElementById('name-input').value.trim(); const phone = localStorage.getItem('taitung_current_phone');
         if (!name) { alert("請輸入稱呼！"); return; }
         if (adminPhones.length === 0) { adminPhones.push(phone); }
-        allUsers[phone] = { phone: phone, name: name, joinDate: Date.now(), customColor: '#005f20', customEmoji: '✨', manualTier: null, closedDays: [], tempClosedDates: [], bio: '', mapUrl: '', manualBonus: 0, manualAttendBonus: 0 };
+        allUsers[phone] = { phone: phone, name: name, joinDate: Date.now(), customColor: '#005f20', customEmoji: '✨', manualTier: null, closedDays: [], tempClosedDates: [], bio: '', mapUrl: '', manualBonus: 0, manualAttendBonus: 0, notifications: [], cardEffect: 'none', cardBgImage: null };
         currentUserPhone = phone; 
         saveAllData(); 
         showMain();
@@ -586,8 +702,18 @@
         const score = calculateUserScore(targetPhone);
         const cardColor = user.customColor || '#005f20'; 
         const cardEmoji = user.customEmoji || '✨';
+        const cardEffect = user.cardEffect || 'none';
+        const bgImage = user.cardBgImage;
         const closedDaysStr = (user.closedDays && user.closedDays.length > 0) ? `星期${user.closedDays.join('、')}` : '無';
         
+        let bgStyle = `background: linear-gradient(135deg, ${cardColor} 0%, #111111 150%);`;
+        if (bgImage) {
+            bgStyle = `background: linear-gradient(135deg, ${cardColor}cc 0%, rgba(17,17,17,0.9) 150%), url('${bgImage}') center/cover no-repeat;`;
+        } else if (cardEffect === 'gradient') {
+            bgStyle = `background: linear-gradient(270deg, ${cardColor}, #111111, ${cardColor});`;
+        }
+
+        const effectClass = cardEffect !== 'none' ? `effect-${cardEffect}` : '';
         const highActivityBadge = score > 100 ? `<span style="background-color:#d32f2f; color:white; font-size:14px; padding:2px 8px; border-radius:12px; margin-left:8px; text-shadow:none; white-space:nowrap; vertical-align:middle;">🎖️ 高活躍</span>` : '';
         
         let privacyHtml = '';
@@ -600,24 +726,24 @@
             privacyHtml = `<div class="member-info-row" style="color:#aaa; font-style:italic; justify-content:center; border:none; margin-top:5px; background:rgba(0,0,0,0.3); padding:5px; border-radius:5px;">隱私設定：聯絡資訊與活躍度不公開</div>`;
         }
 
-        const bioHtml = user.bio ? `<div style="margin-top: 15px; font-size: 14px; line-height: 1.5; background: rgba(255,255,255,0.15); padding: 12px; border-radius: 8px; text-shadow: none;">${user.bio.replace(/\n/g, '<br>')}</div>` : '';
+        const bioHtml = user.bio ? `<div style="margin-top: 15px; font-size: 14px; line-height: 1.5; background: rgba(255,255,255,0.15); padding: 12px; border-radius: 8px; text-shadow: none; z-index:2; position:relative;">${user.bio.replace(/\n/g, '<br>')}</div>` : '';
         
         let mapHtml = '';
         if (user.mapUrl) {
             if (user.mapUrl.includes('<iframe')) {
                 const srcMatch = user.mapUrl.match(/src="([^"]+)"/);
-                if (srcMatch) mapHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2);"><iframe src="${srcMatch[1]}" width="100%" height="180" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`;
+                if (srcMatch) mapHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); z-index:2; position:relative;"><iframe src="${srcMatch[1]}" width="100%" height="180" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`;
             } else if (user.mapUrl.startsWith('http')) {
-                mapHtml = `<div style="margin-top: 15px; text-align:center;"><a href="${user.mapUrl}" target="_blank" style="color: #333; background: #ffd700; text-decoration: none; font-weight: bold; padding: 10px 20px; border-radius: 20px; display: inline-block; font-size:14px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); text-shadow: none;">📍 開啟 Google 地圖地標</a></div>`;
+                mapHtml = `<div style="margin-top: 15px; text-align:center; z-index:2; position:relative;"><a href="${user.mapUrl}" target="_blank" style="color: #333; background: #ffd700; text-decoration: none; font-weight: bold; padding: 10px 20px; border-radius: 20px; display: inline-block; font-size:14px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); text-shadow: none;">📍 開啟 Google 地圖地標</a></div>`;
             } else {
-                 mapHtml = `<div style="margin-top: 15px; font-size: 13px; color: #ffeb3b; text-shadow: none;">📍 地標：${user.mapUrl}</div>`;
+                 mapHtml = `<div style="margin-top: 15px; font-size: 13px; color: #ffeb3b; text-shadow: none; z-index:2; position:relative;">📍 地標：${user.mapUrl}</div>`;
             }
         }
 
         return `
-            <div class="membership-card" style="background: linear-gradient(135deg, ${cardColor} 0%, #111111 150%); margin-bottom: 0;">
+            <div class="membership-card ${effectClass}" style="${bgStyle} margin-bottom: 0;">
                 <div class="member-tier-display" style="flex-wrap:wrap;">${stats.tier} ${highActivityBadge}</div>
-                <div style="font-size: 28px; font-weight: bold; margin-bottom: 20px;">${user.name} <span style="font-size:24px;">${cardEmoji}</span></div>
+                <div style="font-size: 28px; font-weight: bold; margin-bottom: 20px; z-index:2; position:relative;">${user.name} <span style="font-size:24px;">${cardEmoji}</span></div>
                 ${privacyHtml}
                 <div class="member-info-row"><span>聚會參與</span><span>共參加 ${stats.attended} 次</span></div>
                 <div class="member-info-row"><span>系統資歷</span><span>滿 ${stats.months} 個月</span></div>
@@ -629,8 +755,18 @@
 
     function showUserCard(phone) {
         document.getElementById('modal-card-container').innerHTML = generateCardHtml(phone, phone === currentUserPhone);
-        document.getElementById('user-card-modal').classList.remove('hidden');
+        
+        const modal = document.getElementById('user-card-modal');
+        const content = document.getElementById('user-card-modal-content');
+        
+        modal.classList.remove('hidden');
+        
+        // 重置並觸發 3D 翻轉動畫
+        content.classList.remove('flip-animate');
+        void content.offsetWidth; // 強制重繪
+        content.classList.add('flip-animate');
     }
+    
     function closeUserCard() {
         document.getElementById('user-card-modal').classList.add('hidden');
     }
@@ -662,11 +798,46 @@
         let me = allUsers[currentUserPhone]; const checkboxes = document.querySelectorAll('#closed-days-checkboxes input:checked');
         me.closedDays = Array.from(checkboxes).map(cb => cb.value); saveAllData(); alert("📅 店休設定已儲存成功！"); renderCardView();
     }
+    
     function saveCardStyle() {
-        const newColor = document.getElementById('card-color-picker').value; const newEmoji = document.getElementById('card-emoji-input').value.trim() || '✨';
-        allUsers[currentUserPhone].customColor = newColor; allUsers[currentUserPhone].customEmoji = newEmoji; saveAllData();
-        document.getElementById('my-avatar').style.backgroundColor = newColor; document.getElementById('welcome-msg').innerText = `${allUsers[currentUserPhone].name} ${newEmoji}`; renderCardView(); alert("🎨 專屬風格套用成功！");
+        const newColor = document.getElementById('card-color-picker').value; 
+        const newEmoji = document.getElementById('card-emoji-input').value.trim() || '✨';
+        const newEffect = document.getElementById('card-effect-select').value;
+        const fileInput = document.getElementById('card-bg-input');
+
+        const u = allUsers[currentUserPhone];
+        u.customColor = newColor; 
+        u.customEmoji = newEmoji; 
+        u.cardEffect = newEffect;
+
+        if (fileInput.files[0]) {
+            compressImage(fileInput.files[0], (base64Img) => {
+                u.cardBgImage = base64Img;
+                finalizeSaveCardStyle(u);
+            });
+        } else {
+            finalizeSaveCardStyle(u);
+        }
     }
+    
+    function finalizeSaveCardStyle(u) {
+        saveAllData();
+        document.getElementById('my-avatar').style.backgroundColor = u.customColor; 
+        document.getElementById('welcome-msg').innerText = `${u.name} ${u.customEmoji}`; 
+        renderCardView(); 
+        alert("🎨 專屬風格與特效套用成功！");
+    }
+
+    function clearCardBg() {
+        if(confirm("確定要移除自訂背景圖片嗎？")) {
+            allUsers[currentUserPhone].cardBgImage = null;
+            document.getElementById('card-bg-input').value = '';
+            saveAllData();
+            renderCardView();
+            alert("背景圖片已移除！");
+        }
+    }
+
     function saveShopInfo() {
         allUsers[currentUserPhone].bio = document.getElementById('card-bio-input').value.trim();
         allUsers[currentUserPhone].mapUrl = document.getElementById('card-map-input').value.trim();
@@ -702,16 +873,62 @@
         eventsData.unshift({ id: Date.now(), type: 'event', title: title, date: date, creatorPhone: currentUserPhone, attendees: {}, comments: [], latestActivity: '', isClosed: false });
         saveAllData(); document.getElementById('event-title').value = ''; document.getElementById('event-date').value = ''; currentTab = 'events'; showMain();
     }
+    
+    function togglePollType() {
+        const pType = document.getElementById('poll-type').value;
+        const pMult = document.getElementById('poll-multiple');
+        if (pType === 'points') {
+            pMult.value = 'single';
+            pMult.disabled = true; // 積分投票強制單選
+        } else {
+            pMult.disabled = false;
+        }
+    }
+
     function submitPoll() {
-        const question = document.getElementById('poll-question').value; const optionsRaw = document.getElementById('poll-options').value; const mode = document.getElementById('poll-mode').value; const isMultiple = document.getElementById('poll-multiple').value === 'multiple';
+        const question = document.getElementById('poll-question').value; 
+        const optionsRaw = document.getElementById('poll-options').value; 
+        const pollType = document.getElementById('poll-type').value;
+        const mode = document.getElementById('poll-mode').value; 
+        const isMultiple = document.getElementById('poll-multiple').value === 'multiple';
+        
         if (!question || !optionsRaw) { alert("請填寫問題與選項！"); return; }
         const options = optionsRaw.split('\n').map(opt => opt.trim()).filter(opt => opt !== "");
         if(options.length < 2) { alert("至少需輸入兩個選項，請記得換行喔！"); return; }
-        pollsData.unshift({ id: Date.now(), type: 'poll', question: question, options: options, mode: mode, isMultiple: isMultiple, creatorPhone: currentUserPhone, votes: [], latestActivity: '', isClosed: false });
-        saveAllData(); document.getElementById('poll-question').value = ''; document.getElementById('poll-options').value = ''; currentTab = 'events'; showMain();
+        
+        pollsData.unshift({ 
+            id: Date.now(), type: 'poll', pollType: pollType, question: question, 
+            options: options, mode: mode, isMultiple: isMultiple, 
+            creatorPhone: currentUserPhone, votes: [], latestActivity: '', isClosed: false 
+        });
+        saveAllData(); 
+        document.getElementById('poll-question').value = ''; 
+        document.getElementById('poll-options').value = ''; 
+        currentTab = 'events'; showMain();
     }
 
-    function showCreateForm(type) { type === 'event' ? showSection('create-event-section') : showSection('create-poll-section'); }
+    function showCreateForm(type) { 
+        if (type === 'poll') {
+            const stats = getUserStats(currentUserPhone);
+            const canCreatePoints = stats.tier === '👑 元老' || adminPhones.includes(currentUserPhone);
+            const pointsOpt = document.getElementById('opt-poll-points');
+            if (pointsOpt) {
+                if (!canCreatePoints) {
+                    pointsOpt.disabled = true;
+                    pointsOpt.innerText = "積分投票 (僅限元老/管理員)";
+                } else {
+                    pointsOpt.disabled = false;
+                    pointsOpt.innerText = "積分投票 (計分)";
+                }
+            }
+            document.getElementById('poll-type').value = 'general';
+            togglePollType();
+            showSection('create-poll-section');
+        } else {
+            showSection('create-event-section');
+        }
+    }
+    
     function cancelCreate() { showMain(); }
 
     // --- 互動邏輯 ---
@@ -742,14 +959,26 @@
         const item = dataArray.find(i => i.id === itemId);
         if(item) { item.comments.splice(commentIndex, 1); saveAllData(); switchTab(currentTab); }
     }
+    
     function addComment(type, id) {
         const input = document.getElementById(`comment-input-${id}`); const text = input.value.trim(); if (!text) return;
         const newComment = { phone: currentUserPhone, text: text, time: new Date().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}) };
+        
+        // 檢查是否標記了其他人 (@名稱)，有的話建立通知
+        for (let p in allUsers) {
+            if (p !== currentUserPhone && text.includes(`@${allUsers[p].name}`)) {
+                if (!allUsers[p].notifications) allUsers[p].notifications = [];
+                allUsers[p].notifications.push(`💬 ${allUsers[currentUserPhone].name} 剛剛回覆了您的留言！`);
+            }
+        }
+
         if (type === 'post') { const post = postsData.find(p => p.id === id); post.comments.push(newComment); } 
         else if (type === 'event') { const evt = eventsData.find(e => e.id === id); evt.comments.push(newComment); evt.latestActivity = `${allUsers[currentUserPhone].name} 剛剛留言了！`; }
+        
         saveAllData(); input.value = ''; switchTab(currentTab);
         document.getElementById(`details-${type}-${id}`).classList.remove('hidden'); 
     }
+
     function submitVote(pollId) {
         const poll = pollsData.find(p => p.id === pollId); if(poll.isClosed) { alert("此投票已截止！"); return; }
         const selectedOptions = document.querySelectorAll(`input[name="poll-${pollId}"]:checked`);
@@ -775,7 +1004,6 @@
     function renderHome() {
         renderAnnouncement();
         
-        // 權限控管：判斷是否為元老或管理員
         const stats = getUserStats(currentUserPhone);
         const canPost = stats.tier === '👑 元老' || adminPhones.includes(currentUserPhone);
         const postArea = document.getElementById('post-creation-area');
@@ -784,19 +1012,15 @@
         if (postArea) postArea.style.display = canPost ? 'block' : 'none';
         if (notElderMsg) notElderMsg.style.display = canPost ? 'none' : 'block';
 
-        // 檢查並過濾超過 24 小時的非管理員文章
         const now = Date.now();
         let needsCleanup = false;
         postsData = postsData.filter(post => {
             const isAdmin = adminPhones.includes(post.creatorPhone);
             if (!isAdmin && (now - post.id > 24 * 60 * 60 * 1000)) {
-                needsCleanup = true;
-                return false;
+                needsCleanup = true; return false;
             }
             return true;
         });
-        
-        // 如果有文章過期，同步儲存以清除雲端資料庫
         if (needsCleanup) saveAllData();
 
         const list = document.getElementById('home-list'); list.innerHTML = '';
@@ -816,10 +1040,13 @@
                 const cUser = allUsers[c.phone] || {name: '未知'};
                 const canDeleteComment = c.phone === currentUserPhone || adminPhones.includes(currentUserPhone);
                 const delCommentBtn = canDeleteComment ? `<button style="background:none; border:none; color:#d32f2f; font-size:12px; cursor:pointer; padding:0;" onclick="deleteComment('post', ${post.id}, ${index})">✕</button>` : '';
+                
                 return `
                     <div class="comment-item">
-                        <strong><span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:${cUser.customColor||'#005f20'}; color:white; text-align:center; line-height:20px; font-size:10px; margin-right:4px;">${getInitial(cUser.name)}</span> ${cUser.name}</strong> 
-                        <span style="color:#999; font-size:12px;">${c.time}</span>
+                        <strong onclick="showUserCard('${c.phone}')" style="cursor:pointer; display:inline-flex; align-items:center; color:#005f20; transition:0.2s;" onmouseover="this.style.color='#ff9800'" onmouseout="this.style.color='#005f20'" title="點擊查看名片">
+                            <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:${cUser.customColor||'#005f20'}; color:white; text-align:center; line-height:20px; font-size:10px; margin-right:4px;">${getInitial(cUser.name)}</span> ${cUser.name}
+                        </strong> 
+                        <span style="color:#999; font-size:12px; margin-left:5px;">${c.time}</span>
                         <div style="position: absolute; right: 8px; top: 8px; display: flex; gap: 10px;">
                             <button style="background:none; border:none; color:#2196F3; font-size:12px; cursor:pointer; padding:0;" onclick="document.getElementById('comment-input-${post.id}').value='@${cUser.name} '; document.getElementById('comment-input-${post.id}').focus();">↩️ 回覆</button>
                             ${delCommentBtn}
@@ -828,7 +1055,6 @@
                     </div>`;
             }).join('');
 
-            // 新增照片下載按鈕
             const imgHtml = post.image ? `
                 <div style="position: relative;">
                     <img src="${post.image}" class="post-image">
@@ -877,10 +1103,13 @@
                 const cUser = allUsers[c.phone] || {name: '未知'};
                 const canDeleteComment = c.phone === currentUserPhone || adminPhones.includes(currentUserPhone);
                 const delCommentBtn = canDeleteComment ? `<button style="background:none; border:none; color:#d32f2f; font-size:12px; cursor:pointer; padding:0;" onclick="deleteComment('event', ${evt.id}, ${index})">✕</button>` : '';
+                
                 return `
                     <div class="comment-item">
-                        <strong><span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:${cUser.customColor||'#005f20'}; color:white; text-align:center; line-height:20px; font-size:10px; margin-right:4px;">${getInitial(cUser.name)}</span> ${cUser.name}</strong> 
-                        <span style="color:#999; font-size:12px;">${c.time}</span>
+                        <strong onclick="showUserCard('${c.phone}')" style="cursor:pointer; display:inline-flex; align-items:center; color:#005f20; transition:0.2s;" onmouseover="this.style.color='#ff9800'" onmouseout="this.style.color='#005f20'" title="點擊查看名片">
+                            <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:${cUser.customColor||'#005f20'}; color:white; text-align:center; line-height:20px; font-size:10px; margin-right:4px;">${getInitial(cUser.name)}</span> ${cUser.name}
+                        </strong> 
+                        <span style="color:#999; font-size:12px; margin-left:5px;">${c.time}</span>
                         <div style="position: absolute; right: 8px; top: 8px; display: flex; gap: 10px;">
                             <button style="background:none; border:none; color:#2196F3; font-size:12px; cursor:pointer; padding:0;" onclick="document.getElementById('comment-input-${evt.id}').value='@${cUser.name} '; document.getElementById('comment-input-${evt.id}').focus();">↩️ 回覆</button>
                             ${delCommentBtn}
@@ -954,11 +1183,17 @@
             const myVotes = poll.votes.filter(v => v.phone === currentUserPhone).map(v => v.option); 
             const uniqueVotersCount = new Set(poll.votes.map(v => v.phone)).size;
             const creator = allUsers[poll.creatorPhone] || {name: '已刪除的使用者', customColor: '#005f20'};
-            const isClosed = poll.isClosed; const inputType = poll.isMultiple ? 'checkbox' : 'radio';
+            const isClosed = poll.isClosed; 
+            const inputType = poll.isMultiple ? 'checkbox' : 'radio';
+            const isPointsPoll = poll.pollType === 'points';
             
             const optionsHtml = poll.options.map((opt, idx) => { 
                 const isChecked = myVotes.includes(opt) ? 'checked' : ''; const disabled = isClosed ? 'disabled' : '';
-                return `<div class="vote-option"><input type="${inputType}" name="poll-${poll.id}" value="${opt}" id="opt-${poll.id}-${idx}" ${isChecked} ${disabled}><label for="opt-${poll.id}-${idx}">${opt}</label></div>`; 
+                let pointHint = '';
+                if (isPointsPoll && !isClosed) {
+                    pointHint = idx === 0 ? ' <span style="color:#d32f2f; font-size:12px; font-weight:bold;">(+5分)</span>' : ' <span style="color:#ff9800; font-size:12px; font-weight:bold;">(+2分)</span>';
+                }
+                return `<div class="vote-option"><input type="${inputType}" name="poll-${poll.id}" value="${opt}" id="opt-${poll.id}-${idx}" ${isChecked} ${disabled}><label for="opt-${poll.id}-${idx}">${opt}${pointHint}</label></div>`; 
             }).join('');
             
             let resultsHtml = '';
@@ -992,7 +1227,8 @@
             }
 
             let badgeType = poll.mode === 'anonymous' ? '🕵️‍♂️ 匿名' : '📝 實名'; badgeType += poll.isMultiple ? ' / 多選' : ' / 單選';
-            const badgeHtml = isClosed ? `<div class="badge badge-closed">已截止</div>` : `<div class="badge badge-poll">投票 · ${badgeType}</div>`;
+            const pollTypeBadge = isPointsPoll ? `<div class="badge" style="background-color:#E91E63;">積分投票</div>` : `<div class="badge badge-poll">一般投票</div>`;
+            const badgeHtml = isClosed ? `<div class="badge badge-closed">已截止</div>` : `${pollTypeBadge} <div class="badge" style="background-color:#555;">${badgeType}</div>`;
             const activityHtml = poll.latestActivity ? `<div class="latest-activity">✨ 最新動態：${poll.latestActivity}</div>` : '';
             const voteBtnHtml = isClosed ? `<div style="text-align:center; width:100%; color:#d32f2f; font-weight:bold; padding:10px; background:#ffebee; border-radius:5px;">🛑 本投票已截止</div>` : `<button style="width: 100%; padding: 8px;" onclick="submitVote(${poll.id})">送出選票</button>`;
 
@@ -1051,6 +1287,7 @@
         
         document.getElementById('card-color-picker').value = me.customColor || '#005f20'; 
         document.getElementById('card-emoji-input').value = me.customEmoji || '✨';
+        document.getElementById('card-effect-select').value = me.cardEffect || 'none';
         document.getElementById('card-bio-input').value = me.bio || '';
         document.getElementById('card-map-input').value = me.mapUrl || '';
 
