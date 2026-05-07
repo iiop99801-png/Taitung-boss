@@ -99,8 +99,8 @@
         .post-text { font-size: 16px; color: #2c3e50; line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap; font-weight: 600; }
         .post-input-area { background-color: #ffffff; padding: 20px; border-radius: 16px; margin-bottom: 25px; border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
         
-        /* 刪除/操作按鈕 */
-        .card-actions { position: absolute; top: 18px; right: 18px; display: flex; gap: 8px; }
+        /* 刪除/操作按鈕 (已優化為獨立排版不擋字) */
+        .card-actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 15px; width: 100%; }
         .action-btn { background: #f8fafc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e1e8ed; padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 8px; width: auto; font-weight: 700; color: #333; margin: 0; }
         .action-btn.delete { color: #d32f2f; }
         .action-btn.delete:hover { background-color: #ffebee; border-color: #ffcdd2; }
@@ -1063,7 +1063,7 @@
         const pType = document.getElementById('poll-type').value;
         const pMult = document.getElementById('poll-multiple');
         if (pType === 'points') {
-            pMult.disabled = false; // 已解鎖積分投票的多選限制
+            pMult.disabled = false; 
         } else {
             pMult.disabled = false;
         }
@@ -1194,13 +1194,8 @@
         const input = document.getElementById(`comment-input-${id}`); const text = input.value.trim(); if (!text) return;
         const newComment = { phone: currentUserPhone, text: text, time: new Date().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}) };
         
-        for (let p in allUsers) {
-            if (p !== currentUserPhone && text.includes(`@${allUsers[p].name}`)) {
-                if (!allUsers[p].notifications) allUsers[p].notifications = [];
-                allUsers[p].notifications.push(`💬 ${allUsers[currentUserPhone].name} 剛剛回覆了您的留言！`);
-            }
-        }
-
+        // 移除了自動標記的推播邏輯，因為沒有回覆按鈕了
+        
         if (type === 'post') { const post = postsData.find(p => p.id === id); post.comments.push(newComment); } 
         else if (type === 'event') { const evt = eventsData.find(e => e.id === id); evt.comments.push(newComment); evt.latestActivity = `${allUsers[currentUserPhone].name} 剛剛留言了！`; }
         
@@ -1280,7 +1275,6 @@
                         </strong> 
                         <span style="color:#7f8c8d; font-size:12px; margin-left:8px;">${c.time}</span>
                         <div style="position: absolute; right: 12px; top: 12px; display: flex; gap: 12px;">
-                            <button style="background:none; border:none; box-shadow:none; color:#0081C9; font-size:13px; font-weight:800; cursor:pointer; padding:0;" onclick="document.getElementById('comment-input-${post.id}').value='@${cUser.name} '; document.getElementById('comment-input-${post.id}').focus();">↩️ 回覆</button>
                             ${delCommentBtn}
                         </div>
                         <div style="margin-top: 6px; word-break: break-all; color:#2c3e50;">${c.text}</div>
@@ -1343,7 +1337,6 @@
                         </strong> 
                         <span style="color:#7f8c8d; font-size:12px; margin-left:8px;">${c.time}</span>
                         <div style="position: absolute; right: 12px; top: 12px; display: flex; gap: 12px;">
-                            <button style="background:none; border:none; box-shadow:none; color:#0081C9; font-size:13px; font-weight:800; cursor:pointer; padding:0;" onclick="document.getElementById('comment-input-${evt.id}').value='@${cUser.name} '; document.getElementById('comment-input-${evt.id}').focus();">↩️ 回覆</button>
                             ${delCommentBtn}
                         </div>
                         <div style="margin-top: 6px; word-break: break-all; color:#2c3e50;">${c.text}</div>
