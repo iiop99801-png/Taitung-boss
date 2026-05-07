@@ -168,10 +168,43 @@
         .kick-btn { background: linear-gradient(135deg, #d32f2f, #e53935); }
         .promote-btn { background: linear-gradient(135deg, #f39c12, #ffb300); }
         
-        /* 名單/搜尋列表 */
+        /* 名單/搜尋列表 (加入層級動態特效) */
         .directory-item { display: flex; align-items: center; padding: 15px; background: #ffffff; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;}
         .directory-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); background: #f8fafc; }
         .directory-item .text-avatar { width: 55px; height: 55px; font-size: 22px; }
+        
+        /* 名單等級卡片樣式 - 超強視覺升級版 */
+        
+        /* 等級 100: 漸層台東藍線條 + 柔和藍色背光 */
+        .dir-tier-100 { border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #00C9FF, #0081C9) border-box; box-shadow: 0 4px 15px rgba(0, 129, 201, 0.2); transition: 0.3s;}
+        .dir-tier-100:hover { box-shadow: 0 8px 25px rgba(0, 129, 201, 0.3); }
+
+        /* 等級 150: 高級愛馬仕漸層橘線條 + 強烈橘色光暈 */
+        .dir-tier-150 { border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #FF6F00, #FF9100) border-box; box-shadow: 0 6px 20px rgba(255, 111, 0, 0.35); transition: 0.3s;}
+        .dir-tier-150:hover { box-shadow: 0 10px 30px rgba(255, 111, 0, 0.5); }
+
+        /* 等級 200: 烈焰大紅線條 + 閃爍火花特效動畫 */
+        @keyframes legendary-fire-glow {
+            0%, 100% { box-shadow: 0 8px 30px rgba(211, 47, 47, 0.6), 0 0 10px rgba(211, 47, 47, 0.4); }
+            50% { box-shadow: 0 12px 40px rgba(211, 47, 47, 0.9), 0 0 20px rgba(255, 152, 0, 0.7); border-color: #ff5252; }
+        }
+
+        .dir-tier-200 { 
+            border: 3px solid #D32F2F; /* 粗體大紅線 */
+            background: linear-gradient(135deg, #ffffff, #ffebee); /* 微紅背景 hint */
+            animation: legendary-fire-glow 2s infinite ease-in-out; /* 呼吸式烈焰光暈 */
+            position: relative;
+        }
+        /* 在卡片後方加入隱約的火花背景 */
+        .dir-tier-200::before {
+            content: '🔥';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 5px rgba(211,47,47,0.5));
+        }
 
         /* 卡片燈箱與編輯燈箱 (Modal) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.8); backdrop-filter: blur(3px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
@@ -509,6 +542,7 @@
         if (!user) return 0;
         let score = 70 + (user.manualBonus || 0);
 
+        // 【修正】聚會積分必須等「已截止 (isClosed)」才會結算發放
         eventsData.forEach(evt => {
             if (evt.isClosed) {
                 const status = evt.attendees ? evt.attendees[phone] : null;
@@ -518,6 +552,7 @@
             }
         });
 
+        // 投票積分一樣是等「已截止」才發放
         pollsData.forEach(poll => {
             if (poll.pollType === 'points' || !poll.pollType) { 
                 if (poll.isClosed) {
@@ -761,17 +796,27 @@
             const score = calculateUserScore(phone);
             
             let badgeText = '';
-            if (score >= 200) badgeText = '超級無敵霹靂活躍大隊長🔥';
-            else if (score >= 150) badgeText = '超級活躍成員🔥';
-            else if (score >= 100) badgeText = '活躍成員🔥';
+            let tierClass = '';
 
-            const badgeHtml = badgeText ? `<span style="background: linear-gradient(135deg, #d32f2f, #e53935); color:white; font-size:11px; padding:3px 8px; border-radius:12px; margin-left:8px; font-weight:800; box-shadow: 0 2px 5px rgba(211,47,47,0.3);">🎖️ ${badgeText}</span>` : '';
+            if (score >= 200) {
+                badgeText = '超級無敵霹靂活躍大隊長🔥';
+                tierClass = 'dir-tier-200';
+            } else if (score >= 150) {
+                badgeText = '超級活躍成員🔥';
+                tierClass = 'dir-tier-150';
+            } else if (score >= 100) {
+                badgeText = '活躍成員🔥';
+                tierClass = 'dir-tier-100';
+            }
+
+            const badgeHtml = badgeText ? `<div style="margin-top: 8px;"><span style="background: linear-gradient(135deg, #d32f2f, #e53935); color:white; font-size:11px; padding:4px 10px; border-radius:12px; font-weight:800; box-shadow: 0 2px 5px rgba(211,47,47,0.3); display:inline-block;">🎖️ ${badgeText}</span></div>` : '';
             
             listDiv.innerHTML += `
-                <div class="directory-item" onclick="showUserCard('${phone}')">
+                <div class="directory-item ${tierClass}" onclick="showUserCard('${phone}')">
                     <div class="text-avatar" style="background-color:${u.customColor||'#005086'}; background-image:none;">${getInitial(u.name)}</div>
                     <div style="flex:1; min-width:0; margin-left: 15px;">
-                        <div style="font-weight:900; font-size:18px; color:#005086;">${u.name} <span style="font-size:16px;">${u.customEmoji || ''}</span>${badgeHtml}</div>
+                        <div style="font-weight:900; font-size:18px; color:#005086;">${u.name} <span style="font-size:16px;">${u.customEmoji || ''}</span></div>
+                        ${badgeHtml}
                         <div style="font-size:14px; color:#7f8c8d; margin-top:6px; font-weight:600;">${stats.tier} | 參與 ${stats.attended} 次聚會</div>
                     </div>
                 </div>
@@ -1183,7 +1228,7 @@
         const me = allUsers[currentUserPhone];
         if (evt) {
             if (evt.attendees[currentUserPhone] === status) { delete evt.attendees[currentUserPhone]; evt.latestActivity = `${me.name} 取消了報名。`; } 
-            else { evt.attendees[currentUserPhone] = status; evt.latestActivity = status === 'attend' ? `${me.name} 決定參加了！` : `${me.name} 殘念不能來。`; }
+            else { evt.attendees[currentUserPhone] = status; evt.latestActivity = status === 'attend' ? `${me.name} 決定參加了！` : `${me.name} 殘念不能來.`; }
             saveAllData(); switchTab(currentTab);
             document.getElementById(`details-event-${eventId}`).classList.remove('hidden'); 
             if(!expandedCards.includes(`event-${eventId}`)) expandedCards.push(`event-${eventId}`);
