@@ -323,6 +323,9 @@
                     <button onclick="showCreateForm('poll')" style="flex:1; background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);">＋ 建立投票</button>
                 </div>
                 <hr style="border: 0; height: 2px; background: #e1e8ed; margin: 25px 0;">
+                
+                <div id="events-rules-container"></div>
+                
                 <div id="events-list"></div><div id="polls-list"></div>
             </div>
             
@@ -464,30 +467,6 @@
     </div>
 </div>
 
-<div id="edit-user-modal" class="modal-overlay hidden">
-    <div class="modal-content" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25);">
-        <h3 style="color: #005086; margin-top: 0; border-bottom: 2px dashed #cfd9e0; padding-bottom: 15px; font-weight: 900; font-size: 20px;">✏️ 編輯會員資料</h3>
-        <input type="hidden" id="edit-target-phone">
-        
-        <label style="font-size:15px; font-weight:800;">顯示名稱：</label>
-        <input type="text" id="edit-user-name" placeholder="輸入新名稱">
-        
-        <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">額外聚會參與次數 (直接設定總次數)：</label>
-        <input type="number" id="edit-user-attend-bonus" min="0">
-        
-        <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">手動增減活躍分數 (目前累計加分: <span id="current-score-bonus" style="color:#0081C9;">0</span>)：</label>
-        <input type="number" id="edit-user-score-bonus" placeholder="輸入正數加分，負數扣分 (例: 5 或 -3)">
-        
-        <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">加入日期 (系統資歷)：</label>
-        <input type="date" id="edit-user-join-date">
-        
-        <div style="display: flex; gap: 12px; margin-top: 25px;">
-            <button onclick="saveUserEdit()" style="flex:1; margin:0;">儲存變更</button>
-            <button onclick="closeEditUserModal()" class="secondary" style="flex:1; margin:0;">取消</button>
-        </div>
-    </div>
-</div>
-
 <script>
     // --- 雲端大腦 (Firebase) 連線設定 ---
     const firebaseConfig = {
@@ -513,6 +492,14 @@
     let systemInviteCode = '8888';
     let announcementText = '歡迎來到台東老闆專屬聚會！\n這是一個私密的交流空間，大家可以在這裡發起聚餐、投票決定餐廳，或是分享開店日常。\n\n如果有臨時特休，記得去「會員卡」更新店休設定喔！';
     
+    // --- 動態計分設定變數 (預設值) ---
+    let ptsEventAttend = 5;
+    let ptsEventAbsent = 3;
+    let ptsEventNoResp = -3;
+    let ptsPollSingleVote = 3;
+    let ptsPollMultiVote = 1;
+    let ptsPollNoVote = -3;
+
     let currentUserPhone = null;
     let currentTab = 'home'; 
     let currentSectionId = 'login-section'; 
@@ -545,9 +532,9 @@
         eventsData.forEach(evt => {
             if (evt.isClosed) {
                 const status = evt.attendees ? evt.attendees[phone] : null;
-                if (status === 'attend') score += 5;
-                else if (status === 'absent') score += 3;
-                else if (!status && evt.id >= user.joinDate) score -= 3;
+                if (status === 'attend') score += ptsEventAttend;
+                else if (status === 'absent') score += ptsEventAbsent;
+                else if (!status && evt.id >= user.joinDate) score += ptsEventNoResp;
             }
         });
 
@@ -556,9 +543,9 @@
                 if (poll.isClosed) {
                     const userVote = poll.votes ? poll.votes.find(v => v.phone === phone) : null;
                     if (userVote) {
-                        score += poll.isMultiple ? 1 : 3; 
+                        score += poll.isMultiple ? ptsPollMultiVote : ptsPollSingleVote; 
                     } else if (!userVote && poll.id >= user.joinDate) {
-                        score -= 3;                           
+                        score += ptsPollNoVote;                           
                     }
                 }
             } 
@@ -581,6 +568,12 @@
                 if (doc.id === "settings") {
                     systemInviteCode = parsed.inviteCode || '8888';
                     announcementText = parsed.announcement || announcementText;
+                    ptsEventAttend = parsed.ptsEventAttend ?? 5;
+                    ptsEventAbsent = parsed.ptsEventAbsent ?? 3;
+                    ptsEventNoResp = parsed.ptsEventNoResp ?? -3;
+                    ptsPollSingleVote = parsed.ptsPollSingleVote ?? 3;
+                    ptsPollMultiVote = parsed.ptsPollMultiVote ?? 1;
+                    ptsPollNoVote = parsed.ptsPollNoVote ?? -3;
                 }
             }
         });
@@ -628,7 +621,11 @@
     }
 
     function saveSettings() {
-        db.collection("taitung_app").doc("settings").set({ d: JSON.stringify({ inviteCode: systemInviteCode, announcement: announcementText }) });
+        db.collection("taitung_app").doc("settings").set({ d: JSON.stringify({ 
+            inviteCode: systemInviteCode, announcement: announcementText,
+            ptsEventAttend, ptsEventAbsent, ptsEventNoResp,
+            ptsPollSingleVote, ptsPollMultiVote, ptsPollNoVote
+        }) });
     }
 
     // --- 初始化系統 ---
@@ -850,12 +847,22 @@
 
         const highActivityBadge = badgeText ? `<span style="background: linear-gradient(135deg, #d32f2f, #e53935); color:white; font-size:14px; padding:4px 12px; border-radius:15px; margin-left:10px; text-shadow:none; white-space:nowrap; vertical-align:middle; box-shadow: 0 2px 8px rgba(211,47,47,0.4);">🎖️ ${badgeText}</span>` : '';
         
+        // 組合 alert 訊息
+        const evtAttStr = ptsEventAttend > 0 ? '+'+ptsEventAttend : ptsEventAttend;
+        const evtAbsStr = ptsEventAbsent > 0 ? '+'+ptsEventAbsent : ptsEventAbsent;
+        const evtNoStr = ptsEventNoResp > 0 ? '+'+ptsEventNoResp : ptsEventNoResp;
+        const pollSinStr = ptsPollSingleVote > 0 ? '+'+ptsPollSingleVote : ptsPollSingleVote;
+        const pollMulStr = ptsPollMultiVote > 0 ? '+'+ptsPollMultiVote : ptsPollMultiVote;
+        const pollNoStr = ptsPollNoVote > 0 ? '+'+ptsPollNoVote : ptsPollNoVote;
+
+        const alertMsg = `【活躍度計算與懲罰機制】\\n\\n📌 聚會：\\n參加 ${evtAttStr} 分\\n無法參加 ${evtAbsStr} 分\\n未回應(截止後) ${evtNoStr} 分\\n\\n📌 積分投票 (單選)：\\n參與投票 ${pollSinStr} 分\\n未投票(截止後) ${pollNoStr} 分\\n\\n📌 積分投票 (多選)：\\n參與投票 ${pollMulStr} 分\\n未投票(截止後) ${pollNoStr} 分\\n\\n🚨 注意：活躍度低於 60 分將會被系統鎖定，屆時需請管理員協助解鎖！`;
+
         let privacyHtml = '';
         if (isSelf) {
             privacyHtml = `
                 <div class="member-info-row"><span>電話帳號</span><span>${user.phone}</span></div>
                 <div class="member-info-row">
-                    <span style="display:flex; align-items:center; gap:6px;">🔥 活躍分數 <span onclick="alert('【活躍度計算與懲罰機制】\\n\\n📌 聚會：\\n參加 +5 分\\n無法參加 +3 分\\n未回應(截止後) -3 分\\n\\n📌 積分投票 (單選)：\\n參與投票 +3 分\\n未投票(截止後) -3 分\\n\\n📌 積分投票 (多選)：\\n參與投票 +1 分\\n未投票(截止後) -3 分\\n\\n🚨 注意：活躍度低於 60 分將會被系統鎖定，屆時需請管理員協助解鎖！'); event.stopPropagation();" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; background:linear-gradient(135deg, #f1c40f, #f39c12); color:#fff; border-radius:50%; font-size:13px; font-weight:900; box-shadow:0 2px 6px rgba(0,0,0,0.4); text-shadow:none;">?</span></span>
+                    <span style="display:flex; align-items:center; gap:6px;">🔥 活躍分數 <span onclick="alert('${alertMsg}'); event.stopPropagation();" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; background:linear-gradient(135deg, #f1c40f, #f39c12); color:#fff; border-radius:50%; font-size:13px; font-weight:900; box-shadow:0 2px 6px rgba(0,0,0,0.4); text-shadow:none;">?</span></span>
                     <span style="color:#ffd700; font-weight:900; font-size:16px;">${score} 分</span>
                 </div>
             `;
@@ -1151,9 +1158,9 @@
                     const u = allUsers[phone];
                     let pts = 0;
                     const status = item.attendees ? item.attendees[phone] : null;
-                    if (status === 'attend') pts = 5;
-                    else if (status === 'absent') pts = 3;
-                    else if (!status && item.id >= u.joinDate) pts = -3;
+                    if (status === 'attend') pts = ptsEventAttend;
+                    else if (status === 'absent') pts = ptsEventAbsent;
+                    else if (!status && item.id >= u.joinDate) pts = ptsEventNoResp;
                     
                     if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
                 });
@@ -1168,8 +1175,8 @@
                         const u = allUsers[phone];
                         const userVote = item.votes ? item.votes.find(v => v.phone === phone) : null;
                         let pts = 0;
-                        if (userVote) pts = item.isMultiple ? 1 : 3;
-                        else if (!userVote && item.id >= u.joinDate) pts = -3;
+                        if (userVote) pts = item.isMultiple ? ptsPollMultiVote : ptsPollSingleVote;
+                        else if (!userVote && item.id >= u.joinDate) pts = ptsPollNoVote;
                         
                         if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
                     });
@@ -1193,8 +1200,6 @@
     function addComment(type, id) {
         const input = document.getElementById(`comment-input-${id}`); const text = input.value.trim(); if (!text) return;
         const newComment = { phone: currentUserPhone, text: text, time: new Date().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}) };
-        
-        // 移除了自動標記的推播邏輯，因為沒有回覆按鈕了
         
         if (type === 'post') { const post = postsData.find(p => p.id === id); post.comments.push(newComment); } 
         else if (type === 'event') { const evt = eventsData.find(e => e.id === id); evt.comments.push(newComment); evt.latestActivity = `${allUsers[currentUserPhone].name} 剛剛留言了！`; }
@@ -1308,7 +1313,7 @@
                         <div class="post-text">${post.text}</div>${imgHtml}
                         <div class="comment-section">
                             <div class="comment-list" id="comment-list-post-${post.id}">${commentsHtml}</div>
-                            <div class="comment-input-group"><input type="text" id="comment-input-${post.id}" placeholder="留言或回覆..."><button onclick="addComment('post', ${post.id})">送出</button></div>
+                            <div class="comment-input-group"><input type="text" id="comment-input-${post.id}" placeholder="留言..."><button onclick="addComment('post', ${post.id})">送出</button></div>
                         </div>
                     </div>
                 </div>`;
@@ -1318,6 +1323,25 @@
     }
 
     function renderEvents(containerId, dataArray) {
+        
+        // 渲染頂部說明區塊
+        const evtBoard = document.getElementById('events-rules-container');
+        if(evtBoard) {
+            evtBoard.innerHTML = `
+                <div class="announcement-board" style="background: linear-gradient(135deg, #ffffff, #f0f6fc); border: 1px solid #bbdefb; margin-bottom: 20px;">
+                    <div class="announcement-title" style="color: #005086; justify-content: flex-start; gap: 8px;">📢 活動與投票規則</div>
+                    <div class="announcement-text" style="color: #2c3e50; font-size: 14px;">
+                        這裡是專屬的活動交流區！您可以自由發起聚會或一般投票。<br><br>
+                        <b style="color:#d32f2f;">🔥 活躍度計分規則：</b><br>
+                        • <b>聚會報名：</b>參加 <b>${ptsEventAttend > 0 ? '+'+ptsEventAttend : ptsEventAttend}</b>分 / 無法參加 <b>${ptsEventAbsent > 0 ? '+'+ptsEventAbsent : ptsEventAbsent}</b>分 / 截止未回應 <b>${ptsEventNoResp > 0 ? '+'+ptsEventNoResp : ptsEventNoResp}</b>分<br>
+                        • <b>積分投票(單選)：</b>參與投票 <b>${ptsPollSingleVote > 0 ? '+'+ptsPollSingleVote : ptsPollSingleVote}</b>分 / 截止未投票 <b>${ptsPollNoVote > 0 ? '+'+ptsPollNoVote : ptsPollNoVote}</b>分<br>
+                        • <b>積分投票(多選)：</b>參與投票 <b>${ptsPollMultiVote > 0 ? '+'+ptsPollMultiVote : ptsPollMultiVote}</b>分 / 截止未投票 <b>${ptsPollNoVote > 0 ? '+'+ptsPollNoVote : ptsPollNoVote}</b>分<br>
+                        <span style="color:#7f8c8d; font-size:13px; display:block; margin-top:6px;">(註：一般投票不影響積分，請踴躍參與討論維持群組熱度喔！)</span>
+                    </div>
+                </div>
+            `;
+        }
+
         const list = typeof containerId === 'string' ? document.getElementById(containerId) : containerId; if(typeof containerId === 'string') list.innerHTML = '';
         dataArray.forEach(evt => {
             let attendCount = 0; let absentCount = 0; Object.values(evt.attendees).forEach(status => { if (status === 'attend') attendCount++; if (status === 'absent') absentCount++; });
@@ -1395,7 +1419,7 @@
                         ${activityHtml}
                         <div class="comment-section">
                             <div class="comment-list" id="comment-list-${evt.id}">${commentsHtml}</div>
-                            <div class="comment-input-group"><input type="text" id="comment-input-${evt.id}" placeholder="留言或回覆..."><button onclick="addComment('event', ${evt.id})">送出</button></div>
+                            <div class="comment-input-group"><input type="text" id="comment-input-${evt.id}" placeholder="留言..."><button onclick="addComment('event', ${evt.id})">送出</button></div>
                         </div>
                     </div>
                 </div>`;
@@ -1418,8 +1442,9 @@
                 const isChecked = myVotes.includes(opt) ? 'checked' : ''; const disabled = isClosed ? 'disabled' : '';
                 let pointHint = '';
                 if (isPointsPoll && !isClosed) {
-                    const pointValue = poll.isMultiple ? 1 : 3;
-                    pointHint = ` <span style="color:#d32f2f; font-size:13px; font-weight:900;">(+${pointValue}分)</span>`;
+                    const pointValue = poll.isMultiple ? ptsPollMultiVote : ptsPollSingleVote;
+                    const sign = pointValue > 0 ? '+' : '';
+                    pointHint = ` <span style="color:#d32f2f; font-size:13px; font-weight:900;">(${sign}${pointValue}分)</span>`;
                 }
                 return `<div class="vote-option" style="margin-bottom:12px; font-size:16px; font-weight:700;"><input type="${inputType}" name="poll-${poll.id}" value="${opt}" id="opt-${poll.id}-${idx}" ${isChecked} ${disabled}><label for="opt-${poll.id}-${idx}" style="cursor:pointer;">${opt}${pointHint}</label></div>`; 
             }).join('');
@@ -1547,12 +1572,56 @@
                 usersListHtml += `<div class="admin-user-row"><div style="line-height:1.6;"><strong onclick="showUserCard('${p}')" style="cursor:pointer; color:#005086; text-decoration:none; font-size:16px;">${u.name} ${u.customEmoji || ''}</strong> <span style="color:#7f8c8d; font-size:13px;">${isMe}</span> ${adminBadge} ${lockedWarning}<br><span style="font-size:13px; color:#556068; font-weight:600;">${p} | ${uStats.tier} | 活躍度: <span style="color:#0081C9; font-weight:800;">${uScore}</span></span></div>${actionsHtml}</div>`;
             }
             adminContainer.innerHTML = `
+                <div class="admin-panel">
+                    <div class="admin-title">⚙️ 活躍度計分設定</div>
+                    <p style="font-size:13px; color:#556068; margin-top:0; margin-bottom:12px;">自訂聚會與投票的預設積分規則。儲存後將立刻套用於全系統。</p>
+                    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px; font-size:14px;">
+                        <div style="flex:1; min-width:120px;">
+                            <label style="font-weight:800; display:block; margin-bottom:4px;">聚會:參加</label>
+                            <input type="number" id="set-evt-attend" value="${ptsEventAttend}" style="padding:8px; margin:0;">
+                        </div>
+                        <div style="flex:1; min-width:120px;">
+                            <label style="font-weight:800; display:block; margin-bottom:4px;">聚會:無法參加</label>
+                            <input type="number" id="set-evt-absent" value="${ptsEventAbsent}" style="padding:8px; margin:0;">
+                        </div>
+                        <div style="flex:1; min-width:120px;">
+                            <label style="font-weight:800; display:block; margin-bottom:4px;">聚會:未回應(扣分)</label>
+                            <input type="number" id="set-evt-noresp" value="${ptsEventNoResp}" style="padding:8px; margin:0;">
+                        </div>
+                        <div style="flex:1; min-width:120px;">
+                            <label style="font-weight:800; display:block; margin-bottom:4px;">單選投票:參與</label>
+                            <input type="number" id="set-poll-single" value="${ptsPollSingleVote}" style="padding:8px; margin:0;">
+                        </div>
+                        <div style="flex:1; min-width:120px;">
+                            <label style="font-weight:800; display:block; margin-bottom:4px;">多選投票:參與</label>
+                            <input type="number" id="set-poll-multi" value="${ptsPollMultiVote}" style="padding:8px; margin:0;">
+                        </div>
+                        <div style="flex:1; min-width:120px;">
+                            <label style="font-weight:800; display:block; margin-bottom:4px;">投票:未投票(扣分)</label>
+                            <input type="number" id="set-poll-novote" value="${ptsPollNoVote}" style="padding:8px; margin:0;">
+                        </div>
+                    </div>
+                    <button onclick="saveScoreSettings()" style="margin:0; width:auto; padding:8px 20px; font-size:14px; background:linear-gradient(135deg, #1565C0, #005086);">儲存計分設定</button>
+                </div>
                 <div class="admin-panel"><div class="admin-title">🔑 邀請碼管理</div><div style="display: flex; gap: 10px; margin-bottom: 10px;"><input type="text" id="admin-invite-code" value="${systemInviteCode}" style="margin:0;"><button onclick="changeInviteCode()" style="margin:0; width:auto; white-space:nowrap; padding: 0 20px;">更新密碼</button></div><p style="font-size:13px; color:#7f8c8d; font-weight:600;">更改邀請碼可防堵非相關人士註冊。</p></div>
                 <div class="admin-panel"><div class="admin-title">🛡️ 團隊與權限管理</div><p style="font-size:14px; color:#556068; margin-top:0; margin-bottom:15px; line-height:1.6;">若成員活躍度低於 60，可點擊「解鎖」為他補足分數。亦可「編輯資料」調整名稱、加入時間與參與數。</p>${usersListHtml}</div>`;
         } else { adminContainer.innerHTML = ''; }
     }
     
     // --- 管理員編輯會員資料 (Modal 控制) ---
+    function saveScoreSettings() {
+        ptsEventAttend = parseInt(document.getElementById('set-evt-attend').value) || 0;
+        ptsEventAbsent = parseInt(document.getElementById('set-evt-absent').value) || 0;
+        ptsEventNoResp = parseInt(document.getElementById('set-evt-noresp').value) || 0;
+        ptsPollSingleVote = parseInt(document.getElementById('set-poll-single').value) || 0;
+        ptsPollMultiVote = parseInt(document.getElementById('set-poll-multi').value) || 0;
+        ptsPollNoVote = parseInt(document.getElementById('set-poll-novote').value) || 0;
+        
+        saveSettings();
+        alert("⚙️ 計分設定已成功更新！系統將自動重新結算全體會員的活躍度！");
+        renderCardView();
+    }
+
     function openEditUserModal(phone) {
         const u = allUsers[phone];
         if(!u) return;
