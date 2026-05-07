@@ -99,7 +99,7 @@
         .post-text { font-size: 16px; color: #2c3e50; line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap; font-weight: 600; }
         .post-input-area { background-color: #ffffff; padding: 20px; border-radius: 16px; margin-bottom: 25px; border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
         
-        /* 刪除/操作按鈕 (已優化為獨立排版不擋字) */
+        /* 刪除/操作按鈕 */
         .card-actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 15px; width: 100%; }
         .action-btn { background: #f8fafc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e1e8ed; padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 8px; width: auto; font-weight: 700; color: #333; margin: 0; }
         .action-btn.delete { color: #d32f2f; }
@@ -116,7 +116,6 @@
         /* 現代化氣泡留言區 */
         .comment-section { border-top: 2px dashed #f0f4f8; padding-top: 18px; margin-top: 12px;}
         .comment-list { max-height: 280px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px; }
-        /* 自訂卷軸 */
         .comment-list::-webkit-scrollbar { width: 6px; }
         .comment-list::-webkit-scrollbar-thumb { background-color: #cfd9e0; border-radius: 10px; }
         .comment-item { background-color: #f8fafc; padding: 12px 16px; border-radius: 16px; margin-bottom: 10px; border: 1px solid #eef2f5; font-size: 15px; position: relative; padding-right: 40px; }
@@ -132,7 +131,7 @@
         .closure-day-label { width: 65px; font-weight: 800; color: #005086; flex-shrink: 0; font-size: 16px;}
         .closure-day-list { color: #556068; font-size: 15px; line-height: 1.6; font-weight: 600;}
         
-        /* 電子會員卡優化 (處理長檔名與玻璃質感) */
+        /* 電子會員卡優化 */
         .membership-card { 
             color: white; border-radius: 16px; padding: 25px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); 
             margin-bottom: 25px; position: relative; overflow: hidden; transition: background 0.3s ease; 
@@ -145,8 +144,11 @@
         .card-name-title { font-size: clamp(24px, 6vw, 32px); font-weight: 900; margin-bottom: 15px; z-index: 2; position: relative; line-height: 1.25; letter-spacing: 1px; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
         .card-name-title .emoji { font-size: clamp(22px, 5.5vw, 26px); display: inline-block; margin-left: 6px; vertical-align: middle; }
 
-        /* 強化毛玻璃面板 */
         .glass-panel { margin-top: 15px; font-size: 15px; line-height: 1.6; background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); z-index: 2; position: relative; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); font-weight: 600; }
+
+        /* 晉升進度條 CSS */
+        .progress-container { width: 100%; height: 14px; background-color: #e1e8ed; border-radius: 10px; overflow: hidden; margin-top: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #ffeb3b); border-radius: 10px; transition: width 0.5s ease-in-out; }
 
         /* 會員卡動態特效 CSS */
         @keyframes shimmer-sweep { 0% { transform: translateX(-100%) skewX(-15deg); } 100% { transform: translateX(200%) skewX(-15deg); } }
@@ -168,64 +170,31 @@
         .kick-btn { background: linear-gradient(135deg, #d32f2f, #e53935); }
         .promote-btn { background: linear-gradient(135deg, #f39c12, #ffb300); }
         
-        /* 名單/搜尋列表 (加入層級動態特效) */
+        /* 名單/搜尋列表 */
         .directory-item { display: flex; align-items: center; padding: 15px; background: #ffffff; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;}
         .directory-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); background: #f8fafc; }
         .directory-item .text-avatar { width: 55px; height: 55px; font-size: 22px; }
         
-        /* 名單等級卡片樣式 - 超強視覺升級版 */
-        
-        /* 等級 100: 漸層台東藍線條 + 柔和藍色背光 */
+        /* 名單等級卡片樣式 */
         .dir-tier-100 { border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #00C9FF, #0081C9) border-box; box-shadow: 0 4px 15px rgba(0, 129, 201, 0.2); transition: 0.3s;}
         .dir-tier-100:hover { box-shadow: 0 8px 25px rgba(0, 129, 201, 0.3); }
-
-        /* 等級 150: 高級愛馬仕漸層橘線條 + 強烈橘色光暈 */
         .dir-tier-150 { border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #FF6F00, #FF9100) border-box; box-shadow: 0 6px 20px rgba(255, 111, 0, 0.35); transition: 0.3s;}
         .dir-tier-150:hover { box-shadow: 0 10px 30px rgba(255, 111, 0, 0.5); }
-
-        /* 等級 200: 烈焰大紅線條 + 閃爍火花特效動畫 */
-        @keyframes legendary-fire-glow {
-            0%, 100% { box-shadow: 0 8px 30px rgba(211, 47, 47, 0.6), 0 0 10px rgba(211, 47, 47, 0.4); }
-            50% { box-shadow: 0 12px 40px rgba(211, 47, 47, 0.9), 0 0 20px rgba(255, 152, 0, 0.7); border-color: #ff5252; }
-        }
-
-        .dir-tier-200 { 
-            border: 3px solid #D32F2F; /* 粗體大紅線 */
-            background: linear-gradient(135deg, #ffffff, #ffebee); /* 微紅背景 hint */
-            animation: legendary-fire-glow 2s infinite ease-in-out; /* 呼吸式烈焰光暈 */
-            position: relative;
-        }
-        /* 在卡片後方加入隱約的火花背景 */
-        .dir-tier-200::before {
-            content: '🔥';
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            opacity: 0.8;
-            filter: drop-shadow(0 0 5px rgba(211,47,47,0.5));
-        }
+        @keyframes legendary-fire-glow { 0%, 100% { box-shadow: 0 8px 30px rgba(211, 47, 47, 0.6), 0 0 10px rgba(211, 47, 47, 0.4); } 50% { box-shadow: 0 12px 40px rgba(211, 47, 47, 0.9), 0 0 20px rgba(255, 152, 0, 0.7); border-color: #ff5252; } }
+        .dir-tier-200 { border: 3px solid #D32F2F; background: linear-gradient(135deg, #ffffff, #ffebee); animation: legendary-fire-glow 2s infinite ease-in-out; position: relative; }
+        .dir-tier-200::before { content: '🔥'; position: absolute; top: 10px; right: 15px; font-size: 24px; opacity: 0.8; filter: drop-shadow(0 0 5px rgba(211,47,47,0.5)); }
 
         /* 卡片燈箱與編輯燈箱 (Modal) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.8); backdrop-filter: blur(3px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { width: 100%; max-width: 420px; position: relative; max-height: 90vh; overflow-y: auto; border-radius: 16px; }
-        /* 隱藏彈出視窗卷軸但保留滑動 */
         .modal-content::-webkit-scrollbar { display: none; }
         .modal-content { -ms-overflow-style: none; scrollbar-width: none; }
-
         .close-modal-btn { position: absolute; top: -15px; right: -5px; background: white; color: #1a252f; border-radius: 50%; width: 36px; height: 36px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; transition: 0.2s; }
         .close-modal-btn:hover { transform: scale(1.1); background: #f0f4f8; }
 
         /* 提示訊息 (Toast) */
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px; }
         .toast-msg { background: linear-gradient(135deg, #f39c12, #ffb300); color: white; padding: 14px 24px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); font-size: 15px; font-weight: 800; opacity: 0; transition: opacity 0.3s ease-in-out; display: flex; align-items: center; gap: 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);}
-
-        /* 比例圖 */
-        .ratio-bar { width: 100%; height: 12px; border-radius: 6px; background-color: #e1e8ed; display: flex; overflow: hidden; margin-bottom: 6px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
-        .ratio-attend { background-color: #0081C9; height: 100%; transition: width 0.4s ease; }
-        .ratio-absent { background-color: #e53935; height: 100%; transition: width 0.4s ease; }
-        .vote-bar-bg { background-color: #eaf4fc; height: 10px; border-radius: 5px; margin-top: 6px; overflow: hidden; }
-        .vote-fill { background: linear-gradient(90deg, #005086, #0081C9); height: 100%; border-radius: 5px; transition: width 0.4s ease; }
 
         .hidden { display: none !important; }
     </style>
@@ -276,7 +245,7 @@
             <p style="font-size: 18px; font-weight: 800;">您的活躍度低於 60 分<br>(目前 <span id="locked-score" style="color:#d32f2f;"></span> 分)</p>
             <p style="color: #444; font-size: 15px; line-height: 1.6; margin-top: 20px; padding: 18px; background: #ffebee; border-radius: 12px; border: 1px solid #ffcdd2; font-weight: 600;">
                 因為您有一段時間沒有參與系統的投票或聚會，系統已暫時限制您的權限。<br><br>
-                💡 <b style="color: #d32f2f;">請在群組呼叫其他老闆或管理員，請他們進入後台幫您「解鎖」！</b>
+                💡 <b style="color: #d32f2f;">請在群組呼叫管理員，請他們進入後台幫您「解鎖」！</b>
             </p>
             <button class="secondary" onclick="logout()" style="margin-top: 30px;">登出帳號</button>
         </div>
@@ -318,8 +287,8 @@
             </div>
 
             <div id="events-view" class="hidden">
-                <div style="display:flex; gap:12px;">
-                    <button onclick="showCreateForm('event')" style="flex:1;">＋ 發起聚會</button>
+                <div style="display:flex; gap:12px;" id="event-buttons-container">
+                    <button id="btn-create-event" onclick="showCreateForm('event')" style="flex:1; display:none;">＋ 發起聚會</button>
                     <button onclick="showCreateForm('poll')" style="flex:1; background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);">＋ 建立投票</button>
                 </div>
                 <hr style="border: 0; height: 2px; background: #e1e8ed; margin: 25px 0;">
@@ -338,6 +307,11 @@
                 <div id="my-membership-card"></div>
                 
                 <div class="custom-style-panel">
+                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">🚀 階級晉升進度</h4>
+                    <div id="tier-progress-container"></div>
+                </div>
+
+                <div class="custom-style-panel">
                     <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">🎨 自訂會員卡風格</h4>
                     <div style="display:flex; gap:15px;">
                         <div style="flex:1;">
@@ -349,7 +323,6 @@
                             <input type="text" id="card-emoji-input" placeholder="例如: 🦖 或 ☕" maxlength="2" value="✨">
                         </div>
                     </div>
-                    
                     <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">專屬卡片動態特效：</label>
                     <select id="card-effect-select">
                         <option value="none">無特效</option>
@@ -357,11 +330,9 @@
                         <option value="glow">🌟 呼吸光暈</option>
                         <option value="gradient">🌈 動態漸層</option>
                     </select>
-                    
                     <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">上傳自訂背景圖片 (選填)：</label>
                     <input type="file" id="card-bg-input" accept="image/*">
                     <p style="font-size:13px; color:#7f8c8d; margin-top:5px; margin-bottom:5px; font-weight: 600;">💡 會自動融合您的主色調呈現高質感濾鏡！</p>
-                    
                     <div style="display:flex; gap:10px; margin-top:20px;">
                         <button onclick="saveCardStyle()" style="flex:2; margin:0;">儲存風格與特效</button>
                         <button onclick="clearCardBg()" class="secondary" style="flex:1; margin:0;">清除背景</button>
@@ -370,20 +341,15 @@
 
                 <div class="custom-style-panel">
                     <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">📝 店家資訊、社群與名片圖片</h4>
-                    
                     <label style="font-size:15px; font-weight:800; margin-top:10px; display:block;">Threads 個人檔案連結：</label>
-                    <input type="text" id="card-threads-input" placeholder="請貼上您的 Threads 網址 (https://www.threads.net/...)">
-                    
+                    <input type="text" id="card-threads-input" placeholder="請貼上 Threads 網址 (https://www.threads.net/...)">
                     <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">自我介紹 / 店家簡介：</label>
                     <textarea id="card-bio-input" placeholder="介紹一下您的店或自己吧..." style="height: 90px;"></textarea>
-                    
                     <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">Google Map 地標 (連結 或 嵌入碼)：</label>
                     <input type="text" id="card-map-input" placeholder="請貼上 Google地圖的分享連結 或 <iframe> 嵌入碼">
-                    
                     <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">📸 上傳專屬圖文名片/海報：</label>
                     <input type="file" id="card-custom-image-input" accept="image/*">
                     <p style="font-size:13px; color:#7f8c8d; margin-top:6px; margin-bottom:0; font-weight: 600;">💡 上傳後會精美呈現於您的會員卡最下方！</p>
-                    
                     <div style="display:flex; gap:10px; margin-top:20px;">
                         <button onclick="saveShopInfo()" style="flex:2; margin:0; background: linear-gradient(135deg, #2196F3, #1565C0);">儲存資訊與圖片</button>
                         <button onclick="clearCardImage()" class="secondary" style="flex:1; margin:0;">清除圖片</button>
@@ -392,7 +358,6 @@
 
                 <div class="custom-style-panel">
                     <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">📅 我的店休設定</h4>
-                    <label style="font-size:15px; font-weight:800;">固定公休日 (可複選)：</label>
                     <div style="margin: 12px 0; font-size:15px;" id="closed-days-checkboxes">
                         <label><input type="checkbox" value="一">一</label> <label><input type="checkbox" value="二">二</label>
                         <label><input type="checkbox" value="三">三</label> <label><input type="checkbox" value="四">四</label>
@@ -438,7 +403,6 @@
                     </select>
                 </div>
             </div>
-
             <div style="display:flex; gap:15px;">
                 <div style="flex:1;">
                     <label style="font-size:14px; font-weight:800;">選項設定：</label>
@@ -468,19 +432,14 @@
     <div class="modal-content" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25);">
         <h3 style="color: #005086; margin-top: 0; border-bottom: 2px dashed #cfd9e0; padding-bottom: 15px; font-weight: 900; font-size: 20px;">✏️ 編輯會員資料</h3>
         <input type="hidden" id="edit-target-phone">
-        
         <label style="font-size:15px; font-weight:800;">顯示名稱：</label>
         <input type="text" id="edit-user-name" placeholder="輸入新名稱">
-        
         <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">額外聚會參與次數 (直接設定總次數)：</label>
         <input type="number" id="edit-user-attend-bonus" min="0">
-        
         <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">手動增減活躍分數 (目前累計加分: <span id="current-score-bonus" style="color:#0081C9;">0</span>)：</label>
         <input type="number" id="edit-user-score-bonus" placeholder="輸入正數加分，負數扣分 (例: 5 或 -3)">
-        
         <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">加入日期 (系統資歷)：</label>
         <input type="date" id="edit-user-join-date">
-        
         <div style="display: flex; gap: 12px; margin-top: 25px;">
             <button onclick="saveUserEdit()" style="flex:1; margin:0;">儲存變更</button>
             <button onclick="closeEditUserModal()" class="secondary" style="flex:1; margin:0;">取消</button>
@@ -489,7 +448,6 @@
 </div>
 
 <script>
-    // --- 雲端大腦 (Firebase) 連線設定 ---
     const firebaseConfig = {
       apiKey: "AIzaSyBWQ6GAMAsPESR3vPe7tqkGPg3KzUtSdJQ",
       authDomain: "taitung-boss.firebaseapp.com",
@@ -500,11 +458,9 @@
       measurementId: "G-69WW2E5L8L"
     };
     
-    // 初始化 Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // --- 系統變數 ---
     let allUsers = {};
     let adminPhones = [];
     let eventsData = [];
@@ -513,7 +469,6 @@
     let systemInviteCode = '8888';
     let announcementText = '歡迎來到台東老闆專屬聚會！\n這是一個私密的交流空間，大家可以在這裡發起聚餐、投票決定餐廳，或是分享開店日常。\n\n如果有臨時特休，記得去「會員卡」更新店休設定喔！';
     
-    // --- 動態計分設定變數 (預設值) ---
     let ptsEventAttend = 5;
     let ptsEventAbsent = 3;
     let ptsEventNoResp = -3;
@@ -525,26 +480,19 @@
     let currentTab = 'home'; 
     let currentSectionId = 'login-section'; 
     let isDataLoaded = false;
-    
     let expandedCards = [];
     let activeInputs = {};
     let activePollVotes = {};
 
-    // --- 提示訊息 (Toast) 顯示功能 ---
     function showToast(msg) {
         const toast = document.createElement('div');
         toast.className = 'toast-msg';
         toast.innerHTML = `🔔 <span>${msg}</span>`;
         document.getElementById('toast-container').appendChild(toast);
-        
         setTimeout(() => toast.style.opacity = '1', 10);
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 300);
-        }, 5000);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 5000);
     }
 
-    // --- 活躍度計算函數 ---
     function calculateUserScore(phone) {
         const user = allUsers[phone];
         if (!user) return 0;
@@ -563,19 +511,14 @@
             if (poll.pollType === 'points' || !poll.pollType) { 
                 if (poll.isClosed) {
                     const userVote = poll.votes ? poll.votes.find(v => v.phone === phone) : null;
-                    if (userVote) {
-                        score += poll.isMultiple ? ptsPollMultiVote : ptsPollSingleVote; 
-                    } else if (!userVote && poll.id >= user.joinDate) {
-                        score += ptsPollNoVote;                           
-                    }
+                    if (userVote) { score += poll.isMultiple ? ptsPollMultiVote : ptsPollSingleVote; } 
+                    else if (!userVote && poll.id >= user.joinDate) { score += ptsPollNoVote; }
                 }
             } 
         });
-
         return score;
     }
 
-    // --- 雲端資料同步監聽 ---
     db.collection("taitung_app").onSnapshot((snapshot) => {
         snapshot.docs.forEach((doc) => {
             const dataStr = doc.data().d;
@@ -620,9 +563,8 @@
                     if (currentSectionId !== 'locked-section') showSection('locked-section');
                     document.getElementById('locked-score').innerText = myScore;
                 } else {
-                    if (currentSectionId === 'locked-section') {
-                        showMain(); 
-                    } else if (currentSectionId === 'main-section') {
+                    if (currentSectionId === 'locked-section') showMain(); 
+                    else if (currentSectionId === 'main-section') {
                         switchTab(currentTab);
                         if(currentTab === 'home' || currentTab === 'card') renderAnnouncement();
                         if(currentTab === 'directory') renderDirectory();
@@ -632,7 +574,6 @@
         }
     });
 
-    // --- 寫入雲端的工具函數 ---
     function saveAllData() {
         db.collection("taitung_app").doc("users").set({ d: JSON.stringify(allUsers) });
         db.collection("taitung_app").doc("admins").set({ d: JSON.stringify(adminPhones) });
@@ -644,12 +585,10 @@
     function saveSettings() {
         db.collection("taitung_app").doc("settings").set({ d: JSON.stringify({ 
             inviteCode: systemInviteCode, announcement: announcementText,
-            ptsEventAttend, ptsEventAbsent, ptsEventNoResp,
-            ptsPollSingleVote, ptsPollMultiVote, ptsPollNoVote
+            ptsEventAttend, ptsEventAbsent, ptsEventNoResp, ptsPollSingleVote, ptsPollMultiVote, ptsPollNoVote
         }) });
     }
 
-    // --- 初始化系統 ---
     function initApp() {
         const savedPhone = localStorage.getItem('taitung_current_phone');
         if (savedPhone && allUsers[savedPhone]) {
@@ -659,25 +598,28 @@
             showSection('login-section');
             document.getElementById('phone-input').addEventListener('input', function(e) {
                 const phoneVal = e.target.value.trim();
-                if(phoneVal.length === 10 && allUsers[phoneVal]) {
-                    document.getElementById('invite-code-container').style.display = 'none';
-                } else {
-                    document.getElementById('invite-code-container').style.display = 'block';
-                }
+                if(phoneVal.length === 10 && allUsers[phoneVal]) { document.getElementById('invite-code-container').style.display = 'none'; } 
+                else { document.getElementById('invite-code-container').style.display = 'block'; }
             });
         }
     }
 
     function getInitial(name) { return name ? name.charAt(0).toUpperCase() : '?'; }
+    
     function getUserStats(phone) {
         const user = allUsers[phone];
-        if(!user) return { tier: '🌱 新人', months: 0, attended: 0 };
-        const monthsJoined = Math.floor((Date.now() - user.joinDate) / (1000 * 60 * 60 * 24 * 30));
+        if(!user) return { tier: '🌱 新人', months: 0, days: 0, attended: 0 };
+        const daysJoined = Math.floor((Date.now() - user.joinDate) / (1000 * 60 * 60 * 24));
+        const monthsJoined = Math.floor(daysJoined / 30);
         let attendedCount = user.manualAttendBonus || 0; 
         eventsData.forEach(e => { if(e.attendees && e.attendees[phone] === 'attend') attendedCount++; });
+        
         let tier = '🌱 新人';
-        if (user.manualTier) tier = user.manualTier; else if (monthsJoined >= 2 && attendedCount >= 2) tier = '👑 元老'; else if (monthsJoined >= 1) tier = '⭐ 成員';
-        return { tier, months: monthsJoined, attended: attendedCount, joinDateStr: new Date(user.joinDate).toLocaleDateString('zh-TW') };
+        if (user.manualTier) tier = user.manualTier; 
+        else if (daysJoined >= 60 || attendedCount >= 3) tier = '👑 元老'; 
+        else if (daysJoined >= 30) tier = '⭐ 聚會成員';
+        
+        return { tier, months: monthsJoined, days: daysJoined, attended: attendedCount, joinDateStr: new Date(user.joinDate).toLocaleDateString('zh-TW') };
     }
 
     function showSection(id) {
@@ -706,12 +648,9 @@
         switchTab(currentTab); 
     }
 
-    // --- 防干擾：重繪前暫存輸入狀態 ---
     function captureActiveStates() {
         activeInputs = {};
-        document.querySelectorAll('input[id^="comment-input-"]').forEach(inp => {
-            if(inp.value) activeInputs[inp.id] = inp.value;
-        });
+        document.querySelectorAll('input[id^="comment-input-"]').forEach(inp => { if(inp.value) activeInputs[inp.id] = inp.value; });
         activePollVotes = {};
         document.querySelectorAll('input[name^="poll-"]:checked').forEach(inp => {
             const name = inp.name;
@@ -720,26 +659,16 @@
         });
     }
 
-    // --- 防干擾：重繪後還原輸入狀態 ---
     function restoreActiveStates() {
-        Object.keys(activeInputs).forEach(id => {
-            const inp = document.getElementById(id);
-            if(inp) inp.value = activeInputs[id];
-        });
+        Object.keys(activeInputs).forEach(id => { const inp = document.getElementById(id); if(inp) inp.value = activeInputs[id]; });
         Object.keys(activePollVotes).forEach(name => {
             const vals = activePollVotes[name];
-            vals.forEach(val => {
-                const inp = document.querySelector(`input[name="${name}"][value="${val}"]`);
-                if(inp) inp.checked = true;
-            });
+            vals.forEach(val => { const inp = document.querySelector(`input[name="${name}"][value="${val}"]`); if(inp) inp.checked = true; });
         });
         expandedCards.forEach(id => {
             const detailDiv = document.getElementById(`details-${id}`);
             const iconSpan = document.getElementById(`icon-${id}`);
-            if(detailDiv && iconSpan) {
-                detailDiv.classList.remove('hidden');
-                iconSpan.innerText = '🔼 收起';
-            }
+            if(detailDiv && iconSpan) { detailDiv.classList.remove('hidden'); iconSpan.innerText = '🔼 收起'; }
         });
     }
 
@@ -760,7 +689,13 @@
 
         if(tab === 'home') renderHome(); 
         else if(tab === 'directory') renderDirectory();
-        else if(tab === 'events') { renderEvents('events-list', eventsData); renderPolls('polls-list', pollsData); }
+        else if(tab === 'events') { 
+            const isAdmin = adminPhones.includes(currentUserPhone);
+            const btnEvent = document.getElementById('btn-create-event');
+            if(btnEvent) btnEvent.style.display = isAdmin ? 'block' : 'none';
+            renderEvents('events-list', eventsData); 
+            renderPolls('polls-list', pollsData); 
+        }
         else if(tab === 'closures') renderClosures(); 
         else if(tab === 'card') renderCardView();
 
@@ -814,16 +749,9 @@
             let badgeText = '';
             let tierClass = '';
 
-            if (score >= 200) {
-                badgeText = '超級無敵霹靂活躍大隊長🔥';
-                tierClass = 'dir-tier-200';
-            } else if (score >= 150) {
-                badgeText = '超級活躍成員🔥';
-                tierClass = 'dir-tier-150';
-            } else if (score >= 100) {
-                badgeText = '活躍成員🔥';
-                tierClass = 'dir-tier-100';
-            }
+            if (score >= 200) { badgeText = '超級無敵霹靂活躍大隊長🔥'; tierClass = 'dir-tier-200'; } 
+            else if (score >= 150) { badgeText = '超級活躍成員🔥'; tierClass = 'dir-tier-150'; } 
+            else if (score >= 100) { badgeText = '活躍成員🔥'; tierClass = 'dir-tier-100'; }
 
             const badgeHtml = badgeText ? `<div style="margin-top: 8px;"><span style="background: linear-gradient(135deg, #d32f2f, #e53935); color:white; font-size:11px; padding:4px 10px; border-radius:12px; font-weight:800; box-shadow: 0 2px 5px rgba(211,47,47,0.3); display:inline-block;">🎖️ ${badgeText}</span></div>` : '';
             
@@ -840,7 +768,7 @@
         });
     }
 
-    // --- 會員卡產生器 (公用模組) ---
+    // --- 會員卡產生器 ---
     function generateCardHtml(targetPhone, isSelf) {
         const user = allUsers[targetPhone];
         if (!user) return '';
@@ -853,14 +781,10 @@
         const closedDaysStr = (user.closedDays && user.closedDays.length > 0) ? `星期${user.closedDays.join('、')}` : '無';
         
         let bgStyle = `background: linear-gradient(135deg, ${cardColor} 0%, #111111 150%);`;
-        if (bgImage) {
-            bgStyle = `background: linear-gradient(135deg, ${cardColor}cc 0%, rgba(17,17,17,0.9) 150%), url('${bgImage}') center/cover no-repeat;`;
-        } else if (cardEffect === 'gradient') {
-            bgStyle = `background: linear-gradient(270deg, ${cardColor}, #111111, ${cardColor});`;
-        }
+        if (bgImage) { bgStyle = `background: linear-gradient(135deg, ${cardColor}cc 0%, rgba(17,17,17,0.9) 150%), url('${bgImage}') center/cover no-repeat;`; } 
+        else if (cardEffect === 'gradient') { bgStyle = `background: linear-gradient(270deg, ${cardColor}, #111111, ${cardColor});`; }
 
         const effectClass = cardEffect !== 'none' ? `effect-${cardEffect}` : '';
-        
         let badgeText = '';
         if (score >= 200) badgeText = '超級無敵霹靂活躍大隊長🔥';
         else if (score >= 150) badgeText = '超級活躍成員🔥';
@@ -870,10 +794,11 @@
         
         let privacyHtml = '';
         if (isSelf) {
+            const alertMsg = `【活躍度計算與懲罰機制】\\n\\n📌 聚會：\\n參加 +${ptsEventAttend} 分\\n無法參加 +${ptsEventAbsent} 分\\n未回應(截止後) ${ptsEventNoResp} 分\\n\\n📌 積分投票 (單選)：\\n參與投票 +${ptsPollSingleVote} 分\\n未投票(截止後) ${ptsPollNoVote} 分\\n\\n📌 積分投票 (多選)：\\n參與投票 +${ptsPollMultiVote} 分\\n未投票(截止後) ${ptsPollNoVote} 分\\n\\n🚨 注意：活躍度低於 60 分將會被系統鎖定，屆時需請管理員協助解鎖！`;
             privacyHtml = `
                 <div class="member-info-row"><span>電話帳號</span><span>${user.phone}</span></div>
                 <div class="member-info-row">
-                    <span style="display:flex; align-items:center; gap:6px;">🔥 活躍分數 <span onclick="alert('【活躍度計算與懲罰機制】\\n\\n📌 聚會：\\n參加 +5 分\\n無法參加 +3 分\\n未回應(截止後) -3 分\\n\\n📌 積分投票 (單選)：\\n參與投票 +3 分\\n未投票(截止後) -3 分\\n\\n📌 積分投票 (多選)：\\n參與投票 +1 分\\n未投票(截止後) -3 分\\n\\n🚨 注意：活躍度低於 60 分將會被系統鎖定，屆時需請管理員協助解鎖！'); event.stopPropagation();" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; background:linear-gradient(135deg, #f1c40f, #f39c12); color:#fff; border-radius:50%; font-size:13px; font-weight:900; box-shadow:0 2px 6px rgba(0,0,0,0.4); text-shadow:none;">?</span></span>
+                    <span style="display:flex; align-items:center; gap:6px;">🔥 活躍分數 <span onclick="alert('${alertMsg}'); event.stopPropagation();" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; background:linear-gradient(135deg, #f1c40f, #f39c12); color:#fff; border-radius:50%; font-size:13px; font-weight:900; box-shadow:0 2px 6px rgba(0,0,0,0.4); text-shadow:none;">?</span></span>
                     <span style="color:#ffd700; font-weight:900; font-size:16px;">${score} 分</span>
                 </div>
             `;
@@ -882,7 +807,6 @@
         }
 
         const bioHtml = user.bio ? `<div class="glass-panel">${user.bio.replace(/\n/g, '<br>')}</div>` : '';
-        
         let mapHtml = '';
         if (user.mapUrl) {
             if (user.mapUrl.includes('<iframe')) {
@@ -890,16 +814,13 @@
                 if (srcMatch) mapHtml = `<div class="glass-panel" style="padding:0; overflow:hidden;"><iframe src="${srcMatch[1]}" width="100%" height="200" style="border:0; display:block;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`;
             } else if (user.mapUrl.startsWith('http')) {
                 mapHtml = `<div style="margin-top: 18px; text-align:center; z-index:2; position:relative;"><a href="${user.mapUrl}" target="_blank" style="color: #005086; background: linear-gradient(135deg, #ffd700, #ffb300); text-decoration: none; font-weight: 900; padding: 14px 24px; border-radius: 30px; display: block; font-size:16px; box-shadow: 0 6px 15px rgba(0,0,0,0.3); text-shadow: none; border: 2px solid rgba(255,255,255,0.8); transition:0.2s;">📍 開啟 Google 地圖地標</a></div>`;
-            } else {
-                 mapHtml = `<div class="glass-panel" style="color: #ffd700; font-weight:900; font-size:15px;">📍 地標：${user.mapUrl}</div>`;
-            }
+            } else { mapHtml = `<div class="glass-panel" style="color: #ffd700; font-weight:900; font-size:15px;">📍 地標：${user.mapUrl}</div>`; }
         }
 
         let threadsHtml = '';
         if (user.threadsUrl) {
             threadsHtml = `<div style="margin-top: 15px; text-align:center; z-index:2; position:relative;"><a href="${user.threadsUrl}" target="_blank" style="color: #fff; background: linear-gradient(135deg, #111, #333); text-decoration: none; font-weight: 900; padding: 12px 24px; border-radius: 30px; display: flex; align-items:center; justify-content:center; gap:8px; font-size:15px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); text-shadow: none; border: 1px solid rgba(255,255,255,0.2); transition:0.2s;"><span style="font-size:18px;">@</span> 追蹤我的 Threads</a></div>`;
         }
-
         let customImageHtml = '';
         if (user.cardImage) {
             customImageHtml = `<div style="margin-top: 18px; z-index:2; position:relative; text-align:center;"><img src="${user.cardImage}" style="max-width:100%; border-radius:12px; box-shadow:0 6px 15px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.15); display:block;"></div>`;
@@ -911,7 +832,7 @@
                 <div class="card-name-title"><span>${user.name}</span> <span class="emoji">${cardEmoji}</span></div>
                 ${privacyHtml}
                 <div class="member-info-row"><span>聚會參與</span><span>共參加 ${stats.attended} 次</span></div>
-                <div class="member-info-row"><span>系統資歷</span><span>滿 ${stats.months} 個月</span></div>
+                <div class="member-info-row"><span>系統資歷</span><span>滿 ${stats.days} 天</span></div>
                 <div class="member-info-row" style="color:#ffd700; margin-top:18px; border:none; padding-bottom:0;"><span>📍 固定店休</span><span>${closedDaysStr}</span></div>
                 ${bioHtml}
                 ${mapHtml}
@@ -922,35 +843,15 @@
 
     function showUserCard(phone) {
         document.getElementById('modal-card-container').innerHTML = generateCardHtml(phone, phone === currentUserPhone);
-        
         const modal = document.getElementById('user-card-modal');
         const content = document.getElementById('user-card-modal-content');
-        
         modal.classList.remove('hidden');
-        
         content.classList.remove('flip-animate');
         void content.offsetWidth; 
         content.classList.add('flip-animate');
     }
     
-    function closeUserCard() {
-        document.getElementById('user-card-modal').classList.add('hidden');
-    }
-
-    // --- 公告牆邏輯 ---
-    function renderAnnouncement() {
-        document.getElementById('announcement-text-display').innerText = announcementText;
-        const editContainer = document.getElementById('edit-notice-container');
-        if (adminPhones.includes(currentUserPhone)) {
-            editContainer.innerHTML = `<button class="edit-notice-btn" onclick="editAnnouncement()">📝 修改公告</button>`;
-        } else {
-            editContainer.innerHTML = '';
-        }
-    }
-    function editAnnouncement() {
-        const newText = prompt("請輸入新的公告內容 (支援換行)：", announcementText);
-        if(newText !== null) { announcementText = newText; saveSettings(); renderAnnouncement(); }
-    }
+    function closeUserCard() { document.getElementById('user-card-modal').classList.add('hidden'); }
 
     // --- 店休設定與邏輯 ---
     function addTempCloseDate() {
@@ -972,72 +873,32 @@
         const fileInput = document.getElementById('card-bg-input');
 
         const u = allUsers[currentUserPhone];
-        u.customColor = newColor; 
-        u.customEmoji = newEmoji; 
-        u.cardEffect = newEffect;
+        u.customColor = newColor; u.customEmoji = newEmoji; u.cardEffect = newEffect;
 
         if (fileInput.files[0]) {
-            compressImage(fileInput.files[0], (base64Img) => {
-                u.cardBgImage = base64Img;
-                finalizeSaveCardStyle(u);
-            });
-        } else {
-            finalizeSaveCardStyle(u);
-        }
+            compressImage(fileInput.files[0], (base64Img) => { u.cardBgImage = base64Img; finalizeSaveCardStyle(u); });
+        } else { finalizeSaveCardStyle(u); }
     }
     
-    function finalizeSaveCardStyle(u) {
-        saveAllData();
-        document.getElementById('my-avatar').style.backgroundColor = u.customColor; 
-        document.getElementById('welcome-msg').innerText = `${u.name} ${u.customEmoji}`; 
-        renderCardView(); 
-        alert("🎨 專屬風格與特效套用成功！");
-    }
+    function finalizeSaveCardStyle(u) { saveAllData(); document.getElementById('my-avatar').style.backgroundColor = u.customColor; document.getElementById('welcome-msg').innerText = `${u.name} ${u.customEmoji}`; renderCardView(); alert("🎨 專屬風格與特效套用成功！"); }
 
     function clearCardBg() {
-        if(confirm("確定要移除自訂背景圖片嗎？")) {
-            allUsers[currentUserPhone].cardBgImage = null;
-            document.getElementById('card-bg-input').value = '';
-            saveAllData();
-            renderCardView();
-            alert("背景圖片已移除！");
-        }
+        if(confirm("確定要移除自訂背景圖片嗎？")) { allUsers[currentUserPhone].cardBgImage = null; document.getElementById('card-bg-input').value = ''; saveAllData(); renderCardView(); alert("背景圖片已移除！"); }
     }
 
     function saveShopInfo() {
         const u = allUsers[currentUserPhone];
-        u.bio = document.getElementById('card-bio-input').value.trim();
-        u.mapUrl = document.getElementById('card-map-input').value.trim();
-        u.threadsUrl = document.getElementById('card-threads-input').value.trim();
-        
+        u.bio = document.getElementById('card-bio-input').value.trim(); u.mapUrl = document.getElementById('card-map-input').value.trim(); u.threadsUrl = document.getElementById('card-threads-input').value.trim();
         const fileInput = document.getElementById('card-custom-image-input');
-        if (fileInput.files[0]) {
-            compressImage(fileInput.files[0], (base64Img) => {
-                u.cardImage = base64Img;
-                finalizeSaveShopInfo();
-            });
-        } else {
-            finalizeSaveShopInfo();
-        }
+        if (fileInput.files[0]) { compressImage(fileInput.files[0], (base64Img) => { u.cardImage = base64Img; finalizeSaveShopInfo(); }); } else { finalizeSaveShopInfo(); }
     }
 
-    function finalizeSaveShopInfo() {
-        saveAllData(); 
-        renderCardView(); 
-        alert("📝 資訊與專屬名片更新成功！");
-    }
+    function finalizeSaveShopInfo() { saveAllData(); renderCardView(); alert("📝 資訊與專屬名片更新成功！"); }
 
     function clearCardImage() {
-        if(confirm("確定要移除您的專屬圖片名片嗎？")) {
-            allUsers[currentUserPhone].cardImage = null;
-            document.getElementById('card-custom-image-input').value = '';
-            saveAllData();
-            renderCardView();
-            alert("專屬名片圖片已移除！");
-        }
+        if(confirm("確定要移除您的專屬圖片名片嗎？")) { allUsers[currentUserPhone].cardImage = null; document.getElementById('card-custom-image-input').value = ''; saveAllData(); renderCardView(); alert("專屬名片圖片已移除！"); }
     }
 
-    // --- 發文系統 ---
     function compressImage(file, callback) {
         if (!file) { callback(null); return; }
         const reader = new FileReader();
@@ -1054,101 +915,50 @@
     function submitPost() {
         const text = document.getElementById('post-text-input').value.trim(); const fileInput = document.getElementById('post-image-input');
         if (!text && !fileInput.files[0]) { alert("請至少寫點文字或上傳一張照片喔！"); return; }
-        const createPostData = (imgBase64) => {
-            postsData.unshift({ id: Date.now(), type: 'post', text: text, image: imgBase64, creatorPhone: currentUserPhone, date: new Date().toLocaleDateString('zh-TW'), comments: [] });
-            saveAllData(); document.getElementById('post-text-input').value = ''; fileInput.value = ''; renderHome();
-        };
+        const createPostData = (imgBase64) => { postsData.unshift({ id: Date.now(), type: 'post', text: text, image: imgBase64, creatorPhone: currentUserPhone, date: new Date().toLocaleDateString('zh-TW'), comments: [] }); saveAllData(); document.getElementById('post-text-input').value = ''; fileInput.value = ''; renderHome(); };
         if (fileInput.files[0]) compressImage(fileInput.files[0], createPostData); else createPostData(null);
     }
+    
     function submitEvent() {
-        const title = document.getElementById('event-title').value; 
-        const date = document.getElementById('event-date').value;
-        const description = document.getElementById('event-description').value.trim();
+        const title = document.getElementById('event-title').value; const date = document.getElementById('event-date').value; const description = document.getElementById('event-description').value.trim();
         if (!title || !date) { alert("請填寫聚會名稱與時間！"); return; }
-        
-        eventsData.unshift({ 
-            id: Date.now(), type: 'event', title: title, date: date, description: description, 
-            creatorPhone: currentUserPhone, attendees: {}, comments: [], latestActivity: '', isClosed: false 
-        });
-        saveAllData(); 
-        document.getElementById('event-title').value = ''; 
-        document.getElementById('event-date').value = ''; 
-        document.getElementById('event-description').value = ''; 
-        currentTab = 'events'; showMain();
+        eventsData.unshift({ id: Date.now(), type: 'event', title: title, date: date, description: description, creatorPhone: currentUserPhone, attendees: {}, comments: [], latestActivity: '', isClosed: false });
+        saveAllData(); document.getElementById('event-title').value = ''; document.getElementById('event-date').value = ''; document.getElementById('event-description').value = ''; currentTab = 'events'; showMain();
     }
     
-    function togglePollType() {
-        const pType = document.getElementById('poll-type').value;
-        const pMult = document.getElementById('poll-multiple');
-        if (pType === 'points') {
-            pMult.disabled = false; 
-        } else {
-            pMult.disabled = false;
-        }
-    }
+    function togglePollType() { document.getElementById('poll-multiple').disabled = false; }
 
     function submitPoll() {
-        const question = document.getElementById('poll-question').value; 
-        const description = document.getElementById('poll-description').value.trim();
-        const optionsRaw = document.getElementById('poll-options').value; 
-        const pollType = document.getElementById('poll-type').value;
-        const mode = document.getElementById('poll-mode').value; 
-        const isMultiple = document.getElementById('poll-multiple').value === 'multiple';
-        
+        const question = document.getElementById('poll-question').value; const description = document.getElementById('poll-description').value.trim(); const optionsRaw = document.getElementById('poll-options').value; const pollType = document.getElementById('poll-type').value; const mode = document.getElementById('poll-mode').value; const isMultiple = document.getElementById('poll-multiple').value === 'multiple';
         if (!question || !optionsRaw) { alert("請填寫問題與選項！"); return; }
         const options = optionsRaw.split('\n').map(opt => opt.trim()).filter(opt => opt !== "");
         if(options.length < 2) { alert("至少需輸入兩個選項，請記得換行喔！"); return; }
-        
-        pollsData.unshift({ 
-            id: Date.now(), type: 'poll', pollType: pollType, question: question, description: description,
-            options: options, mode: mode, isMultiple: isMultiple, 
-            creatorPhone: currentUserPhone, votes: [], latestActivity: '', isClosed: false 
-        });
-        saveAllData(); 
-        document.getElementById('poll-question').value = ''; 
-        document.getElementById('poll-description').value = ''; 
-        document.getElementById('poll-options').value = ''; 
-        currentTab = 'events'; showMain();
+        pollsData.unshift({ id: Date.now(), type: 'poll', pollType: pollType, question: question, description: description, options: options, mode: mode, isMultiple: isMultiple, creatorPhone: currentUserPhone, votes: [], latestActivity: '', isClosed: false });
+        saveAllData(); document.getElementById('poll-question').value = ''; document.getElementById('poll-description').value = ''; document.getElementById('poll-options').value = ''; currentTab = 'events'; showMain();
     }
 
     function showCreateForm(type) { 
+        const isAdmin = adminPhones.includes(currentUserPhone);
         if (type === 'poll') {
-            const stats = getUserStats(currentUserPhone);
-            const canCreatePoints = stats.tier === '👑 元老' || adminPhones.includes(currentUserPhone);
             const pointsOpt = document.getElementById('opt-poll-points');
             if (pointsOpt) {
-                if (!canCreatePoints) {
-                    pointsOpt.disabled = true;
-                    pointsOpt.innerText = "積分投票 (僅限元老/管理員)";
-                } else {
-                    pointsOpt.disabled = false;
-                    pointsOpt.innerText = "積分投票 (計分)";
-                }
+                if (!isAdmin) { pointsOpt.disabled = true; pointsOpt.innerText = "積分投票 (僅限管理員)"; } 
+                else { pointsOpt.disabled = false; pointsOpt.innerText = "積分投票 (計分)"; }
             }
             document.getElementById('poll-type').value = 'general';
-            togglePollType();
-            showSection('create-poll-section');
+            togglePollType(); showSection('create-poll-section');
         } else {
+            if (!isAdmin) { alert("目前只有管理員可以發起聚會喔！"); return; }
             showSection('create-event-section');
         }
     }
     
     function cancelCreate() { showMain(); }
 
-    // --- 互動邏輯 ---
     function toggleCard(id) {
-        const detailDiv = document.getElementById(`details-${id}`);
-        const iconSpan = document.getElementById(`icon-${id}`);
-        if(detailDiv.classList.contains('hidden')) { 
-            detailDiv.classList.remove('hidden'); 
-            iconSpan.innerText = '🔼 收起'; 
-            if(!expandedCards.includes(id)) expandedCards.push(id);
-        } 
-        else { 
-            detailDiv.classList.add('hidden'); 
-            iconSpan.innerText = '🔽 展開'; 
-            expandedCards = expandedCards.filter(cid => cid !== id);
-        }
+        const detailDiv = document.getElementById(`details-${id}`); const iconSpan = document.getElementById(`icon-${id}`);
+        if(detailDiv.classList.contains('hidden')) { detailDiv.classList.remove('hidden'); iconSpan.innerText = '🔼 收起'; if(!expandedCards.includes(id)) expandedCards.push(id); } 
+        else { detailDiv.classList.add('hidden'); iconSpan.innerText = '🔽 展開'; expandedCards = expandedCards.filter(cid => cid !== id); }
     }
 
     function closeItem(type, id) {
@@ -1158,52 +968,37 @@
         switchTab(currentTab);
     }
     
-    // --- 刪除時永久保存積分邏輯 (僅保存已截止的活動) ---
     function deleteItem(type, id) {
         if(!confirm("確定要刪除這篇文章/活動嗎？\n(若為已截止的聚會或投票，刪除後大家已結算的積分將永久保留)")) return;
-        
         if(type === 'event') { 
             const item = eventsData.find(e => e.id === id);
             if (item && item.isClosed) { 
                 Object.keys(allUsers).forEach(phone => {
-                    const u = allUsers[phone];
-                    let pts = 0;
-                    const status = item.attendees ? item.attendees[phone] : null;
-                    if (status === 'attend') pts = ptsEventAttend;
-                    else if (status === 'absent') pts = ptsEventAbsent;
-                    else if (!status && item.id >= u.joinDate) pts = ptsEventNoResp;
-                    
+                    const u = allUsers[phone]; let pts = 0; const status = item.attendees ? item.attendees[phone] : null;
+                    if (status === 'attend') pts = ptsEventAttend; else if (status === 'absent') pts = ptsEventAbsent; else if (!status && item.id >= u.joinDate) pts = ptsEventNoResp;
                     if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
                 });
             }
             eventsData = eventsData.filter(e => e.id !== id); 
-        } 
-        else if(type === 'poll') { 
+        } else if(type === 'poll') { 
             const item = pollsData.find(p => p.id === id);
             if (item && item.isClosed) { 
                 if (item.pollType === 'points' || !item.pollType) {
                     Object.keys(allUsers).forEach(phone => {
-                        const u = allUsers[phone];
-                        const userVote = item.votes ? item.votes.find(v => v.phone === phone) : null;
-                        let pts = 0;
-                        if (userVote) pts = item.isMultiple ? ptsPollMultiVote : ptsPollSingleVote;
-                        else if (!userVote && item.id >= u.joinDate) pts = ptsPollNoVote;
-                        
+                        const u = allUsers[phone]; const userVote = item.votes ? item.votes.find(v => v.phone === phone) : null; let pts = 0;
+                        if (userVote) pts = item.isMultiple ? ptsPollMultiVote : ptsPollSingleVote; else if (!userVote && item.id >= u.joinDate) pts = ptsPollNoVote;
                         if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
                     });
                 }
             }
             pollsData = pollsData.filter(p => p.id !== id); 
-        }
-        else if(type === 'post') { postsData = postsData.filter(p => p.id !== id); }
-        
+        } else if(type === 'post') { postsData = postsData.filter(p => p.id !== id); }
         saveAllData(); switchTab(currentTab);
     }
 
     function deleteComment(type, itemId, commentIndex) {
         if(!confirm("確定要刪除這則留言嗎？")) return;
-        let dataArray;
-        if(type === 'event') { dataArray = eventsData; } else if(type === 'post') { dataArray = postsData; }
+        let dataArray; if(type === 'event') { dataArray = eventsData; } else if(type === 'post') { dataArray = postsData; }
         const item = dataArray.find(i => i.id === itemId);
         if(item) { item.comments.splice(commentIndex, 1); saveAllData(); switchTab(currentTab); }
     }
@@ -1211,10 +1006,8 @@
     function addComment(type, id) {
         const input = document.getElementById(`comment-input-${id}`); const text = input.value.trim(); if (!text) return;
         const newComment = { phone: currentUserPhone, text: text, time: new Date().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}) };
-        
         if (type === 'post') { const post = postsData.find(p => p.id === id); post.comments.push(newComment); } 
         else if (type === 'event') { const evt = eventsData.find(e => e.id === id); evt.comments.push(newComment); evt.latestActivity = `${allUsers[currentUserPhone].name} 剛剛留言了！`; }
-        
         saveAllData(); input.value = ''; switchTab(currentTab);
         document.getElementById(`details-${type}-${id}`).classList.remove('hidden'); 
         if(!expandedCards.includes(`${type}-${id}`)) expandedCards.push(`${type}-${id}`);
@@ -1243,25 +1036,18 @@
         }
     }
 
-    // --- 渲染畫面 (折疊卡片版) ---
     function renderHome() {
-        renderAnnouncement();
-        
         const stats = getUserStats(currentUserPhone);
         const canPost = stats.tier === '👑 元老' || adminPhones.includes(currentUserPhone);
         const postArea = document.getElementById('post-creation-area');
         const notElderMsg = document.getElementById('not-elder-message');
-        
         if (postArea) postArea.style.display = canPost ? 'block' : 'none';
         if (notElderMsg) notElderMsg.style.display = canPost ? 'none' : 'block';
 
-        const now = Date.now();
-        let needsCleanup = false;
+        const now = Date.now(); let needsCleanup = false;
         postsData = postsData.filter(post => {
             const isAdmin = adminPhones.includes(post.creatorPhone);
-            if (!isAdmin && (now - post.id > 24 * 60 * 60 * 1000)) {
-                needsCleanup = true; return false;
-            }
+            if (!isAdmin && (now - post.id > 24 * 60 * 60 * 1000)) { needsCleanup = true; return false; }
             return true;
         });
         if (needsCleanup) saveAllData();
@@ -1283,26 +1069,18 @@
                 const cUser = allUsers[c.phone] || {name: '未知'};
                 const canDeleteComment = c.phone === currentUserPhone || adminPhones.includes(currentUserPhone);
                 const delCommentBtn = canDeleteComment ? `<button style="background:none; border:none; box-shadow:none; color:#d32f2f; font-size:14px; cursor:pointer; padding:0;" onclick="deleteComment('post', ${post.id}, ${index})">✕</button>` : '';
-                
                 return `
                     <div class="comment-item">
                         <strong onclick="showUserCard('${c.phone}')" style="cursor:pointer; display:inline-flex; align-items:center; color:#005086; transition:0.2s;" onmouseover="this.style.color='#0081C9'" onmouseout="this.style.color='#005086'" title="點擊查看名片">
                             <span style="display:inline-block; width:22px; height:22px; border-radius:50%; background-color:${cUser.customColor||'#005086'}; color:white; text-align:center; line-height:22px; font-size:11px; margin-right:6px;">${getInitial(cUser.name)}</span> ${cUser.name}
                         </strong> 
                         <span style="color:#7f8c8d; font-size:12px; margin-left:8px;">${c.time}</span>
-                        <div style="position: absolute; right: 12px; top: 12px; display: flex; gap: 12px;">
-                            ${delCommentBtn}
-                        </div>
+                        <div style="position: absolute; right: 12px; top: 12px; display: flex; gap: 12px;">${delCommentBtn}</div>
                         <div style="margin-top: 6px; word-break: break-all; color:#2c3e50;">${c.text}</div>
                     </div>`;
             }).join('');
 
-            const imgHtml = post.image ? `
-                <div style="position: relative;">
-                    <img src="${post.image}" class="post-image">
-                    <a href="${post.image}" download="taitung_boss_${post.id}.jpg" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0, 80, 134, 0.85); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight:800; text-decoration: none; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.3); backdrop-filter: blur(4px);">⬇️ 下載照片</a>
-                </div>` : '';
-                
+            const imgHtml = post.image ? `<div style="position: relative;"><img src="${post.image}" class="post-image"><a href="${post.image}" download="taitung_boss_${post.id}.jpg" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0, 80, 134, 0.85); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight:800; text-decoration: none; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.3); backdrop-filter: blur(4px);">⬇️ 下載照片</a></div>` : '';
             const titleSnippet = post.text ? (post.text.length > 15 ? post.text.substring(0, 15) + '...' : post.text) : '[圖片分享]';
 
             const cardHtml = `
@@ -1310,15 +1088,10 @@
                     <div class="card-summary" onclick="toggleCard('post-${post.id}')">
                         <div class="card-summary-left" onclick="event.stopPropagation(); showUserCard('${post.creatorPhone}')" title="點擊查看名片" style="cursor:pointer;">
                             <div class="text-avatar" style="background-color:${creator.customColor||'#005086'}; background-image:none;">${getInitial(creator.name)}</div>
-                            <div style="flex:1; min-width:0;">
-                                <div class="badge badge-post">分享</div>
-                                <div class="card-title">${titleSnippet}</div>
-                                <div class="card-creator">${creator.name}</div>
-                            </div>
+                            <div style="flex:1; min-width:0;"><div class="badge badge-post">分享</div><div class="card-title">${titleSnippet}</div><div class="card-creator">${creator.name}</div></div>
                         </div>
                         <div class="card-summary-right" id="icon-post-${post.id}">🔽 展開</div>
                     </div>
-                    
                     <div id="details-post-${post.id}" class="card-details hidden">
                         <div class="card-actions">${deleteBtnHtml}</div>
                         <div class="post-text">${post.text}</div>${imgHtml}
@@ -1345,16 +1118,13 @@
                 const cUser = allUsers[c.phone] || {name: '未知'};
                 const canDeleteComment = c.phone === currentUserPhone || adminPhones.includes(currentUserPhone);
                 const delCommentBtn = canDeleteComment ? `<button style="background:none; border:none; box-shadow:none; color:#d32f2f; font-size:14px; cursor:pointer; padding:0;" onclick="deleteComment('event', ${evt.id}, ${index})">✕</button>` : '';
-                
                 return `
                     <div class="comment-item">
                         <strong onclick="showUserCard('${c.phone}')" style="cursor:pointer; display:inline-flex; align-items:center; color:#005086; transition:0.2s;" onmouseover="this.style.color='#ff9800'" onmouseout="this.style.color='#005086'" title="點擊查看名片">
                             <span style="display:inline-block; width:22px; height:22px; border-radius:50%; background-color:${cUser.customColor||'#005086'}; color:white; text-align:center; line-height:22px; font-size:11px; margin-right:6px;">${getInitial(cUser.name)}</span> ${cUser.name}
                         </strong> 
                         <span style="color:#7f8c8d; font-size:12px; margin-left:8px;">${c.time}</span>
-                        <div style="position: absolute; right: 12px; top: 12px; display: flex; gap: 12px;">
-                            ${delCommentBtn}
-                        </div>
+                        <div style="position: absolute; right: 12px; top: 12px; display: flex; gap: 12px;">${delCommentBtn}</div>
                         <div style="margin-top: 6px; word-break: break-all; color:#2c3e50;">${c.text}</div>
                     </div>`;
             }).join('');
@@ -1545,6 +1315,32 @@
         if(me.tempClosedDates && me.tempClosedDates.length > 0) { me.tempClosedDates.forEach(d => { tempListHtml += `<div style="display:inline-block; background:#eaf4fc; color:#005086; font-weight:800; padding:6px 12px; border-radius:20px; margin:4px 6px 4px 0; border:1px solid #bbdefb;">${d} <span style="cursor:pointer; color:#d32f2f; margin-left:6px;" onclick="removeTempCloseDate('${d}')">✕</span></div>`; }); } else { tempListHtml = '無臨時特休'; }
         document.getElementById('temp-close-list').innerHTML = tempListHtml;
 
+        // --- 渲染進度條區塊 ---
+        const stats = getUserStats(currentUserPhone);
+        let progressHtml = '';
+        if (!me.manualTier) {
+            if (stats.tier === '🌱 新人') {
+                let p = Math.min((stats.days / 30) * 100, 100);
+                progressHtml = `
+                    <div style="font-size:14px; color:#556068; font-weight:800; margin-bottom:4px;">距離【⭐ 聚會成員】: 加入滿 30 天 (目前 ${stats.days} 天)</div>
+                    <div class="progress-container"><div class="progress-fill" style="width:${p}%"></div></div>
+                `;
+            } else if (stats.tier === '⭐ 聚會成員') {
+                let p1 = Math.min((stats.days / 60) * 100, 100);
+                let p2 = Math.min((stats.attended / 3) * 100, 100);
+                let bestP = Math.max(p1, p2);
+                progressHtml = `
+                    <div style="font-size:14px; color:#556068; font-weight:800; margin-bottom:4px;">距離【👑 元老】: 加入滿 60 天 (${stats.days}/60) 或 聚會 3 場 (${stats.attended}/3)</div>
+                    <div class="progress-container"><div class="progress-fill" style="width:${bestP}%"></div></div>
+                `;
+            } else if (stats.tier === '👑 元老') {
+                progressHtml = `<div style="font-size:15px; color:#d35400; font-weight:900;">🎉 您已達成最高基本階級【👑 元老】！</div>`;
+            }
+        } else {
+            progressHtml = `<div style="font-size:15px; color:#005086; font-weight:900;">👑 管理員已為您手動設定專屬階級</div>`;
+        }
+        document.getElementById('tier-progress-container').innerHTML = progressHtml;
+
         const adminContainer = document.getElementById('admin-panel-container');
         if (adminPhones.includes(currentUserPhone)) {
             let usersListHtml = '';
@@ -1601,19 +1397,6 @@
     }
     
     // --- 管理員編輯會員資料 (Modal 控制) ---
-    function saveScoreSettings() {
-        ptsEventAttend = parseInt(document.getElementById('set-evt-attend').value) || 0;
-        ptsEventAbsent = parseInt(document.getElementById('set-evt-absent').value) || 0;
-        ptsEventNoResp = parseInt(document.getElementById('set-evt-noresp').value) || 0;
-        ptsPollSingleVote = parseInt(document.getElementById('set-poll-single').value) || 0;
-        ptsPollMultiVote = parseInt(document.getElementById('set-poll-multi').value) || 0;
-        ptsPollNoVote = parseInt(document.getElementById('set-poll-novote').value) || 0;
-        
-        saveSettings();
-        alert("⚙️ 計分設定已成功更新！系統將自動重新結算全體會員的活躍度！");
-        renderCardView();
-    }
-
     function openEditUserModal(phone) {
         const u = allUsers[phone];
         if(!u) return;
