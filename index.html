@@ -542,7 +542,6 @@
         if (!user) return 0;
         let score = 70 + (user.manualBonus || 0);
 
-        // 【修正】聚會積分必須等「已截止 (isClosed)」才會結算發放
         eventsData.forEach(evt => {
             if (evt.isClosed) {
                 const status = evt.attendees ? evt.attendees[phone] : null;
@@ -552,13 +551,12 @@
             }
         });
 
-        // 投票積分一樣是等「已截止」才發放
         pollsData.forEach(poll => {
             if (poll.pollType === 'points' || !poll.pollType) { 
                 if (poll.isClosed) {
                     const userVote = poll.votes ? poll.votes.find(v => v.phone === phone) : null;
                     if (userVote) {
-                        score += 3; 
+                        score += poll.isMultiple ? 1 : 3; 
                     } else if (!userVote && poll.id >= user.joinDate) {
                         score -= 3;                           
                     }
@@ -857,7 +855,7 @@
             privacyHtml = `
                 <div class="member-info-row"><span>電話帳號</span><span>${user.phone}</span></div>
                 <div class="member-info-row">
-                    <span style="display:flex; align-items:center; gap:6px;">🔥 活躍分數 <span onclick="alert('【活躍度計算與懲罰機制】\\n\\n📌 聚會：\\n參加 +5 分\\n無法參加 +3 分\\n未回應(截止後) -3 分\\n\\n📌 積分投票：\\n參與投票 +3 分\\n未投票(截止後) -3 分\\n\\n🚨 注意：活躍度低於 60 分將會被系統鎖定，屆時需請管理員協助解鎖！'); event.stopPropagation();" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; background:linear-gradient(135deg, #f1c40f, #f39c12); color:#fff; border-radius:50%; font-size:13px; font-weight:900; box-shadow:0 2px 6px rgba(0,0,0,0.4); text-shadow:none;">?</span></span>
+                    <span style="display:flex; align-items:center; gap:6px;">🔥 活躍分數 <span onclick="alert('【活躍度計算與懲罰機制】\\n\\n📌 聚會：\\n參加 +5 分\\n無法參加 +3 分\\n未回應(截止後) -3 分\\n\\n📌 積分投票 (單選)：\\n參與投票 +3 分\\n未投票(截止後) -3 分\\n\\n📌 積分投票 (多選)：\\n參與投票 +1 分\\n未投票(截止後) -3 分\\n\\n🚨 注意：活躍度低於 60 分將會被系統鎖定，屆時需請管理員協助解鎖！'); event.stopPropagation();" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; background:linear-gradient(135deg, #f1c40f, #f39c12); color:#fff; border-radius:50%; font-size:13px; font-weight:900; box-shadow:0 2px 6px rgba(0,0,0,0.4); text-shadow:none;">?</span></span>
                     <span style="color:#ffd700; font-weight:900; font-size:16px;">${score} 分</span>
                 </div>
             `;
@@ -1065,8 +1063,7 @@
         const pType = document.getElementById('poll-type').value;
         const pMult = document.getElementById('poll-multiple');
         if (pType === 'points') {
-            pMult.value = 'single';
-            pMult.disabled = true; 
+            pMult.disabled = false; // 已解鎖積分投票的多選限制
         } else {
             pMult.disabled = false;
         }
@@ -1143,7 +1140,7 @@
         switchTab(currentTab);
     }
     
-    // --- 【修正】刪除時永久保存積分邏輯 (僅保存已截止的活動) ---
+    // --- 刪除時永久保存積分邏輯 (僅保存已截止的活動) ---
     function deleteItem(type, id) {
         if(!confirm("確定要刪除這篇文章/活動嗎？\n(若為已截止的聚會或投票，刪除後大家已結算的積分將永久保留)")) return;
         
@@ -1171,7 +1168,7 @@
                         const u = allUsers[phone];
                         const userVote = item.votes ? item.votes.find(v => v.phone === phone) : null;
                         let pts = 0;
-                        if (userVote) pts = 3;
+                        if (userVote) pts = item.isMultiple ? 1 : 3;
                         else if (!userVote && item.id >= u.joinDate) pts = -3;
                         
                         if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
@@ -1228,7 +1225,7 @@
         const me = allUsers[currentUserPhone];
         if (evt) {
             if (evt.attendees[currentUserPhone] === status) { delete evt.attendees[currentUserPhone]; evt.latestActivity = `${me.name} 取消了報名。`; } 
-            else { evt.attendees[currentUserPhone] = status; evt.latestActivity = status === 'attend' ? `${me.name} 決定參加了！` : `${me.name} 殘念不能來.`; }
+            else { evt.attendees[currentUserPhone] = status; evt.latestActivity = status === 'attend' ? `${me.name} 決定參加了！` : `${me.name} 殘念不能來。`; }
             saveAllData(); switchTab(currentTab);
             document.getElementById(`details-event-${eventId}`).classList.remove('hidden'); 
             if(!expandedCards.includes(`event-${eventId}`)) expandedCards.push(`event-${eventId}`);
@@ -1428,7 +1425,8 @@
                 const isChecked = myVotes.includes(opt) ? 'checked' : ''; const disabled = isClosed ? 'disabled' : '';
                 let pointHint = '';
                 if (isPointsPoll && !isClosed) {
-                    pointHint = ' <span style="color:#d32f2f; font-size:13px; font-weight:900;">(+3分)</span>';
+                    const pointValue = poll.isMultiple ? 1 : 3;
+                    pointHint = ` <span style="color:#d32f2f; font-size:13px; font-weight:900;">(+${pointValue}分)</span>`;
                 }
                 return `<div class="vote-option" style="margin-bottom:12px; font-size:16px; font-weight:700;"><input type="${inputType}" name="poll-${poll.id}" value="${opt}" id="opt-${poll.id}-${idx}" ${isChecked} ${disabled}><label for="opt-${poll.id}-${idx}" style="cursor:pointer;">${opt}${pointHint}</label></div>`; 
             }).join('');
