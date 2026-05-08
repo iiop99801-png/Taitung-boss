@@ -116,7 +116,7 @@
         .post-text { font-size: 16px; color: #2c3e50; line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap; font-weight: 600; }
         .post-input-area { background-color: #ffffff; padding: 20px; border-radius: 16px; margin-bottom: 25px; border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
         
-        /* 刪除/操作按鈕 */
+        /* 刪除/操作按鈕 (已優化為獨立排版不擋字) */
         .card-actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 15px; width: 100%; }
         .action-btn { background: #f8fafc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e1e8ed; padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 8px; width: auto; font-weight: 700; color: #333; margin: 0; }
         .action-btn.delete { color: #d32f2f; }
@@ -188,7 +188,7 @@
         .promote-btn { background: linear-gradient(135deg, #f39c12, #ffb300); }
         .suspend-btn { background: linear-gradient(135deg, #7f8c8d, #34495e); }
         
-        /* 名單/搜尋列表 */
+        /* 名單/搜尋列表 (加入層級動態特效) */
         .directory-item { display: flex; align-items: center; padding: 15px; background: #ffffff; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;}
         .directory-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); background: #f8fafc; }
         .directory-item .text-avatar { width: 55px; height: 55px; font-size: 22px; }
@@ -557,7 +557,7 @@
     function calculateUserScore(phone) {
         const user = allUsers[phone];
         if (!user) return 0;
-        let score = 80 + (user.manualBonus || 0); // 初始活躍積分改為 80
+        let score = 80 + (user.manualBonus || 0);
 
         eventsData.forEach(evt => {
             if (evt.isClosed) {
@@ -594,7 +594,6 @@
                     systemInviteCode = parsed.inviteCode || '8888';
                     announcementText = parsed.announcement || announcementText;
                     
-                    // 防呆：確保舊版未設定時有預設值
                     ptsEventAttend = parsed.ptsEventAttend !== undefined ? parsed.ptsEventAttend : 5;
                     ptsEventAbsent = parsed.ptsEventAbsent !== undefined ? parsed.ptsEventAbsent : 3;
                     ptsEventNoResp = parsed.ptsEventNoResp !== undefined ? parsed.ptsEventNoResp : -3;
@@ -684,7 +683,6 @@
     function getUserStats(phone) {
         const user = allUsers[phone];
         if(!user) return { tier: '🌱 新人', months: 0, days: 1, attended: 0 };
-        // 修正：加入當天就算作第一天
         const daysJoined = Math.floor((Date.now() - user.joinDate) / (1000 * 60 * 60 * 24)) + 1;
         const monthsJoined = Math.floor(daysJoined / 30);
         let attendedCount = user.manualAttendBonus || 0; 
@@ -925,7 +923,7 @@
         });
     }
 
-    function generateCardHtml(targetPhone, isSelf) {
+    function generateCardHtml(targetPhone, showPrivate) {
         const user = allUsers[targetPhone];
         if (!user) return '';
         const stats = getUserStats(targetPhone);
@@ -949,7 +947,7 @@
         const highActivityBadge = badgeText ? `<span style="background: linear-gradient(135deg, #d32f2f, #e53935); color:white; font-size:14px; padding:4px 12px; border-radius:15px; margin-left:10px; text-shadow:none; white-space:nowrap; vertical-align:middle; box-shadow: 0 2px 8px rgba(211,47,47,0.4);">🎖️ ${badgeText}</span>` : '';
         
         let privacyHtml = '';
-        if (isSelf) {
+        if (showPrivate) {
             const alertMsg = `【活躍度計算與懲罰機制】\\n\\n📌 聚會：\\n參加 +${ptsEventAttend} 分\\n無法參加 +${ptsEventAbsent} 分\\n未回應(截止後) ${ptsEventNoResp} 分\\n\\n📌 積分投票 (單選)：\\n參與投票 +${ptsPollSingleVote} 分\\n未投票(截止後) ${ptsPollNoVote} 分\\n\\n📌 積分投票 (多選)：\\n參與投票 +${ptsPollMultiVote} 分\\n未投票(截止後) ${ptsPollNoVote} 分\\n\\n🚨 注意：活躍度低於 60 分將會被系統鎖定，屆時需請管理員協助解鎖！`;
             privacyHtml = `
                 <div class="member-info-row"><span>電話帳號</span><span>${user.phone}</span></div>
@@ -959,7 +957,7 @@
                 </div>
             `;
         } else {
-            privacyHtml = `<div class="member-info-row" style="color:#e1e8ed; font-size: 14px; justify-content:center; border:none; margin-top:10px; margin-bottom:15px; background:rgba(0,0,0,0.45); padding:10px; border-radius:8px; z-index:2; position:relative; font-style:normal; font-weight:600; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);">🔒 隱私設定：聯絡資訊與活躍度不公開</div>`;
+            privacyHtml = `<div class="member-info-row" style="color:#e1e8ed; font-size: 14px; justify-content:center; border:none; margin-top:10px; margin-bottom:15px; background:rgba(0,0,0,0.45); padding:10px; border-radius:8px; z-index:2; position:relative; font-style:normal; font-weight:600; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);">🔒 隱私設定：聯絡資訊與活躍分數不公開</div>`;
         }
 
         const bioHtml = user.bio ? `<div class="glass-panel">${user.bio.replace(/\n/g, '<br>')}</div>` : '';
@@ -998,7 +996,8 @@
     }
 
     function showUserCard(phone) {
-        document.getElementById('modal-card-container').innerHTML = generateCardHtml(phone, phone === currentUserPhone);
+        // 在彈出式名片中，一律隱藏隱私資料 (傳入 false)
+        document.getElementById('modal-card-container').innerHTML = generateCardHtml(phone, false);
         const modal = document.getElementById('user-card-modal');
         const content = document.getElementById('user-card-modal-content');
         modal.classList.remove('hidden');
@@ -1472,6 +1471,7 @@
     function renderCardView() {
         const me = allUsers[currentUserPhone]; if(!me) return;
         
+        // 自己看自己的卡片，可以看到電話與分數 (傳入 true)
         document.getElementById('my-membership-card').innerHTML = generateCardHtml(currentUserPhone, true);
         
         document.getElementById('card-color-picker').value = me.customColor || '#005086'; 
