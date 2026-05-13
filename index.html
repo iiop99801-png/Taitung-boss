@@ -44,11 +44,12 @@
             box-shadow: 0 4px 15px rgba(0, 80, 134, 0.2);
             position: relative; z-index: 10;
         }
-        /* 導覽列優化 */
-        .nav-tabs { display: flex; background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; white-space: nowrap; padding: 8px 5px; gap: 5px; }
+        
+        /* 🌟 導覽列優化：改為 flex-wrap 自動換行，保證按鈕絕對不會被擠到畫面外不見 */
+        .nav-tabs { display: flex; flex-wrap: wrap; background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 8px 5px; gap: 5px; }
         .nav-tab {
-            flex: 1; text-align: center; padding: 10px 6px; font-size: 14px;
-            font-weight: 800; cursor: pointer; color: #7f8c8d; border-radius: 20px; transition: 0.3s;
+            flex: 1 1 30%; text-align: center; padding: 10px 4px; font-size: 14px;
+            font-weight: 800; cursor: pointer; color: #7f8c8d; border-radius: 12px; transition: 0.3s; white-space: nowrap;
         }
         .nav-tab.active { background: linear-gradient(135deg, #005086, #0081C9); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 80, 134, 0.3); }
         .content { padding: 20px; }
@@ -96,7 +97,7 @@
         .score-log-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f4f8; font-size: 14px; }
         
         /* 無邊框高級卡片樣式 */
-        .card { border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.06); border-radius: 16px; margin-bottom: 20px; background-color: #ffffff; transition: transform 0.2s ease; }
+        .card { border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.06); border-radius: 16px; margin-bottom: 20px; background-color: #ffffff; transition: transform 0.2s ease; overflow: hidden;}
         .card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
         .card-summary { display: flex; align-items: center; justify-content: space-between; padding: 18px; cursor: pointer; }
         .card-summary-left { display: flex; align-items: center; flex: 1; min-width: 0; }
@@ -106,10 +107,14 @@
         .text-avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #005086, #0081C9); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; margin-right: 15px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0, 80, 134, 0.2); }
         .card-title { font-size: 18px; font-weight: 800; color: #003b73; padding-right: 10px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;}
         .card-creator { font-size: 14px; color: #7f8c8d; margin-top: 5px; font-weight: 600; }
+        
+        /* 標籤樣式 (含意見信箱標籤) */
         .badge { background-color: #005086; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; margin-bottom: 6px; display: inline-block; font-weight: 800; letter-spacing: 0.5px; }
         .badge-poll { background-color: #ff9800; }
         .badge-post { background-color: #2196F3; }
         .badge-closed { background-color: #7f8c8d; }
+        .badge-feedback { background-color: #8e44ad; }
+        .badge-success { background-color: #4CAF50; }
         
         /* 圖片與內文 */
         .post-image { width: 100%; max-height: 350px; object-fit: cover; border-radius: 12px; margin-top: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -123,6 +128,7 @@
         .action-btn.delete:hover { background-color: #ffebee; border-color: #ffcdd2; }
         .action-btn.close { color: #d35400; }
         .action-btn.close:hover { background-color: #fff3e0; border-color: #ffe0b2; }
+        .action-btn.complete { color: #2E7D32; border-color: #A5D6A7; background-color: #E8F5E9; }
         
         /* 出席狀態區 */
         .attendance-group { display: flex; gap: 12px; margin-bottom: 18px; margin-top: 12px;}
@@ -136,6 +142,7 @@
         .comment-list::-webkit-scrollbar { width: 6px; }
         .comment-list::-webkit-scrollbar-thumb { background-color: #cfd9e0; border-radius: 10px; }
         .comment-item { background-color: #f8fafc; padding: 12px 16px; border-radius: 16px; margin-bottom: 10px; border: 1px solid #eef2f5; font-size: 15px; position: relative; padding-right: 40px; }
+        .comment-item.admin-reply { background-color: #eaf4fc; border-color: #bbdefb; border-left: 4px solid #0081C9; }
         
         /* 膠囊輸入框 */
         .comment-input-group { display: flex; gap: 8px; background: #f0f4f8; padding: 6px; border-radius: 25px; border: 1px solid #e1e8ed;}
@@ -234,6 +241,8 @@
         <div class="nav-tab active" id="tab-home" onclick="switchTab('home')">首頁動態</div>
         <div class="nav-tab" id="tab-directory" onclick="switchTab('directory')">找老闆</div>
         <div class="nav-tab" id="tab-events" onclick="switchTab('events')">報名/投票</div>
+        <!-- ⭐️ 意見信箱 (拿掉表情) -->
+        <div class="nav-tab" id="tab-feedbacks" onclick="switchTab('feedbacks')">意見信箱</div>
         <div class="nav-tab" id="tab-closures" onclick="switchTab('closures')">店休總覽</div>
         <div class="nav-tab" id="tab-card" onclick="switchTab('card')">會員卡</div>
     </div>
@@ -329,6 +338,13 @@
                 </div>
                 <hr style="border: 0; height: 2px; background: #e1e8ed; margin: 25px 0;">
                 <div id="events-list"></div><div id="polls-list"></div>
+            </div>
+
+            <!-- ⭐️ 意見信箱 (投信) 顯示區塊 -->
+            <div id="feedbacks-view" class="hidden">
+                <button onclick="showCreateForm('feedback')" style="background: linear-gradient(135deg, #8e44ad, #c0392b); margin-bottom: 15px; box-shadow: 0 4px 12px rgba(142, 68, 173, 0.3);">＋ 聯絡管理員 / 提出建議</button>
+                <input type="text" id="search-feedback-input" placeholder="🔍 輸入案件編號 (例如: Case-123456) 查詢..." onkeyup="renderFeedbacks()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: #e1e8ed; margin-bottom: 20px;">
+                <div id="feedbacks-list"></div>
             </div>
             
             <!-- 店休總覽 -->
@@ -450,7 +466,7 @@
                 </div>
                 <div style="flex:1;">
                     <label style="font-size:14px; font-weight:800;">匿名設定：</label>
-                    <select id="poll-mode"><option value="realname">📝 實名</option><option value="anonymous">🕵️‍♂️ 匿名</option></select>
+                    <select id="poll-mode"><option value="realname">實名</option><option value="anonymous">匿名</option></select>
                 </div>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 25px;">
@@ -458,6 +474,29 @@
                 <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
             </div>
         </div>
+
+        <!-- ⭐️ 意見信箱 (投信) 建立表單 (拿掉提示與表情) -->
+        <div id="create-feedback-section" class="hidden">
+            <h2 style="color: #8e44ad; font-weight: 900;">聯絡管理員 / 提出建議</h2>
+            <p style="font-size: 14px; color: #7f8c8d;">您的意見對我們很重要。送出後將由管理員專人為您回覆處理。</p>
+            <textarea id="feedback-content" placeholder="請詳細描述您的問題或建議..." style="height: 150px;"></textarea>
+            
+            <label style="font-size:14px; font-weight:800; display:block; margin-top:10px;">上傳佐證圖片/截圖 (選填)：</label>
+            <input type="file" id="feedback-image" accept="image/*">
+            <p style="font-size:12px; color:#7f8c8d; margin-top:0;">💡 受限於雲端容量，目前僅支援上傳圖片/截圖喔！</p>
+
+            <label style="font-size:14px; font-weight:800; display:block; margin-top:15px;">發送模式：</label>
+            <select id="feedback-mode">
+                <option value="realname">實名發送</option>
+                <option value="anonymous">匿名發送</option>
+            </select>
+            
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button onclick="submitFeedback()" style="flex:2; margin:0; background: linear-gradient(135deg, #8e44ad, #c0392b);">送出投信</button>
+                <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -468,7 +507,7 @@
     </div>
 </div>
 
-<!-- 編輯會員的 Modal (修復破圖與 Stepper) -->
+<!-- 編輯會員的 Modal -->
 <div id="edit-user-modal" class="modal-overlay hidden">
     <div class="modal-content" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25);">
         <h3 style="color: #005086; margin-top: 0; border-bottom: 2px dashed #cfd9e0; padding-bottom: 15px; font-weight: 900; font-size: 20px;">✏️ 編輯會員資料</h3>
@@ -520,6 +559,8 @@
     let eventsData = [];
     let pollsData = [];
     let postsData = [];
+    let feedbacksData = []; // ⭐️ 投信系統專用資料庫
+    
     let systemInviteCode = '8888';
     let announcementText = '歡迎來到台東老闆專屬聚會！\n這是一個私密的交流空間，大家可以在這裡發起聚餐、投票決定餐廳，或是分享開店日常。\n\n如果有臨時特休，記得去「會員卡」更新店休設定喔！';
     
@@ -552,7 +593,7 @@
     function calculateUserScore(phone) {
         const user = allUsers[phone];
         if (!user) return 0;
-        let score = 80 + (user.manualBonus || 0); // 初始活躍積分改為 80
+        let score = 80 + (user.manualBonus || 0);
 
         eventsData.forEach(evt => {
             if (evt.isClosed) {
@@ -581,15 +622,15 @@
             if (dataStr) {
                 const parsed = JSON.parse(dataStr);
                 if (doc.id === "users") allUsers = parsed || {};
-                if (doc.id === "admins") adminPhones = parsed || [];
-                if (doc.id === "events") eventsData = parsed || [];
-                if (doc.id === "polls") pollsData = parsed || [];
-                if (doc.id === "posts") postsData = parsed || [];
-                if (doc.id === "settings") {
+                else if (doc.id === "admins") adminPhones = parsed || [];
+                else if (doc.id === "events") eventsData = parsed || [];
+                else if (doc.id === "polls") pollsData = parsed || [];
+                else if (doc.id === "posts") postsData = parsed || [];
+                else if (doc.id === "feedbacks") feedbacksData = Array.isArray(parsed) ? parsed : (parsed || []); // ⭐️ 接收投信資料
+                else if (doc.id === "settings") {
                     systemInviteCode = parsed.inviteCode || '8888';
                     announcementText = parsed.announcement || announcementText;
                     
-                    // 防呆：確保舊版未設定時有預設值
                     ptsEventAttend = parsed.ptsEventAttend !== undefined ? parsed.ptsEventAttend : 5;
                     ptsEventAbsent = parsed.ptsEventAbsent !== undefined ? parsed.ptsEventAbsent : 3;
                     ptsEventNoResp = parsed.ptsEventNoResp !== undefined ? parsed.ptsEventNoResp : -3;
@@ -621,7 +662,6 @@
                 const activeEl = document.activeElement;
                 const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
                 if (isTyping && activeEl.value.length > 0) {
-                    console.log("偵測到老闆正在打字，暫停刷新 UI...");
                     return; 
                 }
 
@@ -660,6 +700,7 @@
         db.collection("taitung_app").doc("events").set({ d: JSON.stringify(eventsData) });
         db.collection("taitung_app").doc("polls").set({ d: JSON.stringify(pollsData) });
         db.collection("taitung_app").doc("posts").set({ d: JSON.stringify(postsData) });
+        db.collection("taitung_app").doc("feedbacks").set({ d: JSON.stringify(feedbacksData) }); // ⭐️ 儲存投信資料
     }
 
     function saveSettings() {
@@ -690,7 +731,6 @@
     function getUserStats(phone) {
         const user = allUsers[phone];
         if(!user) return { tier: '🌱 新人', months: 0, days: 1, attended: 0 };
-        // 修正：加入當天就算作第一天
         const daysJoined = Math.floor((Date.now() - user.joinDate) / (1000 * 60 * 60 * 24)) + 1;
         const monthsJoined = Math.floor(daysJoined / 30);
         let attendedCount = user.manualAttendBonus || 0; 
@@ -706,7 +746,7 @@
 
     function showSection(id) {
         currentSectionId = id; 
-        ['login-section', 'profile-section', 'main-section', 'create-event-section', 'create-poll-section', 'locked-section'].forEach(sec => document.getElementById(sec).classList.add('hidden'));
+        ['login-section', 'profile-section', 'main-section', 'create-event-section', 'create-poll-section', 'create-feedback-section', 'locked-section'].forEach(sec => document.getElementById(sec).classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
         if (id === 'main-section') {
             document.getElementById('nav-section').classList.remove('hidden');
@@ -746,6 +786,12 @@
             if(!activePollVotes[name]) activePollVotes[name] = [];
             activePollVotes[name].push(inp.value);
         });
+
+        // ⭐️ 擷取一般輸入框 (排除部分類型避免錯誤)
+        activeInputs = {};
+        document.querySelectorAll('input[type="text"], textarea').forEach(inp => { 
+            if(inp.id && inp.value !== undefined) activeInputs[inp.id] = inp.value; 
+        });
     }
 
     function restoreActiveStates() {
@@ -753,6 +799,13 @@
             const vals = activePollVotes[name];
             vals.forEach(val => { const inp = document.querySelector(`input[name="${name}"][value="${val}"]`); if(inp) inp.checked = true; });
         });
+
+        // ⭐️ 還原輸入框狀態
+        Object.keys(activeInputs).forEach(id => { 
+            const inp = document.getElementById(id); 
+            if(inp) inp.value = activeInputs[id]; 
+        });
+
         expandedCards.forEach(id => {
             const detailDiv = document.getElementById(`details-${id}`);
             const iconSpan = document.getElementById(`icon-${id}`);
@@ -834,7 +887,8 @@
     function switchTab(tab) {
         captureActiveStates(); 
         currentTab = tab;
-        ['home', 'directory', 'events', 'closures', 'card'].forEach(t => { 
+        // ⭐️ 確保 feedbacks 有加入清單
+        ['home', 'directory', 'events', 'closures', 'card', 'feedbacks'].forEach(t => { 
             const navBtn = document.getElementById(`tab-${t}`);
             if(navBtn) navBtn.classList.remove('active'); 
             const viewDiv = document.getElementById(`${t}-view`);
@@ -857,6 +911,7 @@
         }
         else if(tab === 'closures') renderClosures(); 
         else if(tab === 'card') renderCardView();
+        else if(tab === 'feedbacks') renderFeedbacks(); // ⭐️ 渲染意見信箱
 
         restoreActiveStates(); 
     }
@@ -1001,8 +1056,7 @@
     }
 
     function showUserCard(phone) {
-        // 在彈出式名片中，一律隱藏隱私資料 (傳入 false)
-        document.getElementById('modal-card-container').innerHTML = generateCardHtml(phone, false);
+        document.getElementById('modal-card-container').innerHTML = generateCardHtml(phone, phone === currentUserPhone);
         const modal = document.getElementById('user-card-modal');
         const content = document.getElementById('user-card-modal-content');
         modal.classList.remove('hidden');
@@ -1120,6 +1174,9 @@
             }
             document.getElementById('poll-type').value = 'general';
             togglePollType(); showSection('create-poll-section');
+        } else if (type === 'feedback') {
+            // ⭐️ 切換到投信表單
+            showSection('create-feedback-section');
         } else {
             if (!isAdmin) { alert("目前只有管理員可以發起聚會喔！"); return; }
             showSection('create-event-section');
@@ -1141,31 +1198,37 @@
         switchTab(currentTab);
     }
     
+    // ⭐️ 加入意見信箱的刪除支援
     function deleteItem(type, id) {
-        if(!confirm("確定要刪除這篇文章/活動嗎？\n(若為已截止的聚會或投票，刪除後大家已結算的積分將永久保留)")) return;
-        if(type === 'event') { 
-            const item = eventsData.find(e => e.id === id);
-            if (item && item.isClosed) { 
-                Object.keys(allUsers).forEach(phone => {
-                    const u = allUsers[phone]; let pts = 0; const status = item.attendees ? item.attendees[phone] : null;
-                    if (status === 'attend') pts = ptsEventAttend; else if (status === 'absent') pts = ptsEventAbsent; else if (!status && item.id >= u.joinDate) pts = ptsEventNoResp;
-                    if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
-                });
-            }
-            eventsData = eventsData.filter(e => e.id !== id); 
-        } else if(type === 'poll') { 
-            const item = pollsData.find(p => p.id === id);
-            if (item && item.isClosed) { 
-                if (item.pollType === 'points' || !item.pollType) {
+        if (type === 'feedback') {
+            if(!confirm("確定要刪除這個意見信箱案件嗎？")) return;
+            feedbacksData = feedbacksData.filter(f => f.id !== id);
+        } else {
+            if(!confirm("確定要刪除這篇文章/活動嗎？\n(若為已截止的聚會或投票，刪除後大家已結算的積分將永久保留)")) return;
+            if(type === 'event') { 
+                const item = eventsData.find(e => e.id === id);
+                if (item && item.isClosed) { 
                     Object.keys(allUsers).forEach(phone => {
-                        const u = allUsers[phone]; const userVote = item.votes ? item.votes.find(v => v.phone === phone) : null; let pts = 0;
-                        if (userVote) pts = item.isMultiple ? ptsPollMultiVote : ptsPollSingleVote; else if (!userVote && item.id >= u.joinDate) pts = ptsPollNoVote;
+                        const u = allUsers[phone]; let pts = 0; const status = item.attendees ? item.attendees[phone] : null;
+                        if (status === 'attend') pts = ptsEventAttend; else if (status === 'absent') pts = ptsEventAbsent; else if (!status && item.id >= u.joinDate) pts = ptsEventNoResp;
                         if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
                     });
                 }
-            }
-            pollsData = pollsData.filter(p => p.id !== id); 
-        } else if(type === 'post') { postsData = postsData.filter(p => p.id !== id); }
+                eventsData = eventsData.filter(e => e.id !== id); 
+            } else if(type === 'poll') { 
+                const item = pollsData.find(p => p.id === id);
+                if (item && item.isClosed) { 
+                    if (item.pollType === 'points' || !item.pollType) {
+                        Object.keys(allUsers).forEach(phone => {
+                            const u = allUsers[phone]; const userVote = item.votes ? item.votes.find(v => v.phone === phone) : null; let pts = 0;
+                            if (userVote) pts = item.isMultiple ? ptsPollMultiVote : ptsPollSingleVote; else if (!userVote && item.id >= u.joinDate) pts = ptsPollNoVote;
+                            if (pts !== 0) u.manualBonus = (u.manualBonus || 0) + pts;
+                        });
+                    }
+                }
+                pollsData = pollsData.filter(p => p.id !== id); 
+            } else if(type === 'post') { postsData = postsData.filter(p => p.id !== id); }
+        }
         saveAllData(); switchTab(currentTab);
     }
 
@@ -1403,7 +1466,7 @@
             let actionHtml = '';
             if (canManage) {
                 const closeBtnHtml = !isClosed ? `<button class="action-btn close" onclick="closeItem('poll', ${poll.id})">🛑 截止</button>` : '';
-                actionHtml = `<div class="card-actions">${closeBtnHtml}<button class="action-btn delete" onclick="deleteItem('poll', ${poll.id})">🗑️ 刪除</button></div>`;
+                actionHtml = `<div class="card-actions" style="margin-top:-10px;">${closeBtnHtml}<button class="action-btn delete" onclick="deleteItem('poll', ${poll.id})">🗑️ 刪除</button></div>`;
             }
 
             let adminListHtml = '';
@@ -1418,7 +1481,7 @@
                 `;
             }
 
-            let badgeType = poll.mode === 'anonymous' ? '🕵️‍♂️ 匿名' : '📝 實名'; badgeType += poll.isMultiple ? ' / 多選' : ' / 單選';
+            let badgeType = poll.mode === 'anonymous' ? '匿名' : '實名'; badgeType += poll.isMultiple ? ' / 多選' : ' / 單選';
             const pollTypeBadge = isPointsPoll ? `<div class="badge" style="background: linear-gradient(135deg, #e91e63, #c2185b); box-shadow: 0 2px 6px rgba(233,30,99,0.3);">積分投票</div>` : `<div class="badge badge-poll">一般投票</div>`;
             const badgeHtml = isClosed ? `<div class="badge badge-closed">已截止</div>` : `${pollTypeBadge} <div class="badge" style="background-color:#556068;">${badgeType}</div>`;
             const activityHtml = poll.latestActivity ? `<div style="font-size:14px; color:#005086; font-weight:800; margin-top:15px; background:#eaf4fc; padding:8px 12px; border-radius:8px;">✨ 最新動態：${poll.latestActivity}</div>` : '';
@@ -1476,7 +1539,6 @@
     function renderCardView() {
         const me = allUsers[currentUserPhone]; if(!me) return;
         
-        // 自己看自己的卡片，可以看到電話與分數 (傳入 true)
         document.getElementById('my-membership-card').innerHTML = generateCardHtml(currentUserPhone, true);
         
         document.getElementById('card-color-picker').value = me.customColor || '#005086'; 
@@ -1715,6 +1777,211 @@
             }
         } 
     }
+
+    // ⭐️ 意見信箱 (投信) 核心邏輯區塊
+    function renderFeedbacks() {
+        const listDiv = document.getElementById('feedbacks-list');
+        listDiv.innerHTML = '';
+        
+        const keyword = document.getElementById('search-feedback-input').value.trim().toLowerCase();
+        const isAdmin = adminPhones.includes(currentUserPhone);
+
+        // 權限過濾：管理員看全部，一般老闆只看自己發的案件
+        let visibleFeedbacks = feedbacksData.filter(fb => {
+            if (!isAdmin && fb.creatorPhone !== currentUserPhone) return false;
+            if (keyword && !fb.caseNo.toLowerCase().includes(keyword)) return false;
+            return true;
+        });
+
+        if (visibleFeedbacks.length === 0) {
+            listDiv.innerHTML = '<p style="text-align:center; color:#7f8c8d; font-weight:600; padding:30px;">目前尚無相關的投信紀錄喔！</p>';
+            return;
+        }
+
+        visibleFeedbacks.forEach(fb => {
+            const creator = allUsers[fb.creatorPhone] || { name: '未知使用者', customColor: '#ccc' };
+            
+            // 處理顯示名稱與頭像
+            let displayName = creator.name;
+            let displayColor = creator.customColor || '#005086';
+            let initial = getInitial(creator.name);
+            
+            if (fb.mode === 'anonymous') {
+                if (fb.creatorPhone === currentUserPhone) {
+                    displayName = `匿名 (這是我發的)`;
+                    displayColor = '#556068';
+                    initial = '匿';
+                } else {
+                    displayName = '匿名用戶';
+                    displayColor = '#556068';
+                    initial = '匿';
+                    // ⭐️ 管理員專屬天眼
+                    if (isAdmin) {
+                        displayName += ` <span style="color:#d32f2f; font-size:12px;">(真實身分: ${creator.name})</span>`;
+                    }
+                }
+            }
+
+            const statusBadge = fb.status === 'open' 
+                ? `<div class="badge badge-post" style="background:#f39c12; box-shadow:0 2px 4px rgba(243,156,18,0.3);">處理中</div>` 
+                : `<div class="badge badge-success" style="box-shadow:0 2px 4px rgba(76,175,80,0.3);">✅ 已完成</div>`;
+
+            // 對話紀錄
+            const commentsHtml = (fb.comments || []).map((c, index) => {
+                const isCommentAdmin = c.isAdmin;
+                const cUser = allUsers[c.phone] || { name: '未知' };
+                let cName = cUser.name;
+                let cColor = cUser.customColor || '#005086';
+                let cInitial = getInitial(cUser.name);
+                
+                // 若為原發文者且為匿名模式，維持匿名標示
+                if (fb.mode === 'anonymous' && c.phone === fb.creatorPhone && !isCommentAdmin) {
+                    cName = '發信人';
+                    cColor = '#556068';
+                    cInitial = '匿';
+                }
+                
+                const adminTag = isCommentAdmin ? `<span style="background:#0081C9; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px;">管理員回覆</span>` : '';
+                const itemClass = isCommentAdmin ? 'comment-item admin-reply' : 'comment-item';
+
+                return `
+                    <div class="${itemClass}">
+                        <strong style="display:inline-flex; align-items:center; color:#005086;">
+                            <span style="display:inline-block; width:22px; height:22px; border-radius:50%; background-color:${cColor}; color:white; text-align:center; line-height:22px; font-size:11px; margin-right:6px;">${cInitial}</span> ${cName} ${adminTag}
+                        </strong> 
+                        <span style="color:#7f8c8d; font-size:12px; margin-left:8px;">${c.time}</span>
+                        <div style="margin-top: 6px; word-break: break-all; color:#2c3e50; white-space:pre-wrap;">${c.text}</div>
+                    </div>`;
+            }).join('');
+
+            // 管理員操作選項 (新增刪除按鈕)
+            let actionHtml = '';
+            if (isAdmin) {
+                const deleteBtn = `<button class="action-btn delete" onclick="deleteItem('feedback', ${fb.id})">🗑️ 刪除</button>`;
+                if (fb.status === 'open') {
+                    actionHtml = `<div class="card-actions" style="margin-bottom:10px;"><button class="action-btn complete" onclick="toggleFeedbackStatus(${fb.id}, 'closed')">✅ 標示為已完成</button>${deleteBtn}</div>`;
+                } else if (fb.status === 'closed') {
+                    actionHtml = `<div class="card-actions" style="margin-bottom:10px;"><button class="action-btn" onclick="toggleFeedbackStatus(${fb.id}, 'open')">🔄 重新開啟案件</button>${deleteBtn}</div>`;
+                }
+            }
+
+            const imgHtml = fb.image ? `<div style="position: relative; margin-top:10px;"><img src="${fb.image}" class="post-image"><a href="${fb.image}" download="${fb.caseNo}.jpg" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0, 80, 134, 0.85); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight:800; text-decoration: none; border: 1px solid rgba(255,255,255,0.4);">⬇️ 儲存圖片</a></div>` : '';
+            
+            // 結案鎖定防護
+            const replyBoxHtml = fb.status === 'open' 
+                ? `<div class="comment-input-group"><input type="text" id="feedback-comment-input-${fb.id}" placeholder="回覆案件..."><button onmousedown="addFeedbackComment(${fb.id}); event.preventDefault();">傳送</button></div>`
+                : `<div style="text-align:center; padding:12px; background:#e8f5e9; color:#2e7d32; border-radius:12px; font-weight:800; border:1px dashed #a5d6a7;">🔒 案件已完成，雙方無法再進行回覆</div>`;
+
+            const cardHtml = `
+                <div class="card" style="border: ${fb.status === 'closed' ? '1px solid #c8e6c9' : '1px solid #fff'};">
+                    <div class="card-summary" onclick="toggleCard('feedback-${fb.id}')">
+                        <div class="card-summary-left" style="pointer-events:none;">
+                            <div class="text-avatar" style="background-color:${displayColor}; background-image:none;">${initial}</div>
+                            <div style="flex:1; min-width:0;">
+                                <div class="badge badge-feedback" style="margin-bottom:3px;">編號: ${fb.caseNo}</div>
+                                <div class="card-title" style="font-size:16px;">${displayName}</div>
+                                <div class="card-creator" style="color:#95a5a6;">發送日: ${fb.date}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            ${statusBadge}
+                            <div class="card-summary-right" id="icon-feedback-${fb.id}" style="margin-top:5px; margin-left:0; background:none; color:#7f8c8d; padding:0;">🔽 展開</div>
+                        </div>
+                    </div>
+                    
+                    <div id="details-feedback-${fb.id}" class="card-details hidden">
+                        ${actionHtml}
+                        <div style="background:#fff9f0; padding:15px; border-radius:12px; border-left:4px solid #f39c12; margin-bottom:15px;">
+                            <div style="color:#d35400; font-weight:900; margin-bottom:5px; font-size:14px;">📝 投信內容：</div>
+                            <div class="post-text" style="margin:0;">${fb.content}</div>
+                        </div>
+                        ${imgHtml}
+                        
+                        <div class="comment-section">
+                            <div class="comment-list" id="comment-list-feedback-${fb.id}">${commentsHtml}</div>
+                            ${replyBoxHtml}
+                        </div>
+                    </div>
+                </div>`;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = cardHtml;
+            listDiv.appendChild(tempDiv.firstElementChild);
+            if(expandedCards.includes(`feedback-${fb.id}`)) toggleCard(`feedback-${fb.id}`);
+        });
+    }
+
+    function submitFeedback() {
+        const content = document.getElementById('feedback-content').value.trim();
+        const mode = document.getElementById('feedback-mode').value;
+        const fileInput = document.getElementById('feedback-image');
+
+        if (!content && !fileInput.files[0]) {
+            alert("請至少輸入文字內容或上傳一張圖片！");
+            return;
+        }
+
+        const now = Date.now();
+        const caseNo = 'Case-' + now.toString().slice(-6);
+
+        const createData = (imgBase64) => {
+            feedbacksData.unshift({
+                id: now,
+                caseNo: caseNo,
+                content: content,
+                image: imgBase64,
+                mode: mode,
+                creatorPhone: currentUserPhone,
+                status: 'open',
+                date: new Date().toLocaleDateString('zh-TW'),
+                comments: []
+            });
+            saveAllData();
+            document.getElementById('feedback-content').value = '';
+            if(fileInput) fileInput.value = '';
+            alert(`✅ 投信已成功送出！您的案件編號為：${caseNo}`);
+            switchTab('feedbacks');
+        };
+
+        if (fileInput.files[0]) {
+            compressImage(fileInput.files[0], createData);
+        } else {
+            createData(null);
+        }
+    }
+
+    function addFeedbackComment(id) {
+        const input = document.getElementById(`feedback-comment-input-${id}`);
+        if(!input) return;
+        const text = input.value.trim();
+        if (!text) return;
+
+        const fb = feedbacksData.find(f => f.id === id);
+        if (fb) {
+            if(!fb.comments) fb.comments = [];
+            fb.comments.push({
+                phone: currentUserPhone,
+                text: text,
+                time: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }),
+                isAdmin: adminPhones.includes(currentUserPhone)
+            });
+            saveAllData();
+            input.value = '';
+            if(!expandedCards.includes(`feedback-${id}`)) expandedCards.push(`feedback-${id}`);
+            renderFeedbacks();
+        }
+    }
+
+    function toggleFeedbackStatus(id, newStatus) {
+        const fb = feedbacksData.find(f => f.id === id);
+        if (fb) {
+            fb.status = newStatus;
+            saveAllData();
+            if(!expandedCards.includes(`feedback-${id}`)) expandedCards.push(`feedback-${id}`);
+            renderFeedbacks();
+        }
+    }
+
 </script>
 </body>
 </html>
