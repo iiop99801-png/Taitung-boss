@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台東老闆專屬聚會 - 防彈備份版</title>
+    <title>台東老闆專屬聚會 - 液態玻璃完整版</title>
     
     <script>
         window.onerror = function(msg, url, line, col, error) {
@@ -21,25 +21,26 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <style>
         /* =========================================
-            基礎樣式與排版
+            液態玻璃 (Liquid Glass) 基礎樣式與排版
             ========================================= */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'PingFang TC', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #f0f4f8; 
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); 
             color: #1a252f; 
             margin: 0; padding: 0;
             display: flex; justify-content: center;
             font-weight: 600; 
-            padding-bottom: 120px; /* 為了給懸浮導覽列留空間 */
+            padding-bottom: 120px;
         }
         
+        /* 🚨 補回來的載入畫面樣式 */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #005086 0%, #0081C9 100%); 
             color: white; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; font-size: 22px; font-weight: 800; z-index: 9999;
+            align-items: center; justify-content: center; font-size: 22px; font-weight: 800; z-index: 99999;
         }
 
         .spinner { 
@@ -54,70 +55,68 @@
         }
 
         .app-container {
-            width: 100%; max-width: 480px; background-color: #f0f4f8;
-            min-height: 100vh; border: none; box-shadow: 0 0 40px rgba(0,0,0,0.1); 
+            width: 100%; max-width: 480px; 
+            min-height: 100vh; border: none; 
             position: relative;
         }
 
         .header {
-            background: linear-gradient(135deg, #005086 0%, #0081C9 100%); 
-            color: #ffffff; text-align: center;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            color: #005086; text-align: center;
             padding: 18px; font-size: 22px; font-weight: 900; letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(0, 80, 134, 0.2); position: relative; z-index: 10;
+            position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.3);
         }
         
-        /* --- 修改後：蘋果風懸浮毛玻璃導覽列 --- */
+        /* --- 蘋果風懸浮毛玻璃導覽列 --- */
         .nav-tabs { 
             position: fixed; 
-            bottom: 20px; 
-            left: 15px; 
-            right: 15px; 
-            margin: 0 auto;
+            bottom: 20px; left: 15px; right: 15px; margin: 0 auto;
             max-width: 450px;
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center;
-            background-color: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px);
+            display: flex; justify-content: space-around; align-items: center;
+            background-color: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
-            padding: 10px; 
-            border-radius: 25px;
+            padding: 10px; border-radius: 25px;
             border: 1px solid rgba(255,255,255,0.5);
-            z-index: 1000;
+            z-index: 10000;
         }
 
         .nav-tab {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 5px; font-size: 11px;
-            font-weight: 800; cursor: pointer; color: #7f8c8d; 
+            font-weight: 800; cursor: pointer; color: #556068; 
             transition: 0.3s; white-space: nowrap; flex: 1;
         }
 
-        .nav-tab.active { 
-            color: #0081C9;
-        }
+        .nav-tab.active { color: #0081C9; }
 
         .content { padding: 20px; }
         
+        /* 液態玻璃卡片與面板 */
+        .card, .custom-style-panel, .admin-panel, .announcement-board, .score-log-card { 
+            background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; 
+            padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        
         input, select, textarea {
-            width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #cfd9e0; 
+            width: 100%; padding: 14px; margin: 8px 0; border: 1px solid rgba(255,255,255,0.5); 
             border-radius: 12px; font-size: 16px; font-family: inherit; font-weight: 600; 
-            background-color: #ffffff; transition: 0.3s;
+            background-color: rgba(255,255,255,0.7); transition: 0.3s;
         }
 
         input:focus, select:focus, textarea:focus { 
-            border-color: #0081C9; box-shadow: 0 0 0 4px rgba(0, 129, 201, 0.15); outline: none; 
+            border-color: #0081C9; box-shadow: 0 0 0 4px rgba(0, 129, 201, 0.15); outline: none; background-color: #ffffff;
         }
 
         input[type="color"] { padding: 5px; height: 55px; cursor: pointer; border-radius: 12px; }
-        input[type="file"] { padding: 10px; font-size: 14px; border: 2px dashed #cfd9e0; background: #fafcff; }
+        input[type="file"] { padding: 10px; font-size: 14px; border: 2px dashed #cfd9e0; background: rgba(255,255,255,0.5); }
         input[type="checkbox"], input[type="radio"] { width: auto; margin-right: 8px; transform: scale(1.3); }
         
-        .stepper-group { display: flex; align-items: center; border: 2px solid #cfd9e0; border-radius: 12px; background: #fff; overflow: hidden; height: 48px; width: 100%; }
-        .stepper-btn { flex: 1; background: #f0f4f8; color: #005086; border: none; height: 100%; font-size: 22px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0 !important; border-radius: 0 !important; }
-        .stepper-btn:hover { background: #e1e8ed; }
-        .stepper-input { flex: 1; border: none !important; text-align: center; margin: 0 !important; font-size: 16px; font-weight: 900; color: #1a252f; -moz-appearance: textfield; }
+        .stepper-group { display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.5); border-radius: 12px; background: rgba(255,255,255,0.7); overflow: hidden; height: 48px; width: 100%; }
+        .stepper-btn { flex: 1; background: transparent; color: #005086; border: none; height: 100%; font-size: 22px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0 !important; border-radius: 0 !important; box-shadow: none; }
+        .stepper-btn:hover { background: rgba(0,0,0,0.05); }
+        .stepper-input { flex: 1; border: none !important; background: transparent !important; text-align: center; margin: 0 !important; font-size: 16px; font-weight: 900; color: #1a252f; -moz-appearance: textfield; box-shadow: none !important;}
 
         button { 
             background: linear-gradient(135deg, #005086, #0081C9); color: #ffffff; 
@@ -128,27 +127,25 @@
 
         button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 80, 134, 0.35); }
         button:active { transform: translateY(0); }
-        button.secondary { background: #ffffff; color: #005086; border: 2px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        button.secondary:hover { background: #f0f6fc; border-color: #cfd9e0; }
-        
+        button.secondary { background: rgba(255,255,255,0.8); color: #005086; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        button.secondary:hover { background: #ffffff; }
+
         /* =========================================
-            卡片與元件樣式
+            卡片與內部元件調整
             ========================================= */
-        .announcement-board { background: linear-gradient(135deg, #ffffff, #fdfbf7); box-shadow: 0 6px 20px rgba(211, 84, 0, 0.08); padding: 18px; border-radius: 16px; margin-bottom: 20px; }
         .announcement-title { color: #d35400; font-weight: 800; margin-bottom: 10px; font-size: 18px; display: flex; justify-content: space-between; align-items: center;}
         .announcement-text { font-size: 15px; color: #444; line-height: 1.6; white-space: pre-wrap; font-weight: 600;}
         .edit-notice-btn { background: none; border: none; box-shadow: none; color: #d35400; text-decoration: underline; cursor: pointer; font-size: 13px; padding: 0; width: auto; font-weight: 600;}
 
-        .score-log-card { background: #ffffff; border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .score-log-header { display: flex; justify-content: space-between; align-items: center; color: #005086; font-weight: 900; font-size: 16px; cursor: pointer; }
-        .score-log-content { margin-top: 15px; padding-top: 10px; border-top: 2px dashed #e1e8ed; max-height: 250px; overflow-y: auto; }
-        .score-log-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f4f8; font-size: 14px; }
+        .score-log-content { margin-top: 15px; padding-top: 10px; border-top: 1px dashed rgba(0,0,0,0.1); max-height: 250px; overflow-y: auto; }
+        .score-log-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 14px; }
         
-        .card { border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.06); border-radius: 16px; margin-bottom: 20px; background-color: #ffffff; overflow: hidden; }
+        .card { padding: 0; overflow: hidden; }
         .card-summary { display: flex; align-items: center; justify-content: space-between; padding: 18px; cursor: pointer; }
         .card-summary-left { display: flex; align-items: center; flex: 1; min-width: 0; }
-        .card-summary-right { font-size: 14px; color: #0081C9; font-weight: 800; flex-shrink: 0; margin-left: 10px; background: #eaf4fc; padding: 6px 12px; border-radius: 20px; }
-        .card-details { padding: 0 18px 18px 18px; border-top: 1px solid #f0f4f8; margin-top: -5px; padding-top: 18px; position: relative;}
+        .card-summary-right { font-size: 14px; color: #0081C9; font-weight: 800; flex-shrink: 0; margin-left: 10px; background: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px; }
+        .card-details { padding: 0 18px 18px 18px; border-top: 1px solid rgba(0,0,0,0.05); margin-top: -5px; padding-top: 18px; position: relative;}
         
         .text-avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #005086, #0081C9); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; margin-right: 15px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0, 80, 134, 0.2); }
         .card-title { font-size: 18px; font-weight: 800; color: #003b73; padding-right: 10px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;}
@@ -163,32 +160,32 @@
         
         .post-image { width: 100%; max-height: 350px; object-fit: cover; border-radius: 12px; margin-top: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .post-text { font-size: 16px; color: #2c3e50; line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap; font-weight: 600; }
-        .post-input-area { background-color: #ffffff; padding: 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .post-input-area { background-color: rgba(255,255,255,0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.5); }
         
         .card-actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 15px; width: 100%; flex-wrap: wrap;}
-        .action-btn { background: #f8fafc; border: 1px solid #e1e8ed; padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 8px; width: auto; font-weight: 700; color: #333; margin: 0; }
-        .action-btn.delete { color: #d32f2f; background-color: #ffebee; border-color: #ffcdd2;}
-        .action-btn.close { color: #d35400; background-color: #fff3e0; border-color: #ffe0b2;}
-        .action-btn.complete { color: #2E7D32; border-color: #A5D6A7; background-color: #E8F5E9; }
-        .action-btn.report { color: #d32f2f; background-color: #ffebee; border-color: #ffcdd2; }
-        .action-btn.collect { color: #f39c12; background-color: #fff9e6; border-color: #ffe0b2; }
-        .action-btn.throwback { color: #0081C9; background-color: #eaf4fc; border-color: #bbdefb; }
+        .action-btn { background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.1); padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 8px; width: auto; font-weight: 700; color: #333; margin: 0; box-shadow: none; }
+        .action-btn.delete { color: #d32f2f; background-color: rgba(255,235,238,0.8); border-color: #ffcdd2;}
+        .action-btn.close { color: #d35400; background-color: rgba(255,243,224,0.8); border-color: #ffe0b2;}
+        .action-btn.complete { color: #2E7D32; border-color: #A5D6A7; background-color: rgba(232,245,233,0.8); }
+        .action-btn.report { color: #d32f2f; background-color: rgba(255,235,238,0.8); border-color: #ffcdd2; }
+        .action-btn.collect { color: #f39c12; background-color: rgba(255,249,230,0.8); border-color: #ffe0b2; }
+        .action-btn.throwback { color: #0081C9; background-color: rgba(234,244,252,0.8); border-color: #bbdefb; }
         
         .attendance-group { display: flex; gap: 12px; margin-bottom: 18px; margin-top: 12px;}
         .attendance-btn { flex: 1; padding: 12px; font-size: 15px; border-radius: 12px; }
         .attendance-btn.active-attend { background: linear-gradient(135deg, #005086, #0081C9); color: white; border: none; box-shadow: 0 4px 12px rgba(0, 80, 134, 0.3); }
         .attendance-btn.active-absent { background: linear-gradient(135deg, #d32f2f, #e53935); color: white; border: none; box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3); }
         
-        .comment-section { border-top: 2px dashed #f0f4f8; padding-top: 18px; margin-top: 12px;}
+        .comment-section { border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 18px; margin-top: 12px;}
         .comment-list { max-height: 280px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px; }
-        .comment-item { background-color: #f8fafc; padding: 12px 16px; border-radius: 16px; margin-bottom: 10px; border: 1px solid #eef2f5; font-size: 15px; position: relative; padding-right: 40px; }
-        .comment-item.admin-reply { background-color: #eaf4fc; border-color: #bbdefb; border-left: 4px solid #0081C9; }
+        .comment-item { background-color: rgba(255,255,255,0.6); padding: 12px 16px; border-radius: 16px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.4); font-size: 15px; position: relative; padding-right: 40px; }
+        .comment-item.admin-reply { background-color: rgba(234,244,252,0.8); border-left: 4px solid #0081C9; }
         
-        .comment-input-group { display: flex; gap: 8px; background: #f0f4f8; padding: 6px; border-radius: 25px; border: 1px solid #e1e8ed;}
+        .comment-input-group { display: flex; gap: 8px; background: rgba(255,255,255,0.6); padding: 6px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.5);}
         .comment-input-group input { margin: 0; flex: 1; border: none; background: transparent; padding: 10px 15px; box-shadow: none;}
-        .comment-input-group button { width: auto; margin: 0; padding: 10px 20px; white-space: nowrap; border-radius: 20px; }
+        .comment-input-group button { width: auto; margin: 0; padding: 10px 20px; white-space: nowrap; border-radius: 20px; box-shadow: none; }
 
-        .closure-day-row { display: flex; padding: 12px 0; border-bottom: 1px solid #e1e8ed; align-items: center; }
+        .closure-day-row { display: flex; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); align-items: center; }
         .closure-day-label { width: 65px; font-weight: 800; color: #005086; flex-shrink: 0; font-size: 16px;}
         .closure-day-list { color: #556068; font-size: 15px; line-height: 1.6; font-weight: 600;}
         
@@ -199,7 +196,7 @@
         .member-info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.6); z-index: 2; position: relative; font-weight: 700;}
         .card-name-title { font-size: clamp(24px, 6vw, 32px); font-weight: 900; margin-bottom: 15px; z-index: 2; position: relative; line-height: 1.25; letter-spacing: 1px; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
         .glass-panel { margin-top: 15px; font-size: 15px; line-height: 1.6; background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); z-index: 2; position: relative; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(6px); font-weight: 600; }
-        .progress-container { width: 100%; height: 14px; background-color: #e1e8ed; border-radius: 10px; overflow: hidden; margin-top: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .progress-container { width: 100%; height: 14px; background-color: rgba(255,255,255,0.3); border-radius: 10px; overflow: hidden; margin-top: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #ffeb3b); border-radius: 10px; transition: width 0.5s ease-in-out; }
 
         @keyframes shimmer-sweep { 0% { transform: translateX(-100%) skewX(-15deg); } 100% { transform: translateX(200%) skewX(-15deg); } }
@@ -213,32 +210,27 @@
         @keyframes royal-glow { 0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); border: 2px solid rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.9); border: 2px solid rgba(255,215,0,1); } }
         .admin-glow { animation: royal-glow 3s infinite ease-in-out; }
 
-        @keyframes flipIn { 0% { transform: perspective(1000px) rotateY(-90deg); opacity: 0; } 100% { transform: perspective(1000px) rotateY(0deg); opacity: 1; } }
-        .flip-animate { animation: flipIn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; transform-style: preserve-3d; }
-
-        .custom-style-panel { background-color: #ffffff; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        .admin-panel { border-left: 5px solid #005086; border-radius: 12px; padding: 20px; background-color: #fff; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.06);}
-        .admin-title { color: #005086; font-weight: 900; margin-bottom: 15px; font-size: 18px; border-bottom: 2px dashed #cfd9e0; padding-bottom: 10px;}
-        .admin-user-row { padding: 12px 0; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-        .admin-actions button { width: auto; margin: 2px; padding: 6px 12px; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .kick-btn { background: linear-gradient(135deg, #d32f2f, #e53935); }
-        .promote-btn { background: linear-gradient(135deg, #f39c12, #ffb300); }
-        .suspend-btn { background: linear-gradient(135deg, #7f8c8d, #34495e); }
-         
-        .directory-item { display: flex; align-items: center; padding: 15px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;}
-        .directory-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); background: #f8fafc; }
+        .admin-title { color: #005086; font-weight: 900; margin-bottom: 15px; font-size: 18px; border-bottom: 1px dashed rgba(0,0,0,0.1); padding-bottom: 10px;}
+        .admin-user-row { padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .admin-actions button { width: auto; margin: 2px; padding: 6px 12px; font-size: 13px; box-shadow: none; }
+        .kick-btn { background: linear-gradient(135deg, #d32f2f, #e53935); color:white; }
+        .promote-btn { background: linear-gradient(135deg, #f39c12, #ffb300); color:white; }
+        .suspend-btn { background: linear-gradient(135deg, #7f8c8d, #34495e); color:white; }
+        
+        .directory-item { display: flex; align-items: center; padding: 15px; background: rgba(255,255,255,0.5); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;}
+        .directory-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); background: rgba(255,255,255,0.8); }
         .directory-item .text-avatar { width: 55px; height: 55px; font-size: 22px; }
         
-        .dir-tier-100 { border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #00C9FF, #0081C9) border-box; box-shadow: 0 4px 15px rgba(0, 129, 201, 0.2); }
-        .dir-tier-150 { border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #FF6F00, #FF9100) border-box; box-shadow: 0 6px 20px rgba(255, 111, 0, 0.35); }
+        .dir-tier-100 { border: 2px solid transparent; background: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)) padding-box, linear-gradient(135deg, #00C9FF, #0081C9) border-box; box-shadow: 0 4px 15px rgba(0, 129, 201, 0.2); }
+        .dir-tier-150 { border: 2px solid transparent; background: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)) padding-box, linear-gradient(135deg, #FF6F00, #FF9100) border-box; box-shadow: 0 6px 20px rgba(255, 111, 0, 0.35); }
         @keyframes legendary-fire-glow { 0%, 100% { box-shadow: 0 8px 30px rgba(211, 47, 47, 0.6), 0 0 10px rgba(211, 47, 47, 0.4); } 50% { box-shadow: 0 12px 40px rgba(211, 47, 47, 0.9), 0 0 20px rgba(255, 152, 0, 0.7); border-color: #ff5252; } }
-        .dir-tier-200 { border: 3px solid #D32F2F; background: linear-gradient(135deg, #ffffff, #ffebee); animation: legendary-fire-glow 2s infinite ease-in-out; position: relative; }
+        .dir-tier-200 { border: 3px solid #D32F2F; background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,235,238,0.8)); animation: legendary-fire-glow 2s infinite ease-in-out; position: relative; }
         .dir-tier-200::before { content: '🔥'; position: absolute; top: 10px; right: 15px; font-size: 24px; opacity: 0.8; filter: drop-shadow(0 0 5px rgba(211,47,47,0.5)); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.8); backdrop-filter: blur(3px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { width: 100%; max-width: 420px; position: relative; max-height: 90vh; border-radius: 16px; box-sizing: border-box; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.5); backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { width: 100%; max-width: 420px; position: relative; max-height: 90vh; border-radius: 20px; box-sizing: border-box; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: auto; }
         
-        .close-modal-btn-sticky { position: absolute; top: 10px; right: 10px; background: #ffffff; color: #d32f2f; border-radius: 50%; width: 36px; height: 36px; border: 2px solid #ffcdd2; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10005; }
+        .close-modal-btn-sticky { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); color: #d32f2f; border-radius: 50%; width: 36px; height: 36px; border: 1px solid #ffcdd2; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10005; }
         .close-modal-btn { position: absolute; top: -15px; right: -5px; background: white; color: #1a252f; border-radius: 50%; width: 36px; height: 36px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
 
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px; }
@@ -262,10 +254,10 @@
         @keyframes ocean-gradient { 0% { background-position: 50% 0%; } 50% { background-position: 50% 100%; } 100% { background-position: 50% 0%; } }
         @keyframes move-wave { 0% { transform: translateX(0); } 100% { transform: translateX(-400px); } }
         
-        .bottle-sub-nav { display:flex; gap:10px; margin-bottom:15px; background:#fff; padding:6px; border-radius:15px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
-        .bottle-sub-tab { flex:1; text-align:center; padding:10px; font-size:14px; font-weight:800; border-radius:12px; cursor:pointer; color:#7f8c8d; }
-        .bottle-sub-tab.active { background:#eaf4fc; color:#0081C9; }
-        .bottle-sub-tab.admin-active { background:#ffebee; color:#d32f2f; }
+        .bottle-sub-nav { display:flex; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.5); backdrop-filter:blur(10px); padding:6px; border-radius:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.4); }
+        .bottle-sub-tab { flex:1; text-align:center; padding:10px; font-size:14px; font-weight:800; border-radius:15px; cursor:pointer; color:#556068; }
+        .bottle-sub-tab.active { background:rgba(255,255,255,0.8); color:#0081C9; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .bottle-sub-tab.admin-active { background:rgba(255,235,238,0.8); color:#d32f2f; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
         .beach-view {
             background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
@@ -282,8 +274,8 @@
 
         /* ✉️ 絕美羊皮信封 */
         .letter-modal {
-            background: #fdfaf0; border-radius: 4px; padding: 45px 25px 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2), inset 0 0 60px rgba(139,69,19,0.08);
+            background: #fdfaf0; border-radius: 12px; padding: 45px 25px 25px;
+            box-shadow: inset 0 0 60px rgba(139,69,19,0.08);
             position: relative; font-family: 'Courier New', Courier, serif;
             border: 1px solid #d4c0a8; color: #4a3b32; font-size: 16px; font-weight: 900; line-height: 1.6;
         }
@@ -296,7 +288,7 @@
             content: '✉️'; position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
             z-index: 11; font-size: 22px; filter: sepia(1) hue-rotate(-50deg) saturate(3) brightness(0.8);
         }
-        .letter-img { width: 100%; border-radius: 4px; margin-top: 15px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .letter-img { width: 100%; border-radius: 8px; margin-top: 15px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
         @keyframes throwBottleArc {
             0% { transform: translate(0, 150px) scale(1.5) rotate(0deg); opacity: 1; }
@@ -314,9 +306,16 @@
 </head>
 <body>
 
+<!-- 🚨 絕對不能漏掉的 Loading Screen 🚨 -->
+<div id="loading-screen">
+    <div>連線至台東雲端大腦...</div>
+    <div class="spinner"></div>
+</div>
+
 <div id="toast-container"></div>
 
-<div id="pickup-animation-overlay" class="modal-overlay hidden" style="background: rgba(0,50,80,0.95); flex-direction: column; z-index:10001;">
+<!-- 漂流瓶動畫與內容 Modal 區塊 -->
+<div id="pickup-animation-overlay" class="modal-overlay hidden" style="flex-direction: column; z-index:10001;">
     <div id="pickup-bottle-emoji" style="font-size: 100px; transition: 0.8s transform ease-in-out;">🍾</div>
     <div style="color: white; font-size: 18px; margin-top: 20px; text-align: center; padding: 20px; font-weight:800; text-shadow:0 2px 4px rgba(0,0,0,0.5);">
         🌊 這是一個未知的漂流瓶<br><span style="font-size:14px; color:#cfd9e0;">打開後將消耗 1 次撿取額度</span>
@@ -328,32 +327,32 @@
 </div>
 
 <div id="letter-modal-overlay" class="modal-overlay hidden" style="z-index:10002;">
-    <div class="modal-content" style="display:flex; flex-direction:column; max-height:95vh; background:transparent; overflow:hidden;">
+    <div class="modal-content" style="display:flex; flex-direction:column; max-height:95vh; background:transparent; overflow:hidden; border:none; box-shadow:none;">
         <button class="close-modal-btn-sticky" onclick="closeLetter()">✕</button>
         
-        <div style="overflow-y:auto; padding:15px; background:white; border-radius:16px 16px 0 0; flex-grow:1;">
+        <div style="overflow-y:auto; padding:15px; background:rgba(255,255,255,0.9); backdrop-filter:blur(20px); border-radius:20px 20px 0 0; flex-grow:1; border:1px solid rgba(255,255,255,0.6);">
             <div class="letter-modal">
                 <div id="letter-content" style="min-height: 100px; white-space: pre-wrap;"></div>
                 <div id="letter-image-container"></div>
                 <p style="text-align: right; font-size: 12px; color: #888; margin-top: 20px;" id="letter-date"></p>
             </div>
             
-            <div class="comment-section" style="background: white; border-radius: 12px; padding: 15px; margin-top: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div class="comment-section" style="background: rgba(255,255,255,0.5); border-radius: 16px; padding: 15px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.5);">
                 <div id="bottle-comments" style="max-height: 150px; overflow-y: auto; padding-right:5px; font-size:14px;"></div>
                 <div class="comment-input-group" style="margin-top:10px;">
                     <input type="text" id="bottle-reply-input" placeholder="寫下留言並塞回瓶子...">
-                    <button onclick="replyToBottle()" style="width: auto; padding: 10px 20px;">回覆</button>
+                    <button onclick="replyToBottle()" style="width: auto; padding: 10px 20px; box-shadow:none;">回覆</button>
                 </div>
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button onclick="collectBottle()" style="flex:1; background:linear-gradient(135deg, #f39c12, #ffb300); box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);">⭐ 收下收藏</button>
-                <button onclick="throwBackBottle()" class="secondary" style="flex:1;">🌊 丟回大海</button>
+                <button onclick="throwBackBottle()" class="secondary" style="flex:1; background:rgba(255,255,255,0.8);">🌊 丟回大海</button>
             </div>
         </div>
         
-        <div style="background:white; padding:10px; border-radius:0 0 16px 16px; border-top:1px solid #e1e8ed; text-align:center;">
-            <button onclick="closeLetter()" style="background:#f0f4f8; color:#1a252f; box-shadow:none; margin:0; font-size:15px; padding:12px;">關閉信件視窗</button>
+        <div style="background:rgba(255,255,255,0.8); backdrop-filter:blur(20px); padding:10px; border-radius:0 0 20px 20px; border-top:1px solid rgba(0,0,0,0.05); text-align:center;">
+            <button onclick="closeLetter()" style="background:rgba(0,0,0,0.05); color:#1a252f; box-shadow:none; margin:0; font-size:15px; padding:12px;">關閉信件視窗</button>
         </div>
     </div>
 </div>
@@ -365,51 +364,87 @@
     </div>
 </div>
 
-<div id="loading-screen">
-    <div>連線至台東雲端大腦...</div>
-    <div class="spinner"></div>
+<div id="user-card-modal" class="modal-overlay hidden">
+    <div class="modal-content" id="user-card-modal-content">
+        <button class="close-modal-btn" onclick="closeUserCard()">✕</button>
+        <div id="modal-card-container"></div>
+    </div>
 </div>
 
+<div id="edit-user-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="padding: 25px;">
+        <h3 style="color: #005086; margin-top: 0; border-bottom: 1px dashed rgba(0,0,0,0.1); padding-bottom: 15px; font-weight: 900; font-size: 20px;">✏️ 編輯會員資料</h3>
+        <input type="hidden" id="edit-target-phone">
+        <label style="font-size:14px; font-weight:800; color:#333;">顯示名稱：</label>
+        <input type="text" id="edit-user-name" placeholder="輸入新名稱" style="padding:10px; width:100%;">
+        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block; color:#333;">額外聚會參與次數 (直接設定)：</label>
+        <div class="stepper-group" style="margin-top: 8px;">
+            <button class="stepper-btn" onclick="changeSet('edit-user-attend-bonus', -1)">-</button>
+            <input type="number" id="edit-user-attend-bonus" value="0" class="stepper-input" min="0" style="width:100%;">
+            <button class="stepper-btn" onclick="changeSet('edit-user-attend-bonus', 1)">+</button>
+        </div>
+        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block; color:#333;">手動增減活躍分數 (目前加成: <span id="current-score-bonus" style="color:#0081C9;">0</span>)：</label>
+        <div class="stepper-group" style="margin-top: 8px;">
+            <button class="stepper-btn" onclick="changeSet('edit-user-score-bonus', -1)">-</button>
+            <input type="number" id="edit-user-score-bonus" value="0" class="stepper-input" style="width:100%;">
+            <button class="stepper-btn" onclick="changeSet('edit-user-score-bonus', 1)">+</button>
+        </div>
+        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block; color:#333;">加入日期 (系統資歷)：</label>
+        <input type="date" id="edit-user-join-date" style="padding:10px; width:100%;">
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button onclick="saveUserEdit()" style="flex:1; margin:0; padding:12px; box-shadow:0 4px 10px rgba(0,122,255,0.2);">儲存</button>
+            <button onclick="closeEditUserModal()" class="secondary" style="flex:1; margin:0; padding:12px; background:rgba(255,255,255,0.8);">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= 主程式容器 ================= -->
 <div class="app-container hidden" id="main-app-wrapper">
     <div class="header">台東老闆專屬聚會</div>
     
     <div class="content">
         <div id="login-section" class="hidden">
-            <h2 style="color: #005086; font-weight: 900;">台東老闆專屬聚會</h2>
-            <p style="font-size: 15px; color: #556068;">首次登入需輸入邀請碼，已註冊的老闆只要輸入電話即可快速登入。</p>
-            <label style="font-weight: 800; font-size: 15px;">手機號碼 (10碼)：</label>
-            <input type="tel" id="phone-input" placeholder="例如: 0912345678" maxlength="10">
-            <div id="invite-code-container">
-                <label style="font-weight: 800; font-size: 15px; margin-top: 10px; display: block;">專屬邀請碼 <span style="color:#888; font-size:13px; font-weight:600;">(已註冊免填)</span>：</label>
-                <input type="text" id="invite-code-input" placeholder="初次加入請輸入邀請碼">
+            <div class="card" style="border:none;">
+                <h2 style="color: #005086; font-weight: 900; margin-top:0;">台東老闆專屬聚會</h2>
+                <p style="font-size: 15px; color: #556068;">首次登入需輸入邀請碼，已註冊的老闆只要輸入電話即可快速登入。</p>
+                <label style="font-weight: 800; font-size: 15px;">手機號碼 (10碼)：</label>
+                <input type="tel" id="phone-input" placeholder="例如: 0912345678" maxlength="10">
+                <div id="invite-code-container">
+                    <label style="font-weight: 800; font-size: 15px; margin-top: 10px; display: block;">專屬邀請碼 <span style="color:#888; font-size:13px; font-weight:600;">(已註冊免填)</span>：</label>
+                    <input type="text" id="invite-code-input" placeholder="初次加入請輸入邀請碼">
+                </div>
+                <button onclick="login()" style="margin-top: 20px;">進入系統</button>
             </div>
-            <button onclick="login()" style="margin-top: 20px;">進入系統</button>
         </div>
 
         <div id="profile-section" class="hidden">
-            <h2 style="color: #005086; font-weight: 900;">設定基本資料</h2>
-            <p style="font-size: 15px; color: #556068;">歡迎加入！請輸入您的稱呼，系統將為您建立專屬會員卡。</p>
-            <input type="text" id="name-input" placeholder="請輸入您的稱呼或店名 (例: 王老闆)">
-            <button onclick="saveProfile()" style="margin-top: 20px;">儲存並進入</button>
+            <div class="card" style="border:none;">
+                <h2 style="color: #005086; font-weight: 900; margin-top:0;">設定基本資料</h2>
+                <p style="font-size: 15px; color: #556068;">歡迎加入！請輸入您的稱呼，系統將為您建立專屬會員卡。</p>
+                <input type="text" id="name-input" placeholder="請輸入您的稱呼或店名 (例: 王老闆)">
+                <button onclick="saveProfile()" style="margin-top: 20px;">儲存並進入</button>
+            </div>
         </div>
 
         <div id="locked-section" class="hidden" style="text-align: center; padding: 40px 20px;">
-            <h1 style="font-size: 65px; margin-bottom: 10px;">🔒</h1>
-            <h2 style="color: #d32f2f; font-weight: 900;" id="locked-title">帳號已鎖定</h2>
-            <div id="locked-desc">
-                <p style="font-size: 18px; font-weight: 800;">您的活躍度低於 60 分<br>(目前 <span id="locked-score" style="color:#d32f2f;"></span> 分)</p>
-                <p style="color: #444; font-size: 15px; line-height: 1.6; margin-top: 20px; padding: 18px; background: #ffebee; border-radius: 12px; border: 1px solid #ffcdd2; font-weight: 600;">因為您有一段時間沒有參與系統的投票或聚會，系統已暫時限制您的權限。<br><br>💡 <b style="color: #d32f2f;">請在群組呼叫管理員，請他們進入後台幫您「解鎖」！</b></p>
+            <div class="card" style="border:none;">
+                <h1 style="font-size: 65px; margin-top:0; margin-bottom: 10px;">🔒</h1>
+                <h2 style="color: #d32f2f; font-weight: 900;" id="locked-title">帳號已鎖定</h2>
+                <div id="locked-desc">
+                    <p style="font-size: 18px; font-weight: 800;">您的活躍度低於 60 分<br>(目前 <span id="locked-score" style="color:#d32f2f;"></span> 分)</p>
+                    <p style="color: #444; font-size: 15px; line-height: 1.6; margin-top: 20px; padding: 18px; background: rgba(255,235,238,0.8); border-radius: 12px; border: 1px solid #ffcdd2; font-weight: 600;">因為您有一段時間沒有參與系統的投票或聚會，系統已暫時限制您的權限。<br><br>💡 <b style="color: #d32f2f;">請在群組呼叫管理員，請他們進入後台幫您「解鎖」！</b></p>
+                </div>
+                <button class="secondary" onclick="logout()" style="margin-top: 30px;">登出帳號</button>
             </div>
-            <button class="secondary" onclick="logout()" style="margin-top: 30px;">登出帳號</button>
         </div>
 
         <div id="main-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px;">
-                <div style="display: flex; align-items: center;">
-                    <div id="my-avatar" class="text-avatar" style="width:36px; height:36px; font-size:16px;"></div>
-                    <span id="welcome-msg" style="font-weight:800; color:#005086; font-size: 18px;">歡迎！</span>
+                <div style="display: flex; align-items: center; background: rgba(255,255,255,0.5); padding: 5px 15px 5px 5px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(10px);">
+                    <div id="my-avatar" class="text-avatar" style="width:36px; height:36px; font-size:16px; margin-right: 10px; box-shadow:none;"></div>
+                    <span id="welcome-msg" style="font-weight:800; color:#005086; font-size: 16px;">歡迎！</span>
                 </div>
-                <button style="width: auto; padding: 8px 18px; font-size: 14px; margin:0;" class="secondary" onclick="logout()">登出</button>
+                <button style="width: auto; padding: 8px 18px; font-size: 14px; margin:0; box-shadow:none;" class="secondary" onclick="logout()">登出</button>
             </div>
             
             <div id="home-view" class="hidden">
@@ -435,7 +470,7 @@
                     <input type="file" id="post-image-input" accept="image/*">
                     <button onclick="submitPost()" style="margin-top: 15px;">發佈動態</button>
                 </div>
-                <div id="not-elder-message" style="text-align:center; color:#005086; font-size:15px; margin-bottom:20px; background:#eaf4fc; padding:18px; border-radius:12px; display:none; border: 1px dashed #0081C9; font-weight: 700;">
+                <div id="not-elder-message" style="text-align:center; color:#005086; font-size:15px; margin-bottom:20px; background:rgba(234,244,252,0.8); padding:18px; border-radius:16px; display:none; border: 1px solid rgba(0,129,201,0.3); font-weight: 700; backdrop-filter: blur(10px);">
                     🔒 <b>發文權限已鎖定</b>：目前僅開放給元老與管理員發佈動態！
                 </div>
 
@@ -443,23 +478,23 @@
             </div>
 
             <div id="directory-view" class="hidden">
-                <input type="text" id="search-user-input" placeholder="🔍 搜尋名稱、自我介紹或Emoji..." onkeyup="renderDirectory()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: #e1e8ed; margin-bottom: 20px;">
+                <input type="text" id="search-user-input" placeholder="🔍 搜尋名稱、自我介紹或Emoji..." onkeyup="renderDirectory()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px;">
                 <div id="directory-list"></div>
             </div>
 
             <div id="events-view" class="hidden">
                 <div style="display:flex; gap:12px;" id="event-buttons-container">
-                    <button id="btn-create-event" onclick="showCreateForm('event')" style="flex:1; display:none;">＋ 發起聚會</button>
+                    <button id="btn-create-event" onclick="showCreateForm('event')" style="flex:1; box-shadow: 0 4px 12px rgba(0,80,134,0.2);">＋ 發起聚會</button>
                     <button onclick="showCreateForm('poll')" style="flex:1; background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);">＋ 建立投票</button>
                 </div>
-                <hr style="border: 0; height: 2px; background: #e1e8ed; margin: 25px 0;">
+                <hr style="border: 0; height: 1px; background: rgba(0,0,0,0.1); margin: 25px 0;">
                 <div id="events-list"></div>
                 <div id="polls-list"></div>
             </div>
 
             <div id="feedbacks-view" class="hidden">
                 <button onclick="showCreateForm('feedback')" style="background: linear-gradient(135deg, #8e44ad, #c0392b); margin-bottom: 15px; box-shadow: 0 4px 12px rgba(142, 68, 173, 0.3);">＋ 聯絡管理員 / 提出建議</button>
-                <input type="text" id="search-feedback-input" placeholder="🔍 輸入案件編號 (例如: Case-123456) 查詢..." onkeyup="renderFeedbacks()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: #e1e8ed; margin-bottom: 20px;">
+                <input type="text" id="search-feedback-input" placeholder="🔍 輸入案件編號 (例如: Case-123456) 查詢..." onkeyup="renderFeedbacks()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px;">
                 <div id="feedbacks-list"></div>
             </div>
 
@@ -483,77 +518,77 @@
             </div>
             
             <div id="closures-view" class="hidden">
-                <h3 style="color: #005086; font-weight: 900; font-size: 20px; border-bottom: 3px solid #005086; padding-bottom: 8px; display: inline-block;">📍 固定店休一覽</h3>
+                <h3 style="color: #005086; font-weight: 900; font-size: 20px; border-bottom: 3px solid rgba(0,80,134,0.3); padding-bottom: 8px; display: inline-block;">📍 固定店休一覽</h3>
                 <div class="custom-style-panel" id="regular-closures-list" style="margin-top: 10px;"></div>
                 
-                <h3 style="color: #d35400; font-weight: 900; font-size: 20px; border-bottom: 3px solid #d35400; padding-bottom: 8px; display: inline-block; margin-top: 30px;">🏖️ 近期臨時特休</h3>
-                <div class="custom-style-panel" id="temp-closures-list" style="background-color:#fffaf0; border: 1px solid #fbeee0; margin-top: 10px;"></div>
+                <h3 style="color: #d35400; font-weight: 900; font-size: 20px; border-bottom: 3px solid rgba(211,84,0,0.3); padding-bottom: 8px; display: inline-block; margin-top: 30px;">🏖️ 近期臨時特休</h3>
+                <div class="custom-style-panel" id="temp-closures-list" style="background:rgba(255,249,230,0.6); border: 1px solid rgba(255,249,230,0.8); margin-top: 10px;"></div>
             </div>
 
             <div id="card-view" class="hidden">
                 <div id="my-membership-card"></div>
                 
                 <div class="custom-style-panel">
-                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">🚀 階級晉升進度</h4>
+                    <h4 style="margin-top:0; color:#005086; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:10px; font-weight: 900; font-size: 18px;">🚀 階級晉升進度</h4>
                     <div id="tier-progress-container"></div>
                 </div>
 
                 <div class="custom-style-panel">
-                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">🎨 自訂會員卡風格</h4>
+                    <h4 style="margin-top:0; color:#005086; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:10px; font-weight: 900; font-size: 18px;">🎨 自訂會員卡風格</h4>
                     <div style="display:flex; gap:15px;">
                         <div style="flex:1;">
-                            <label style="font-size:15px; font-weight:800;">卡片主色調：</label>
-                            <input type="color" id="card-color-picker" value="#005086">
+                            <label style="font-size:15px; font-weight:800; color:#333;">卡片主色調：</label>
+                            <input type="color" id="card-color-picker" value="#005086" style="padding:2px; height:45px;">
                         </div>
                         <div style="flex:1;">
-                            <label style="font-size:15px; font-weight:800;">表情 (Emoji)：</label>
-                            <input type="text" id="card-emoji-input" placeholder="例如: 🦖 或 ☕" maxlength="2" value="✨">
+                            <label style="font-size:15px; font-weight:800; color:#333;">表情 (Emoji)：</label>
+                            <input type="text" id="card-emoji-input" placeholder="例: 🦖" maxlength="2" value="✨" style="padding:10px;">
                         </div>
                     </div>
-                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">專屬卡片動態特效：</label>
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">專屬卡片動態特效：</label>
                     <select id="card-effect-select">
                         <option value="none">無特效</option>
                         <option value="shimmer">✨ 流光掃過</option>
                         <option value="glow">🌟 呼吸光暈</option>
                         <option value="gradient">🌈 動態漸層</option>
                     </select>
-                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">上傳自訂背景圖片 (選填)：</label>
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">上傳自訂背景圖片 (選填)：</label>
                     <input type="file" id="card-bg-input" accept="image/*">
-                    <p style="font-size:13px; color:#7f8c8d; margin-top:5px; margin-bottom:5px; font-weight: 600;">💡 會自動融合您的主色調呈現高質感濾鏡！</p>
+                    <p style="font-size:13px; color:#556068; margin-top:5px; margin-bottom:5px; font-weight: 600;">💡 會自動融合您的主色調呈現高質感濾鏡！</p>
                     <div style="display:flex; gap:10px; margin-top:20px;">
-                        <button onclick="saveCardStyle()" style="flex:2; margin:0;">儲存風格與特效</button>
-                        <button onclick="clearCardBg()" class="secondary" style="flex:1; margin:0;">清除背景</button>
+                        <button onclick="saveCardStyle()" style="flex:2; margin:0; box-shadow:0 4px 10px rgba(0,122,255,0.2);">儲存風格與特效</button>
+                        <button onclick="clearCardBg()" class="secondary" style="flex:1; margin:0; background:rgba(255,255,255,0.8);">清除背景</button>
                     </div>
                 </div>
 
                 <div class="custom-style-panel">
-                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">📝 店家資訊、社群與名片圖片</h4>
-                    <label style="font-size:15px; font-weight:800; margin-top:10px; display:block;">Threads 個人檔案連結：</label>
-                    <input type="text" id="card-threads-input" placeholder="請貼上 Threads 網址 (https://www.threads.net/...)">
-                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">自我介紹 / 店家簡介：</label>
+                    <h4 style="margin-top:0; color:#005086; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:10px; font-weight: 900; font-size: 18px;">📝 店家資訊、社群與名片圖片</h4>
+                    <label style="font-size:15px; font-weight:800; margin-top:10px; display:block; color:#333;">Threads 個人檔案連結：</label>
+                    <input type="text" id="card-threads-input" placeholder="請貼上 Threads 網址">
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">自我介紹 / 店家簡介：</label>
                     <textarea id="card-bio-input" placeholder="介紹一下您的店或自己吧..." style="height: 90px;"></textarea>
-                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">Google Map 地標 (連結 或 嵌入碼)：</label>
-                    <input type="text" id="card-map-input" placeholder="請貼上 Google地圖的分享連結 或 <iframe> 嵌入碼">
-                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">📸 上傳專屬圖文名片/海報：</label>
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">Google Map 地標 (連結 或 嵌入碼)：</label>
+                    <input type="text" id="card-map-input" placeholder="請貼上 Google地圖的分享連結">
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">📸 上傳專屬圖文名片/海報：</label>
                     <input type="file" id="card-custom-image-input" accept="image/*">
                     <div style="display:flex; gap:10px; margin-top:20px;">
-                        <button onclick="saveShopInfo()" style="flex:2; margin:0; background: linear-gradient(135deg, #2196F3, #1565C0);">儲存資訊與圖片</button>
-                        <button onclick="clearCardImage()" class="secondary" style="flex:1; margin:0;">清除圖片</button>
+                        <button onclick="saveShopInfo()" style="flex:2; margin:0; background: linear-gradient(135deg, #2196F3, #1565C0); box-shadow:0 4px 10px rgba(33,150,243,0.3);">儲存資訊與圖片</button>
+                        <button onclick="clearCardImage()" class="secondary" style="flex:1; margin:0; background:rgba(255,255,255,0.8);">清除圖片</button>
                     </div>
                 </div>
 
                 <div class="custom-style-panel">
-                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">📅 我的店休設定</h4>
+                    <h4 style="margin-top:0; color:#005086; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:10px; font-weight: 900; font-size: 18px;">📅 我的店休設定</h4>
                     <div style="margin: 12px 0; font-size:15px;" id="closed-days-checkboxes">
                         <label><input type="checkbox" value="一">一</label> <label><input type="checkbox" value="二">二</label>
                         <label><input type="checkbox" value="三">三</label> <label><input type="checkbox" value="四">四</label>
                         <label><input type="checkbox" value="五">五</label> <label><input type="checkbox" value="六">六</label>
                         <label><input type="checkbox" value="日">日</label>
                     </div>
-                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">新增臨時特休日期：</label>
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">新增臨時特休日期：</label>
                     <div style="display:flex; gap:10px; margin-top:8px;">
                         <input type="date" id="temp-close-date" style="margin:0;">
-                        <button onclick="addTempCloseDate()" style="margin:0; width:auto; white-space:nowrap; padding: 0 20px;">新增</button>
+                        <button onclick="addTempCloseDate()" style="margin:0; width:auto; white-space:nowrap; padding: 0 20px; box-shadow:none;">新增</button>
                     </div>
                     <div id="temp-close-list" style="margin-top:12px; font-size:14px; color:#556068;"></div>
                     <button onclick="saveClosureSettings()" style="margin-top:20px; background: linear-gradient(135deg, #d35400, #e67e22); box-shadow: 0 4px 12px rgba(211, 84, 0, 0.3);">儲存店休設定</button>
@@ -563,137 +598,123 @@
             </div>
         </div>
 
+        <!-- 🌟 發起/編輯聚會表單 -->
         <div id="create-event-section" class="hidden">
-            <h2 style="color: #005086; font-weight: 900;">發起新聚會</h2>
-            <input type="text" id="event-title" placeholder="聚會名稱 (例: 週末喝一杯)">
-            <input type="text" id="event-date" placeholder="時間地點 (例: 週六晚上 8 點)">
-            <textarea id="event-description" placeholder="聚會詳細說明 (例: 需攜帶500元交換禮物、報名費300元請先匯款...)" style="height: 120px;"></textarea>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button onclick="submitEvent()" style="flex:2; margin:0;">發布聚會</button>
-                <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
+            <div class="card">
+                <h2 id="event-form-title" style="color: #005086; font-weight: 900; margin-top:0;">發起新聚會</h2>
+                <input type="text" id="event-title" placeholder="聚會名稱 (例: 週末喝一杯)">
+                <input type="text" id="event-date" placeholder="時間地點 (例: 週六晚上 8 點)">
+                <textarea id="event-description" placeholder="聚會詳細說明 (例: 需攜帶500元交換禮物...)" style="height: 120px;"></textarea>
+                
+                <label style="font-size:14px; font-weight:800; color:#333; display:block; margin-top:10px;">限制人數 (留空表示不限制)：</label>
+                <input type="number" id="event-max-pax" placeholder="例如: 10" min="1">
+                
+                <label style="font-size:14px; font-weight:800; color:#333; display:block; margin-top:10px;">報名截止時間 (留空表示手動截止)：</label>
+                <input type="datetime-local" id="event-deadline">
+
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button onclick="submitEvent()" style="flex:2; margin:0;">儲存發布</button>
+                    <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0; background:rgba(255,255,255,0.8);">取消</button>
+                </div>
             </div>
         </div>
         
+        <!-- 🌟 建立/編輯投票表單 -->
         <div id="create-poll-section" class="hidden">
-            <h2 style="color: #005086; font-weight: 900;">建立新投票</h2>
-            <input type="text" id="poll-question" placeholder="投票問題 (例: 聚會想吃什麼？)">
-            <textarea id="poll-description" placeholder="投票詳細說明 (例: 請大家在週五前投完，餐廳需要提早訂位...)" style="height: 90px;"></textarea>
-            <textarea id="poll-options" placeholder="輸入選項 (請換行分隔)&#10;例如：&#10;披薩&#10;熱炒&#10;烤肉" style="height: 120px;"></textarea>
-            
-            <div style="display:flex; gap:15px; margin-bottom: 12px; margin-top: 10px;">
-                <div style="flex:1;">
-                    <label style="font-size:14px; font-weight:800;">投票類型：</label>
-                    <select id="poll-type" onchange="togglePollType()">
-                        <option value="general">一般投票 (不計分)</option>
-                        <option value="points" id="opt-poll-points">積分投票 (計分)</option>
-                    </select>
+            <div class="card">
+                <h2 id="poll-form-title" style="color: #005086; font-weight: 900; margin-top:0;">建立新投票</h2>
+                <input type="text" id="poll-question" placeholder="投票問題 (例: 聚會想吃什麼？)">
+                <textarea id="poll-description" placeholder="投票詳細說明 (例: 請大家在週五前投完，餐廳需要提早訂位...)" style="height: 90px;"></textarea>
+                <textarea id="poll-options" placeholder="輸入選項 (請換行分隔)&#10;例如：&#10;披薩&#10;熱炒&#10;烤肉" style="height: 120px;"></textarea>
+                
+                <label style="font-size:14px; font-weight:800; color:#333; display:block; margin-top:10px;">投票截止時間 (留空表示手動截止)：</label>
+                <input type="datetime-local" id="poll-deadline">
+
+                <div style="display:flex; gap:15px; margin-bottom: 12px; margin-top: 10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:14px; font-weight:800; color:#333;">投票類型：</label>
+                        <select id="poll-type" onchange="togglePollType()">
+                            <option value="general">一般投票 (不計分)</option>
+                            <option value="points" id="opt-poll-points">積分投票 (計分)</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div style="display:flex; gap:15px;">
-                <div style="flex:1;">
-                    <label style="font-size:14px; font-weight:800;">選項設定：</label>
-                    <select id="poll-multiple"><option value="single">單選</option><option value="multiple">多選</option></select>
+                <div style="display:flex; gap:15px;">
+                    <div style="flex:1;">
+                        <label style="font-size:14px; font-weight:800; color:#333;">選項設定：</label>
+                        <select id="poll-multiple"><option value="single">單選</option><option value="multiple">多選</option></select>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:14px; font-weight:800; color:#333;">匿名設定：</label>
+                        <select id="poll-mode"><option value="realname">實名</option><option value="anonymous">匿名</option></select>
+                    </div>
                 </div>
-                <div style="flex:1;">
-                    <label style="font-size:14px; font-weight:800;">匿名設定：</label>
-                    <select id="poll-mode"><option value="realname">實名</option><option value="anonymous">匿名</option></select>
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                    <button onclick="submitPoll()" style="flex:2; margin:0;">儲存發布</button>
+                    <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0; background:rgba(255,255,255,0.8);">取消</button>
                 </div>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button onclick="submitPoll()" style="flex:2; margin:0;">發布投票</button>
-                <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
             </div>
         </div>
 
         <div id="create-feedback-section" class="hidden">
-            <h2 style="color: #8e44ad; font-weight: 900;">聯絡管理員 / 提出建議</h2>
-            <p style="font-size: 14px; color: #7f8c8d;">您的意見對我們很重要。送出後將由管理員專人為您回覆處理。</p>
-            <textarea id="feedback-content" placeholder="請詳細描述您的問題或建議..." style="height: 150px;"></textarea>
-            
-            <label style="font-size:14px; font-weight:800; display:block; margin-top:10px;">上傳佐證圖片/截圖 (選填)：</label>
-            <input type="file" id="feedback-image" accept="image/*">
+            <div class="card" style="border-left: 5px solid #8e44ad;">
+                <h2 style="color: #8e44ad; font-weight: 900; margin-top:0;">聯絡管理員 / 提出建議</h2>
+                <p style="font-size: 14px; color: #556068;">您的意見對我們很重要。送出後將由管理員專人為您回覆處理。</p>
+                <textarea id="feedback-content" placeholder="請詳細描述您的問題或建議..." style="height: 150px;"></textarea>
+                
+                <label style="font-size:14px; font-weight:800; display:block; margin-top:10px; color:#333;">上傳佐證圖片/截圖 (選填)：</label>
+                <input type="file" id="feedback-image" accept="image/*">
 
-            <label style="font-size:14px; font-weight:800; display:block; margin-top:15px;">發送模式：</label>
-            <select id="feedback-mode">
-                <option value="realname">實名發送</option>
-                <option value="anonymous">匿名發送</option>
-            </select>
-            
-            <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button onclick="submitFeedback()" style="flex:2; margin:0; background: linear-gradient(135deg, #8e44ad, #c0392b);">送出投信</button>
-                <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
+                <label style="font-size:14px; font-weight:800; display:block; margin-top:15px; color:#333;">發送模式：</label>
+                <select id="feedback-mode">
+                    <option value="realname">實名發送</option>
+                    <option value="anonymous">匿名發送</option>
+                </select>
+                
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                    <button onclick="submitFeedback()" style="flex:2; margin:0; background: linear-gradient(135deg, #8e44ad, #c0392b); box-shadow:0 4px 12px rgba(142,68,173,0.3);">送出投信</button>
+                    <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0; background:rgba(255,255,255,0.8);">取消</button>
+                </div>
             </div>
         </div>
 
         <div id="create-bottle-section" class="hidden">
-            <h2 style="color: #0081C9; font-weight: 900;">🌊 丟出漂流瓶</h2>
-            <p style="font-size: 14px; color: #7f8c8d;">每天最多拋出 5 個，每個瓶子可被 5 位有緣人撿起</p>
-            <textarea id="bottle-content" placeholder="寫下你的心情、秘密或故事..." style="height: 120px;"></textarea>
-            
-            <label style="font-size:14px; font-weight:800; display:block; margin-top:10px;">上傳照片 (選填)：</label>
-            <input type="file" id="bottle-image" accept="image/*">
-            
-            <div style="background: #ffebee; border: 1px solid #ffcdd2; padding: 12px; border-radius: 8px; margin-top: 15px;">
-                <p style="color: #d32f2f; font-weight: 800; font-size: 13px; margin: 0;">⚠️ 發送前請注意：<br>嚴禁發布任何不雅、色情或血腥內容。使用者可檢舉違規內容，管理員將進行審核，違規者將被封鎖！</p>
-            </div>
+            <div class="card" style="border-left: 5px solid #00c6ff;">
+                <h2 style="color: #0081C9; font-weight: 900; margin-top:0;">🌊 丟出漂流瓶</h2>
+                <p style="font-size: 14px; color: #556068;">每天最多拋出 5 個，每個瓶子可被 5 位有緣人撿起</p>
+                <textarea id="bottle-content" placeholder="寫下你的心情、秘密或故事..." style="height: 120px;"></textarea>
+                
+                <label style="font-size:14px; font-weight:800; display:block; margin-top:10px; color:#333;">上傳照片 (選填)：</label>
+                <input type="file" id="bottle-image" accept="image/*">
+                
+                <div style="background: rgba(255,235,238,0.8); border: 1px solid rgba(255,205,210,0.8); padding: 12px; border-radius: 12px; margin-top: 15px;">
+                    <p style="color: #d32f2f; font-weight: 800; font-size: 13px; margin: 0;">⚠️ 發送前請注意：<br>嚴禁發布任何不雅、色情或血腥內容。使用者可檢舉違規內容，管理員將進行審核，違規者將被封鎖！</p>
+                </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button onclick="submitBottle()" style="flex:2; margin:0; background: linear-gradient(135deg, #00c6ff, #0072ff);">丟出漂流瓶</button>
-                <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                    <button onclick="submitBottle()" style="flex:2; margin:0; background: linear-gradient(135deg, #00c6ff, #0072ff); box-shadow:0 4px 12px rgba(0,198,255,0.3);">丟出漂流瓶</button>
+                    <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0; background:rgba(255,255,255,0.8);">取消</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- 🍎 液態玻璃懸浮導覽列 (單排呈現) -->
     <div id="nav-section" class="nav-tabs hidden">
-        <div class="nav-tab active" id="tab-home" onclick="switchTab('home')">🏠首頁</div>
-        <div class="nav-tab" id="tab-directory" onclick="switchTab('directory')">🔍老闆</div>
-        <div class="nav-tab" id="tab-events" onclick="switchTab('events')">🗓️活動</div>
-        <div class="nav-tab" id="tab-bottles" onclick="switchTab('bottles')">🌊瓶子</div>
-        <div class="nav-tab" id="tab-card" onclick="switchTab('card')">💳卡片</div>
-    </div>
-</div>
-
-<div id="user-card-modal" class="modal-overlay hidden">
-    <div class="modal-content" id="user-card-modal-content">
-        <button class="close-modal-btn" onclick="closeUserCard()">✕</button>
-        <div id="modal-card-container"></div>
-    </div>
-</div>
-
-<div id="edit-user-modal" class="modal-overlay hidden">
-    <div class="modal-content" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25);">
-        <h3 style="color: #005086; margin-top: 0; border-bottom: 2px dashed #cfd9e0; padding-bottom: 15px; font-weight: 900; font-size: 20px;">✏️ 編輯會員資料</h3>
-        <input type="hidden" id="edit-target-phone">
-        
-        <label style="font-size:14px; font-weight:800;">顯示名稱：</label>
-        <input type="text" id="edit-user-name" placeholder="輸入新名稱" style="padding:10px; width:100%;">
-        
-        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block;">額外聚會參與次數 (直接設定)：</label>
-        <div class="stepper-group" style="margin-top: 8px;">
-            <button class="stepper-btn" onclick="changeSet('edit-user-attend-bonus', -1)">-</button>
-            <input type="number" id="edit-user-attend-bonus" value="0" class="stepper-input" min="0" style="width:100%;">
-            <button class="stepper-btn" onclick="changeSet('edit-user-attend-bonus', 1)">+</button>
-        </div>
-        
-        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block;">手動增減活躍分數 (目前手動加成: <span id="current-score-bonus" style="color:#0081C9;">0</span>)：</label>
-        <div class="stepper-group" style="margin-top: 8px;">
-            <button class="stepper-btn" onclick="changeSet('edit-user-score-bonus', -1)">-</button>
-            <input type="number" id="edit-user-score-bonus" value="0" class="stepper-input" style="width:100%;">
-            <button class="stepper-btn" onclick="changeSet('edit-user-score-bonus', 1)">+</button>
-        </div>
-        
-        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block;">加入日期 (系統資歷)：</label>
-        <input type="date" id="edit-user-join-date" style="padding:10px; width:100%;">
-        
-        <div style="display: flex; gap: 12px; margin-top: 20px;">
-            <button onclick="saveUserEdit()" style="flex:1; margin:0; padding:12px;">儲存</button>
-            <button onclick="closeEditUserModal()" class="secondary" style="flex:1; margin:0; padding:12px;">取消</button>
-        </div>
+        <div class="nav-tab active" id="tab-home" onclick="switchTab('home')"><span style="font-size:18px; margin-bottom:2px;">🏠</span>首頁</div>
+        <div class="nav-tab" id="tab-directory" onclick="switchTab('directory')"><span style="font-size:18px; margin-bottom:2px;">🔍</span>老闆</div>
+        <div class="nav-tab" id="tab-events" onclick="switchTab('events')"><span style="font-size:18px; margin-bottom:2px;">🗓️</span>活動</div>
+        <div class="nav-tab" id="tab-feedbacks" onclick="switchTab('feedbacks')"><span style="font-size:18px; margin-bottom:2px;">✉️</span>意見</div>
+        <div class="nav-tab" id="tab-bottles" onclick="switchTab('bottles')"><span style="font-size:18px; margin-bottom:2px;">🌊</span>瓶子</div>
+        <div class="nav-tab" id="tab-closures" onclick="switchTab('closures')"><span style="font-size:18px; margin-bottom:2px;">🏖️</span>店休</div>
+        <div class="nav-tab" id="tab-card" onclick="switchTab('card')"><span style="font-size:18px; margin-bottom:2px;">💳</span>卡片</div>
     </div>
 </div>
 
 <script>
-    // 請確認這部分包含您原本所有 2000 多行的邏輯內容
+    // ==========================================
+    // 您的核心 JavaScript 邏輯從此開始
+    // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyBWQ6GAMAsPESR3vPe7tqkGPg3KzUtSdJQ",
       authDomain: "taitung-boss.firebaseapp.com",
@@ -716,8 +737,9 @@
     let currentUserPhone = null, currentTab = 'home', currentBottleTab = 'received', currentSectionId = 'login-section'; 
     let isDataLoaded = false, expandedCards = [], activeInputs = {}, activePollVotes = {}, bottleCountdownInterval = null; 
     let loadedFlags = { users: false, events: false, polls: false, posts: false, feedbacks: false, bottles: false, settings: false };
+    
+    let editingItemType = null;
 
-    // --- (其餘 2000 行邏輯程式碼請務必維持不變) ---
     function generateCardHtml(phone, showControls) {
         const u = allUsers[phone];
         if (!u) return '<p>資料載入中...</p>';
@@ -751,8 +773,6 @@
 
     function closeUserCard() { document.getElementById('user-card-modal').classList.add('hidden'); }
     
-    // ... (在此處貼上您原本的其他所有 JS 函式，直到結尾) ...
-
     function showToast(msg) {
         const toast = document.createElement('div');
         toast.className = 'toast-msg';
@@ -956,9 +976,9 @@
         saveEvent: (evt) => db.collection("taitung_v2_events").doc(evt.id.toString()).set(evt),
         delEvent: (id) => db.collection("taitung_v2_events").doc(id.toString()).delete(),
         savePoll: (poll) => db.collection("taitung_v2_polls").doc(poll.id.toString()).set(poll),
-        delPoll: (id) => db.collection("taitung_v2_polls").doc(poll.id.toString()).delete(),
+        delPoll: (id) => db.collection("taitung_v2_polls").doc(id.toString()).delete(),
         saveFeedback: (fb) => db.collection("taitung_v2_feedbacks").doc(fb.id.toString()).set(fb),
-        delFeedback: (id) => db.collection("taitung_v2_feedbacks").doc(fb.id.toString()).delete(),
+        delFeedback: (id) => db.collection("taitung_v2_feedbacks").doc(id.toString()).delete(),
         saveBottle: (b) => db.collection("taitung_v2_bottles").doc(b.id.toString()).set(b),
         delBottle: (id) => db.collection("taitung_v2_bottles").doc(id.toString()).delete(),
         saveSettings: () => db.collection("taitung_v2_settings").doc("config").set({
@@ -1262,18 +1282,6 @@
         listDiv.innerHTML = html;
     }
 
-    function submitPost() {
-        const text = document.getElementById('post-text-input').value.trim(); const fileInput = document.getElementById('post-image-input');
-        if (!text && !fileInput.files[0]) { alert("請至少寫點文字或上傳一張照片喔！"); return; }
-        const createPostData = (imgBase64) => { 
-            const newPost = { id: Date.now(), type: 'post', text: text, image: imgBase64, creatorPhone: currentUserPhone, date: new Date().toLocaleDateString('zh-TW'), comments: [] }; 
-            DB.savePost(newPost);
-            document.getElementById('post-text-input').value = ''; 
-            fileInput.value = ''; 
-        };
-        if (fileInput.files[0]) compressImage(fileInput.files[0], createPostData); else createPostData(null);
-    }
-
     function renderEvents() {
         const list = document.getElementById('events-list'); if(!list) return;
         list.innerHTML = '';
@@ -1289,7 +1297,10 @@
             
             const myStatus = (evt.attendees||{})[currentUserPhone]; 
             const creator = allUsers[evt.creatorPhone] || {name: '已刪除的使用者', customColor: '#005086'};
-            const isClosed = evt.isClosed;
+            
+            const isTimeUp = evt.deadline && new Date(evt.deadline).getTime() <= Date.now();
+            const isClosed = evt.isClosed || isTimeUp;
+            const isFull = evt.maxPax && attendCount >= parseInt(evt.maxPax);
             
             const commentsHtml = (evt.comments || []).map((c, index) => {
                 const cUser = allUsers[c.phone] || {name: '未知', customColor: '#005086'};
@@ -1308,19 +1319,27 @@
             const canManage = evt.creatorPhone === currentUserPhone || isAdmin;
             let actionHtml = '';
             if (canManage) {
+                const editBtnHtml = `<button class="action-btn throwback" onclick="editItem('event', ${evt.id})">📝 編輯</button>`;
                 const closeBtnHtml = !isClosed ? `<button class="action-btn close" onclick="closeItem('event', ${evt.id})">🛑 截止</button>` : '';
-                actionHtml = `<div class="card-actions">${closeBtnHtml}<button class="action-btn delete" onclick="deleteItem('event', ${evt.id})">🗑️ 刪除</button></div>`;
+                actionHtml = `<div class="card-actions">${editBtnHtml}${closeBtnHtml}<button class="action-btn delete" onclick="deleteItem('event', ${evt.id})">🗑️ 刪除</button></div>`;
             }
             
             const badgeHtml = isClosed ? `<div class="badge badge-closed">已截止</div>` : `<div class="badge">聚會</div>`;
             const activityHtml = evt.latestActivity ? `<div style="font-size:14px; color:#005086; font-weight:800; margin-top:10px; background:#eaf4fc; padding:8px 12px; border-radius:8px;">✨ 最新動態：${evt.latestActivity}</div>` : '';
             const descriptionHtml = evt.description ? `<div style="font-size:15px; color:#2c3e50; margin-bottom:15px; line-height:1.6; white-space:pre-wrap; background:#eaf4fc; padding:15px; border-radius:12px; border-left:5px solid #0081C9;">${evt.description}</div>` : '';
             
+            const deadlineDisplay = evt.deadline ? `<div style="font-size:14px; color:#d32f2f; font-weight:900; margin-bottom:10px;">⏳ 報名截止：${new Date(evt.deadline).toLocaleString('zh-TW', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</div>` : '';
+            const limitDisplay = evt.maxPax ? ` / 限制 ${evt.maxPax} 人` : '';
+
             let attendanceBtns = '';
             if(isClosed) { 
                 attendanceBtns = `<div style="text-align:center; width:100%; color:#d32f2f; font-weight:900; padding:12px; background:#ffebee; border-radius:12px;">🛑 本活動已截止報名</div>`; 
             } else { 
-                attendanceBtns = `<button class="secondary attendance-btn ${myStatus === 'attend' ? 'active-attend' : ''}" onclick="toggleAttendance(${evt.id}, 'attend')">✅ 我要參加</button><button class="secondary attendance-btn ${myStatus === 'absent' ? 'active-absent' : ''}" style="${myStatus === 'absent' ? '' : 'color:#d32f2f; border-color:#ffcdd2; background:#fffafa;'}" onclick="toggleAttendance(${evt.id}, 'absent')">❌ 無法出席</button>`; 
+                let attendBtnStyle = (isFull && myStatus !== 'attend') ? 'background: #ccc; box-shadow:none; cursor: not-allowed;' : '';
+                let attendAction = (isFull && myStatus !== 'attend') ? `alert('目前已額滿，無法報名參加！');` : `toggleAttendance(${evt.id}, 'attend')`;
+                let attendText = (isFull && myStatus !== 'attend') ? '🈵 已額滿' : '✅ 我要參加';
+                
+                attendanceBtns = `<button class="secondary attendance-btn ${myStatus === 'attend' ? 'active-attend' : ''}" style="${attendBtnStyle}" onclick="${attendAction}">${attendText}</button><button class="secondary attendance-btn ${myStatus === 'absent' ? 'active-absent' : ''}" style="${myStatus === 'absent' ? '' : 'color:#d32f2f; border-color:#ffcdd2; background:#fffafa;'}" onclick="toggleAttendance(${evt.id}, 'absent')">❌ 無法出席</button>`; 
             }
 
             let adminListHtml = '';
@@ -1346,10 +1365,11 @@
                     
                     <div id="details-event-${evt.id}" class="card-details hidden">
                         ${actionHtml}
-                        <div style="font-size:16px; color:#005086; margin-bottom:15px; font-weight:900;">📍 時間地點：${evt.date}</div>
+                        <div style="font-size:16px; color:#005086; margin-bottom:10px; font-weight:900;">📍 時間地點：${evt.date}</div>
+                        ${deadlineDisplay}
                         ${descriptionHtml}
                         <div class="progress-container"><div class="progress-fill" style="width: ${attendPercent}%; background:linear-gradient(90deg,#0081C9,#00c6ff);"></div></div>
-                        <div style="font-size:12px; color:#7f8c8d; text-align:right; margin-bottom:10px;">參加 ${attendCount} 人 / 不參加 ${absentCount} 人</div>
+                        <div style="font-size:12px; color:#7f8c8d; text-align:right; margin-bottom:10px;">參加 ${attendCount} 人 / 不參加 ${absentCount} 人 ${limitDisplay}</div>
                         <div class="attendance-group">${attendanceBtns}</div>
                         ${adminListHtml}
                         ${activityHtml}
@@ -1383,7 +1403,9 @@
             const myVotes = (poll.votes||[]).filter(v => v.phone === currentUserPhone).map(v => v.option); 
             const uniqueVotersCount = new Set((poll.votes||[]).map(v => v.phone)).size;
             const creator = allUsers[poll.creatorPhone] || {name: '已刪除的使用者', customColor: '#005086'};
-            const isClosed = poll.isClosed; 
+            
+            const isTimeUp = poll.deadline && new Date(poll.deadline).getTime() <= Date.now();
+            const isClosed = poll.isClosed || isTimeUp; 
             const isPointsPoll = poll.pollType === 'points';
             
             const optionsHtml = poll.options.map((opt, idx) => { 
@@ -1406,8 +1428,9 @@
             const canManage = poll.creatorPhone === currentUserPhone || isAdmin;
             let actionHtml = '';
             if (canManage) {
+                const editBtnHtml = `<button class="action-btn throwback" onclick="editItem('poll', ${poll.id})">📝 編輯</button>`;
                 const closeBtnHtml = !isClosed ? `<button class="action-btn close" onclick="closeItem('poll', ${poll.id})">🛑 截止</button>` : '';
-                actionHtml = `<div class="card-actions" style="margin-top:-10px;">${closeBtnHtml}<button class="action-btn delete" onclick="deleteItem('poll', ${poll.id})">🗑️ 刪除</button></div>`;
+                actionHtml = `<div class="card-actions" style="margin-top:-10px;">${editBtnHtml}${closeBtnHtml}<button class="action-btn delete" onclick="deleteItem('poll', ${poll.id})">🗑️ 刪除</button></div>`;
             }
 
             let adminListHtml = '';
@@ -1426,6 +1449,8 @@
             const pollTypeBadge = isPointsPoll ? `<div class="badge" style="background: linear-gradient(135deg, #e91e63, #c2185b);">積分投票</div>` : `<div class="badge badge-poll">一般投票</div>`;
             const badgeHtml = isClosed ? `<div class="badge badge-closed">已截止</div>` : `${pollTypeBadge} <div class="badge" style="background-color:#556068;">${badgeType}</div>`;
             
+            const deadlineDisplay = poll.deadline ? `<div style="font-size:14px; color:#d32f2f; font-weight:900; margin-bottom:10px;">⏳ 投票截止：${new Date(poll.deadline).toLocaleString('zh-TW', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</div>` : '';
+
             html += `
                 <div class="card">
                     <div class="card-summary" onclick="toggleCard('poll-${poll.id}')">
@@ -1442,6 +1467,7 @@
 
                     <div id="details-poll-${poll.id}" class="card-details hidden">
                         ${actionHtml}
+                        ${deadlineDisplay}
                         ${poll.description ? `<div style="font-size:15px; color:#2c3e50; margin-bottom:15px; line-height:1.6; white-space:pre-wrap; background:#fff9f0; padding:15px; border-radius:12px; border-left:5px solid #f39c12;">${poll.description}</div>` : ''}
                         <div>${optionsHtml}
                         ${isClosed ? `<div style="text-align:center; width:100%; color:#d32f2f; font-weight:900; padding:12px; background:#ffebee; border-radius:12px; margin-top:15px;">🛑 本投票已截止</div>` : `<button style="width: 100%; padding: 14px; margin-top:15px; border-radius:12px; font-size:16px;" onclick="submitVote(${poll.id})">送出選票</button>`}
@@ -1462,27 +1488,68 @@
     }
 
     function submitEvent() {
-        const title = document.getElementById('event-title').value; const date = document.getElementById('event-date').value; const description = document.getElementById('event-description').value.trim();
+        const title = document.getElementById('event-title').value.trim(); 
+        const date = document.getElementById('event-date').value.trim(); 
+        const description = document.getElementById('event-description').value.trim();
+        const maxPax = document.getElementById('event-max-pax').value.trim();
+        const deadline = document.getElementById('event-deadline').value;
+
         if (!title || !date) { alert("請填寫聚會名稱與時間！"); return; }
-        const newEvt = { id: Date.now(), type: 'event', title: title, date: date, description: description, creatorPhone: currentUserPhone, attendees: {}, comments: [], latestActivity: '', isClosed: false };
-        DB.saveEvent(newEvt);
-        document.getElementById('event-title').value = ''; document.getElementById('event-date').value = ''; document.getElementById('event-description').value = ''; switchTab('events');
+        
+        if (editingItemId && editingItemType === 'event') {
+            const evt = eventsData.find(e => e.id === editingItemId);
+            if(evt) {
+                evt.title = title; evt.date = date; evt.description = description; 
+                evt.maxPax = maxPax || null; evt.deadline = deadline || null;
+                DB.saveEvent(evt);
+                alert("✅ 聚會已成功更新！");
+            }
+        } else {
+            const newEvt = { id: Date.now(), type: 'event', title: title, date: date, description: description, maxPax: maxPax || null, deadline: deadline || null, creatorPhone: currentUserPhone, attendees: {}, comments: [], latestActivity: '', isClosed: false };
+            DB.saveEvent(newEvt);
+        }
+        
+        editingItemId = null; editingItemType = null;
+        document.getElementById('event-title').value = ''; document.getElementById('event-date').value = ''; document.getElementById('event-description').value = ''; document.getElementById('event-max-pax').value = ''; document.getElementById('event-deadline').value = ''; 
+        switchTab('events');
     }
 
     function togglePollType() { document.getElementById('poll-multiple').disabled = false; }
 
     function submitPoll() {
-        const question = document.getElementById('poll-question').value; const description = document.getElementById('poll-description').value.trim(); const optionsRaw = document.getElementById('poll-options').value; const pollType = document.getElementById('poll-type').value; const mode = document.getElementById('poll-mode').value; const isMultiple = document.getElementById('poll-multiple').value === 'multiple';
-        if (!question || !optionsRaw) { alert("請填寫問題與選項！"); return; }
+        const question = document.getElementById('poll-question').value.trim(); 
+        const description = document.getElementById('poll-description').value.trim(); 
+        const optionsRaw = document.getElementById('poll-options').value; 
+        const pollType = document.getElementById('poll-type').value; 
+        const mode = document.getElementById('poll-mode').value; 
+        const isMultiple = document.getElementById('poll-multiple').value === 'multiple';
+        const deadline = document.getElementById('poll-deadline').value;
+
+        if (!question || !optionsRaw.trim()) { alert("請填寫問題與選項！"); return; }
         const options = optionsRaw.split('\n').map(opt => opt.trim()).filter(opt => opt !== "");
         if(options.length < 2) { alert("至少需輸入兩個選項，請記得換行喔！"); return; }
-        const newPoll = { id: Date.now(), type: 'poll', pollType: pollType, question: question, description: description, options: options, mode: mode, isMultiple: isMultiple, creatorPhone: currentUserPhone, votes: [], latestActivity: '', isClosed: false };
-        DB.savePoll(newPoll);
-        document.getElementById('poll-question').value = ''; document.getElementById('poll-description').value = ''; document.getElementById('poll-options').value = ''; switchTab('events');
+        
+        if (editingItemId && editingItemType === 'poll') {
+            const poll = pollsData.find(p => p.id === editingItemId);
+            if(poll) {
+                poll.question = question; poll.description = description; poll.options = options;
+                poll.pollType = pollType; poll.mode = mode; poll.isMultiple = isMultiple; poll.deadline = deadline || null;
+                DB.savePoll(poll);
+                alert("✅ 投票已成功更新！");
+            }
+        } else {
+            const newPoll = { id: Date.now(), type: 'poll', pollType: pollType, question: question, description: description, options: options, mode: mode, isMultiple: isMultiple, deadline: deadline || null, creatorPhone: currentUserPhone, votes: [], latestActivity: '', isClosed: false };
+            DB.savePoll(newPoll);
+        }
+
+        editingItemId = null; editingItemType = null;
+        document.getElementById('poll-question').value = ''; document.getElementById('poll-description').value = ''; document.getElementById('poll-options').value = ''; document.getElementById('poll-deadline').value = '';
+        switchTab('events');
     }
 
     function submitVote(pollId) {
-        const poll = pollsData.find(p => p.id === pollId); if(poll.isClosed) { alert("此投票已截止！"); return; }
+        const poll = pollsData.find(p => p.id === pollId); 
+        if(poll.isClosed || (poll.deadline && new Date(poll.deadline).getTime() <= Date.now())) { alert("此投票已截止！"); return; }
         const selectedOptions = document.querySelectorAll(`input[name="poll-${pollId}"]:checked`);
         if (selectedOptions.length === 0) { alert("請至少選擇一個選項！"); return; }
         poll.votes = poll.votes.filter(v => v.phone !== currentUserPhone); 
@@ -1493,22 +1560,65 @@
     }
 
     function toggleAttendance(eventId, status) {
-        const evt = eventsData.find(e => e.id === eventId); if(evt.isClosed) { alert("此活動已截止報名！"); return; }
+        const evt = eventsData.find(e => e.id === eventId); 
+        if(evt.isClosed || (evt.deadline && new Date(evt.deadline).getTime() <= Date.now())) { alert("此活動已截止報名！"); return; }
+        
+        let attendCount = 0; 
+        Object.values(evt.attendees||{}).forEach(s => { if (s === 'attend') attendCount++; });
+        const myStatus = (evt.attendees||{})[currentUserPhone];
+        
+        if(status === 'attend' && myStatus !== 'attend' && evt.maxPax && attendCount >= parseInt(evt.maxPax)) {
+            alert("抱歉，目前已經額滿囉！"); return;
+        }
+
         const me = allUsers[currentUserPhone];
         if (evt) {
-            if (evt.attendees[currentUserPhone] === status) { delete evt.attendees[currentUserPhone]; evt.latestActivity = `${me.name} 取消了報名。`; } 
+            if (myStatus === status) { delete evt.attendees[currentUserPhone]; evt.latestActivity = `${me.name} 取消了報名。`; } 
             else { evt.attendees[currentUserPhone] = status; evt.latestActivity = status === 'attend' ? `${me.name} 決定參加了！` : `${me.name} 殘念不能來。`; }
             DB.saveEvent(evt);
             if(!expandedCards.includes(`event-${eventId}`)) expandedCards.push(`event-${eventId}`);
         }
     }
 
+    function editItem(type, id) {
+        editingItemId = id;
+        editingItemType = type;
+        if (type === 'event') {
+            const evt = eventsData.find(e => e.id === id);
+            document.getElementById('event-form-title').innerText = '📝 編輯聚會';
+            document.getElementById('event-title').value = evt.title || '';
+            document.getElementById('event-date').value = evt.date || '';
+            document.getElementById('event-description').value = evt.description || '';
+            document.getElementById('event-max-pax').value = evt.maxPax || '';
+            document.getElementById('event-deadline').value = evt.deadline || '';
+            showSection('create-event-section');
+        } else if (type === 'poll') {
+            const poll = pollsData.find(p => p.id === id);
+            document.getElementById('poll-form-title').innerText = '📝 編輯投票';
+            document.getElementById('poll-question').value = poll.question || '';
+            document.getElementById('poll-description').value = poll.description || '';
+            document.getElementById('poll-options').value = poll.options.join('\n');
+            document.getElementById('poll-type').value = poll.pollType || 'general';
+            document.getElementById('poll-multiple').value = poll.isMultiple ? 'multiple' : 'single';
+            document.getElementById('poll-mode').value = poll.mode || 'realname';
+            document.getElementById('poll-deadline').value = poll.deadline || '';
+            showSection('create-poll-section');
+        }
+    }
+
     function showCreateForm(type) { 
-        const isAdmin = adminPhones.includes(currentUserPhone);
+        editingItemId = null;
+        editingItemType = null;
+        
         if (type === 'poll') {
+            document.getElementById('poll-form-title').innerText = '建立新投票';
+            document.getElementById('poll-question').value = '';
+            document.getElementById('poll-description').value = '';
+            document.getElementById('poll-options').value = '';
+            document.getElementById('poll-deadline').value = '';
             const pointsOpt = document.getElementById('opt-poll-points');
             if (pointsOpt) {
-                if (!isAdmin) { pointsOpt.disabled = true; pointsOpt.innerText = "積分投票 (僅限管理員)"; } 
+                if (!adminPhones.includes(currentUserPhone)) { pointsOpt.disabled = true; pointsOpt.innerText = "積分投票 (僅限管理員)"; } 
                 else { pointsOpt.disabled = false; pointsOpt.innerText = "積分投票 (計分)"; }
             }
             document.getElementById('poll-type').value = 'general';
@@ -1518,12 +1628,21 @@
         } else if (type === 'bottle') {
             showSection('create-bottle-section');
         } else {
-            if (!isAdmin) { alert("目前只有管理員可以發起聚會喔！"); return; }
+            document.getElementById('event-form-title').innerText = '發起新聚會';
+            document.getElementById('event-title').value = '';
+            document.getElementById('event-date').value = '';
+            document.getElementById('event-description').value = '';
+            document.getElementById('event-max-pax').value = '';
+            document.getElementById('event-deadline').value = '';
+            if (!adminPhones.includes(currentUserPhone)) { alert("目前只有管理員可以發起聚會喔！"); return; }
             showSection('create-event-section');
         }
     }
     
-    function cancelCreate() { showMain(); }
+    function cancelCreate() { 
+        editingItemId = null; editingItemType = null;
+        showMain(); 
+    }
 
     function renderClosures() {
         const days = ['一', '二', '三', '四', '五', '六', '日']; let regularHtml = '';
@@ -2267,7 +2386,6 @@
             else if (type === 'post') DB.savePost(item);
         }
     }
-
 </script>
 </body>
 </html>
