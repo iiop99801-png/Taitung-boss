@@ -3,135 +3,2271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台東老闆專屬聚會 - 系統升級中</title>
+    <title>台東老闆專屬聚會 - 防彈備份版</title>
+    
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            document.body.innerHTML = '<div style="padding:30px; background:white; color:#d32f2f; font-size:16px; z-index:999999; position:fixed; top:0; left:0; width:100%; height:100%; overflow:auto;">' +
+            '<h2 style="margin-top:0;">🚨 系統崩潰報告</h2>' +
+            '<p>老闆，系統發生了錯誤導致無法顯示畫面！<br>請將這個畫面截圖傳給工程師：</p>' +
+            '<div style="background:#ffebee; padding:15px; border-radius:10px; border:1px solid #ffcdd2; font-family:monospace; word-break:break-all;">' +
+            '<b>Error:</b> ' + msg + '<br><b>Line:</b> ' + line + '<br><b>Col:</b> ' + col +
+            '</div><button onclick="location.reload()" style="margin-top:20px; padding:15px; width:100%; background:#005086; color:white; border:none; border-radius:10px; font-weight:bold; font-size:16px;">重新整理</button></div>';
+            return false;
+        };
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <style>
-        * { box-sizing: border-box; }
-        
+        /* =========================================
+            基礎樣式與排版
+            ========================================= */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
+            font-family: 'PingFang TC', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f0f4f8; 
+            color: #1a252f; 
             margin: 0; padding: 0;
-            font-family: 'PingFang TC', 'Helvetica Neue', Helvetica, Arial, 'Microsoft JhengHei', sans-serif;
-            /* 尊榮深海漸層背景 */
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            color: #ffffff;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            overflow: hidden;
+            display: flex; justify-content: center;
+            font-weight: 600; 
+            padding-bottom: 120px; /* 為了給懸浮導覽列留空間 */
+        }
+        
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #005086 0%, #0081C9 100%); 
+            color: white; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; font-size: 22px; font-weight: 800; z-index: 9999;
         }
 
-        /* 毛玻璃質感卡片 */
-        .maintenance-card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
-            padding: 50px 30px;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-            /* 上下懸浮動畫 */
-            animation: float 4s ease-in-out infinite;
+        .spinner { 
+            margin-top: 20px; width: 45px; height: 45px; 
+            border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid white; 
+            border-radius: 50%; animation: spin 1s linear infinite; 
+        }
+
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+
+        .app-container {
+            width: 100%; max-width: 480px; background-color: #f0f4f8;
+            min-height: 100vh; border: none; box-shadow: 0 0 40px rgba(0,0,0,0.1); 
             position: relative;
-            z-index: 10;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+        .header {
+            background: linear-gradient(135deg, #005086 0%, #0081C9 100%); 
+            color: #ffffff; text-align: center;
+            padding: 18px; font-size: 22px; font-weight: 900; letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(0, 80, 134, 0.2); position: relative; z-index: 10;
+        }
+        
+        /* --- 修改後：蘋果風懸浮毛玻璃導覽列 --- */
+        .nav-tabs { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 15px; 
+            right: 15px; 
+            margin: 0 auto;
+            max-width: 450px;
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+            padding: 10px; 
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.5);
+            z-index: 1000;
         }
 
-        .icon {
-            font-size: 75px;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        .nav-tab {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 5px; font-size: 11px;
+            font-weight: 800; cursor: pointer; color: #7f8c8d; 
+            transition: 0.3s; white-space: nowrap; flex: 1;
         }
 
-        h1 {
-            font-size: 26px;
-            font-weight: 900;
-            margin: 0 0 15px 0;
-            letter-spacing: 2px;
-            color: #00c6ff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        .nav-tab.active { 
+            color: #0081C9;
         }
 
-        p {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #e1e8ed;
-            margin: 0 0 35px 0;
-            font-weight: 600;
+        .content { padding: 20px; }
+        
+        input, select, textarea {
+            width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #cfd9e0; 
+            border-radius: 12px; font-size: 16px; font-family: inherit; font-weight: 600; 
+            background-color: #ffffff; transition: 0.3s;
         }
 
-        /* 科技感動態光條 */
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 25px;
+        input:focus, select:focus, textarea:focus { 
+            border-color: #0081C9; box-shadow: 0 0 0 4px rgba(0, 129, 201, 0.15); outline: none; 
         }
 
-        .progress-fill {
-            width: 40%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, #00c6ff, #0072ff, transparent);
-            border-radius: 10px;
-            position: absolute;
-            animation: scan 2s infinite linear;
+        input[type="color"] { padding: 5px; height: 55px; cursor: pointer; border-radius: 12px; }
+        input[type="file"] { padding: 10px; font-size: 14px; border: 2px dashed #cfd9e0; background: #fafcff; }
+        input[type="checkbox"], input[type="radio"] { width: auto; margin-right: 8px; transform: scale(1.3); }
+        
+        .stepper-group { display: flex; align-items: center; border: 2px solid #cfd9e0; border-radius: 12px; background: #fff; overflow: hidden; height: 48px; width: 100%; }
+        .stepper-btn { flex: 1; background: #f0f4f8; color: #005086; border: none; height: 100%; font-size: 22px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0 !important; border-radius: 0 !important; }
+        .stepper-btn:hover { background: #e1e8ed; }
+        .stepper-input { flex: 1; border: none !important; text-align: center; margin: 0 !important; font-size: 16px; font-weight: 900; color: #1a252f; -moz-appearance: textfield; }
+
+        button { 
+            background: linear-gradient(135deg, #005086, #0081C9); color: #ffffff; 
+            font-weight: 800; font-size: 16px; padding: 14px; margin: 8px 0; width: 100%;
+            border: none; border-radius: 12px; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 80, 134, 0.25); letter-spacing: 1px; 
         }
 
-        @keyframes scan {
-            0% { left: -50%; }
-            100% { left: 100%; }
-        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 80, 134, 0.35); }
+        button:active { transform: translateY(0); }
+        button.secondary { background: #ffffff; color: #005086; border: 2px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        button.secondary:hover { background: #f0f6fc; border-color: #cfd9e0; }
+        
+        /* =========================================
+            卡片與元件樣式
+            ========================================= */
+        .announcement-board { background: linear-gradient(135deg, #ffffff, #fdfbf7); box-shadow: 0 6px 20px rgba(211, 84, 0, 0.08); padding: 18px; border-radius: 16px; margin-bottom: 20px; }
+        .announcement-title { color: #d35400; font-weight: 800; margin-bottom: 10px; font-size: 18px; display: flex; justify-content: space-between; align-items: center;}
+        .announcement-text { font-size: 15px; color: #444; line-height: 1.6; white-space: pre-wrap; font-weight: 600;}
+        .edit-notice-btn { background: none; border: none; box-shadow: none; color: #d35400; text-decoration: underline; cursor: pointer; font-size: 13px; padding: 0; width: auto; font-weight: 600;}
 
-        .footer {
-            font-size: 13px;
-            color: rgba(255,255,255,0.4);
-            letter-spacing: 1px;
-        }
+        .score-log-card { background: #ffffff; border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .score-log-header { display: flex; justify-content: space-between; align-items: center; color: #005086; font-weight: 900; font-size: 16px; cursor: pointer; }
+        .score-log-content { margin-top: 15px; padding-top: 10px; border-top: 2px dashed #e1e8ed; max-height: 250px; overflow-y: auto; }
+        .score-log-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f4f8; font-size: 14px; }
+        
+        .card { border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.06); border-radius: 16px; margin-bottom: 20px; background-color: #ffffff; overflow: hidden; }
+        .card-summary { display: flex; align-items: center; justify-content: space-between; padding: 18px; cursor: pointer; }
+        .card-summary-left { display: flex; align-items: center; flex: 1; min-width: 0; }
+        .card-summary-right { font-size: 14px; color: #0081C9; font-weight: 800; flex-shrink: 0; margin-left: 10px; background: #eaf4fc; padding: 6px 12px; border-radius: 20px; }
+        .card-details { padding: 0 18px 18px 18px; border-top: 1px solid #f0f4f8; margin-top: -5px; padding-top: 18px; position: relative;}
+        
+        .text-avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #005086, #0081C9); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; margin-right: 15px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0, 80, 134, 0.2); }
+        .card-title { font-size: 18px; font-weight: 800; color: #003b73; padding-right: 10px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;}
+        .card-creator { font-size: 14px; color: #7f8c8d; margin-top: 5px; font-weight: 600; }
+        
+        .badge { background-color: #005086; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; margin-bottom: 6px; display: inline-block; font-weight: 800; }
+        .badge-poll { background-color: #ff9800; }
+        .badge-post { background-color: #2196F3; }
+        .badge-closed { background-color: #7f8c8d; }
+        .badge-feedback { background-color: #8e44ad; }
+        .badge-success { background-color: #4CAF50; }
+        
+        .post-image { width: 100%; max-height: 350px; object-fit: cover; border-radius: 12px; margin-top: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .post-text { font-size: 16px; color: #2c3e50; line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap; font-weight: 600; }
+        .post-input-area { background-color: #ffffff; padding: 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        
+        .card-actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 15px; width: 100%; flex-wrap: wrap;}
+        .action-btn { background: #f8fafc; border: 1px solid #e1e8ed; padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 8px; width: auto; font-weight: 700; color: #333; margin: 0; }
+        .action-btn.delete { color: #d32f2f; background-color: #ffebee; border-color: #ffcdd2;}
+        .action-btn.close { color: #d35400; background-color: #fff3e0; border-color: #ffe0b2;}
+        .action-btn.complete { color: #2E7D32; border-color: #A5D6A7; background-color: #E8F5E9; }
+        .action-btn.report { color: #d32f2f; background-color: #ffebee; border-color: #ffcdd2; }
+        .action-btn.collect { color: #f39c12; background-color: #fff9e6; border-color: #ffe0b2; }
+        .action-btn.throwback { color: #0081C9; background-color: #eaf4fc; border-color: #bbdefb; }
+        
+        .attendance-group { display: flex; gap: 12px; margin-bottom: 18px; margin-top: 12px;}
+        .attendance-btn { flex: 1; padding: 12px; font-size: 15px; border-radius: 12px; }
+        .attendance-btn.active-attend { background: linear-gradient(135deg, #005086, #0081C9); color: white; border: none; box-shadow: 0 4px 12px rgba(0, 80, 134, 0.3); }
+        .attendance-btn.active-absent { background: linear-gradient(135deg, #d32f2f, #e53935); color: white; border: none; box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3); }
+        
+        .comment-section { border-top: 2px dashed #f0f4f8; padding-top: 18px; margin-top: 12px;}
+        .comment-list { max-height: 280px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px; }
+        .comment-item { background-color: #f8fafc; padding: 12px 16px; border-radius: 16px; margin-bottom: 10px; border: 1px solid #eef2f5; font-size: 15px; position: relative; padding-right: 40px; }
+        .comment-item.admin-reply { background-color: #eaf4fc; border-color: #bbdefb; border-left: 4px solid #0081C9; }
+        
+        .comment-input-group { display: flex; gap: 8px; background: #f0f4f8; padding: 6px; border-radius: 25px; border: 1px solid #e1e8ed;}
+        .comment-input-group input { margin: 0; flex: 1; border: none; background: transparent; padding: 10px 15px; box-shadow: none;}
+        .comment-input-group button { width: auto; margin: 0; padding: 10px 20px; white-space: nowrap; border-radius: 20px; }
 
-        /* 背景微光點綴 */
-        .glow {
-            position: absolute;
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(0,198,255,0.2) 0%, transparent 70%);
-            border-radius: 50%;
-            z-index: 1;
-            top: -100px; left: -100px;
+        .closure-day-row { display: flex; padding: 12px 0; border-bottom: 1px solid #e1e8ed; align-items: center; }
+        .closure-day-label { width: 65px; font-weight: 800; color: #005086; flex-shrink: 0; font-size: 16px;}
+        .closure-day-list { color: #556068; font-size: 15px; line-height: 1.6; font-weight: 600;}
+        
+        /* 💳 電子會員卡 */
+        .membership-card { color: white; border-radius: 16px; padding: 25px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); margin-bottom: 25px; position: relative; overflow: hidden; transition: background 0.3s ease; word-wrap: break-word; overflow-wrap: break-word; z-index: 1;}
+        .membership-card::after { content: '台東開店人生'; position: absolute; font-size: 65px; color: rgba(255,255,255,0.05); top: 10px; right: -20px; font-weight: 900; line-height: 1; white-space: nowrap; pointer-events: none; z-index: -1;}
+        .member-tier-display { font-size: 26px; font-weight: 900; color: #ffd700; margin-bottom: 15px; display: flex; align-items: center; text-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 2; position: relative;}
+        .member-info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.6); z-index: 2; position: relative; font-weight: 700;}
+        .card-name-title { font-size: clamp(24px, 6vw, 32px); font-weight: 900; margin-bottom: 15px; z-index: 2; position: relative; line-height: 1.25; letter-spacing: 1px; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+        .glass-panel { margin-top: 15px; font-size: 15px; line-height: 1.6; background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); z-index: 2; position: relative; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(6px); font-weight: 600; }
+        .progress-container { width: 100%; height: 14px; background-color: #e1e8ed; border-radius: 10px; overflow: hidden; margin-top: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #ffeb3b); border-radius: 10px; transition: width 0.5s ease-in-out; }
+
+        @keyframes shimmer-sweep { 0% { transform: translateX(-100%) skewX(-15deg); } 100% { transform: translateX(200%) skewX(-15deg); } }
+        .effect-shimmer::before { content: ''; position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%); transform: skewX(-15deg); animation: shimmer-sweep 3s infinite; pointer-events: none; z-index: 1; }
+        @keyframes breathe-glow { 0%, 100% { box-shadow: 0 0 15px rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 30px rgba(255,215,0,0.9), 0 0 15px white inset; } }
+        .effect-glow { animation: breathe-glow 2.5s infinite; border: 1px solid rgba(255,215,0,0.5); }
+        @keyframes animated-gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .effect-gradient { background-size: 300% 300% !important; animation: animated-gradient 5s ease infinite; }
+
+        /* 👑 管理員金邊特效 */
+        @keyframes royal-glow { 0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); border: 2px solid rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.9); border: 2px solid rgba(255,215,0,1); } }
+        .admin-glow { animation: royal-glow 3s infinite ease-in-out; }
+
+        @keyframes flipIn { 0% { transform: perspective(1000px) rotateY(-90deg); opacity: 0; } 100% { transform: perspective(1000px) rotateY(0deg); opacity: 1; } }
+        .flip-animate { animation: flipIn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; transform-style: preserve-3d; }
+
+        .custom-style-panel { background-color: #ffffff; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .admin-panel { border-left: 5px solid #005086; border-radius: 12px; padding: 20px; background-color: #fff; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.06);}
+        .admin-title { color: #005086; font-weight: 900; margin-bottom: 15px; font-size: 18px; border-bottom: 2px dashed #cfd9e0; padding-bottom: 10px;}
+        .admin-user-row { padding: 12px 0; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .admin-actions button { width: auto; margin: 2px; padding: 6px 12px; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .kick-btn { background: linear-gradient(135deg, #d32f2f, #e53935); }
+        .promote-btn { background: linear-gradient(135deg, #f39c12, #ffb300); }
+        .suspend-btn { background: linear-gradient(135deg, #7f8c8d, #34495e); }
+         
+        .directory-item { display: flex; align-items: center; padding: 15px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;}
+        .directory-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); background: #f8fafc; }
+        .directory-item .text-avatar { width: 55px; height: 55px; font-size: 22px; }
+        
+        .dir-tier-100 { border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #00C9FF, #0081C9) border-box; box-shadow: 0 4px 15px rgba(0, 129, 201, 0.2); }
+        .dir-tier-150 { border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #FF6F00, #FF9100) border-box; box-shadow: 0 6px 20px rgba(255, 111, 0, 0.35); }
+        @keyframes legendary-fire-glow { 0%, 100% { box-shadow: 0 8px 30px rgba(211, 47, 47, 0.6), 0 0 10px rgba(211, 47, 47, 0.4); } 50% { box-shadow: 0 12px 40px rgba(211, 47, 47, 0.9), 0 0 20px rgba(255, 152, 0, 0.7); border-color: #ff5252; } }
+        .dir-tier-200 { border: 3px solid #D32F2F; background: linear-gradient(135deg, #ffffff, #ffebee); animation: legendary-fire-glow 2s infinite ease-in-out; position: relative; }
+        .dir-tier-200::before { content: '🔥'; position: absolute; top: 10px; right: 15px; font-size: 24px; opacity: 0.8; filter: drop-shadow(0 0 5px rgba(211,47,47,0.5)); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.8); backdrop-filter: blur(3px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { width: 100%; max-width: 420px; position: relative; max-height: 90vh; border-radius: 16px; box-sizing: border-box; }
+        
+        .close-modal-btn-sticky { position: absolute; top: 10px; right: 10px; background: #ffffff; color: #d32f2f; border-radius: 50%; width: 36px; height: 36px; border: 2px solid #ffcdd2; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10005; }
+        .close-modal-btn { position: absolute; top: -15px; right: -5px; background: white; color: #1a252f; border-radius: 50%; width: 36px; height: 36px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
+
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px; }
+        .toast-msg { background: linear-gradient(135deg, #f39c12, #ffb300); color: white; padding: 14px 24px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); font-size: 15px; font-weight: 800; opacity: 0; transition: opacity 0.3s ease-in-out; display: flex; align-items: center; gap: 10px;}
+
+        /* 🌊 漂流瓶特效 */
+        .ocean-bg {
+            position: relative; overflow: hidden;
+            background: linear-gradient(180deg, #5ce1e6 0%, #0081C9 50%, #003b73 100%);
+            background-size: 400% 400%; animation: ocean-gradient 10s ease infinite;
+            border-radius: 16px; padding: 35px 20px; color: white;
+            box-shadow: 0 8px 32px rgba(0, 80, 134, 0.4); margin-bottom: 20px; text-align: center;
         }
-        .glow2 {
-            position: absolute;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(0,114,255,0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            z-index: 1;
-            bottom: -150px; right: -100px;
+        .ocean-wave-layer {
+            position: absolute; bottom: 0; left: 0; width: 200%; height: 50px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 50"><path d="M0 25 Q 100 0 200 25 T 400 25 T 600 25 T 800 25 L 800 50 L 0 50 Z" fill="rgba(255,255,255,0.15)"/></svg>') repeat-x;
+            background-size: 400px 50px; animation: move-wave 4s linear infinite;
         }
+        .ocean-wave-layer:nth-child(2) { bottom: 5px; opacity: 0.5; animation: move-wave 6s linear infinite reverse; background-size: 300px 40px; }
+        
+        @keyframes ocean-gradient { 0% { background-position: 50% 0%; } 50% { background-position: 50% 100%; } 100% { background-position: 50% 0%; } }
+        @keyframes move-wave { 0% { transform: translateX(0); } 100% { transform: translateX(-400px); } }
+        
+        .bottle-sub-nav { display:flex; gap:10px; margin-bottom:15px; background:#fff; padding:6px; border-radius:15px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+        .bottle-sub-tab { flex:1; text-align:center; padding:10px; font-size:14px; font-weight:800; border-radius:12px; cursor:pointer; color:#7f8c8d; }
+        .bottle-sub-tab.active { background:#eaf4fc; color:#0081C9; }
+        .bottle-sub-tab.admin-active { background:#ffebee; color:#d32f2f; }
+
+        .beach-view {
+            background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+            height: 250px; border-radius: 16px; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 20px;
+            box-shadow: inset 0 -60px 80px rgba(0,0,0,0.4); margin-bottom: 15px;
+        }
+        .drifting-bottle {
+            font-size: 60px; cursor: pointer; position: absolute; bottom: 30%;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+            animation: float-bottle 3s infinite ease-in-out;
+        }
+        @keyframes float-bottle { 0%, 100% { transform: translateY(0) rotate(-10deg); } 50% { transform: translateY(-15px) rotate(10deg); } }
+
+        /* ✉️ 絕美羊皮信封 */
+        .letter-modal {
+            background: #fdfaf0; border-radius: 4px; padding: 45px 25px 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2), inset 0 0 60px rgba(139,69,19,0.08);
+            position: relative; font-family: 'Courier New', Courier, serif;
+            border: 1px solid #d4c0a8; color: #4a3b32; font-size: 16px; font-weight: 900; line-height: 1.6;
+        }
+        .letter-modal::before {
+            content: ''; position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            width: 55px; height: 55px; background: radial-gradient(circle, #c0392b, #922b21);
+            border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.4); border: 2px solid #7b241c; z-index: 10;
+        }
+        .letter-modal::after {
+            content: '✉️'; position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+            z-index: 11; font-size: 22px; filter: sepia(1) hue-rotate(-50deg) saturate(3) brightness(0.8);
+        }
+        .letter-img { width: 100%; border-radius: 4px; margin-top: 15px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        @keyframes throwBottleArc {
+            0% { transform: translate(0, 150px) scale(1.5) rotate(0deg); opacity: 1; }
+            40% { transform: translate(50px, -150px) scale(1) rotate(120deg); opacity: 1; }
+            80% { transform: translate(0px, 0px) scale(0.3) rotate(360deg); opacity: 0.8; }
+            90% { transform: translate(0px, 20px) scale(0.1) rotate(400deg); opacity: 0; }
+            100% { transform: translate(0px, 20px) scale(0); opacity: 0; }
+        }
+        @keyframes splashEffect { 0% { transform: scale(0.5); opacity: 0; } 80% { transform: scale(0.5); opacity: 0; } 85% { transform: scale(1.5); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+        .bottle-animate { animation: throwBottleArc 2s forwards cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .splash-animate { position: absolute; bottom: 30%; font-size: 60px; animation: splashEffect 2s forwards ease-out; opacity: 0; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="glow"></div>
-    <div class="glow2"></div>
+<div id="toast-container"></div>
 
-    <div class="maintenance-card">
-        <div class="icon">🛠️ 🌊</div>
-        <h1>系統升級維護中</h1>
-        <p>為了給台東老闆們更穩定、更高質感的體驗，<br>「台東大腦」目前正在進行深度潛水升級！<br><br>請稍後再重新載入，我們馬上回來！</p>
+<div id="pickup-animation-overlay" class="modal-overlay hidden" style="background: rgba(0,50,80,0.95); flex-direction: column; z-index:10001;">
+    <div id="pickup-bottle-emoji" style="font-size: 100px; transition: 0.8s transform ease-in-out;">🍾</div>
+    <div style="color: white; font-size: 18px; margin-top: 20px; text-align: center; padding: 20px; font-weight:800; text-shadow:0 2px 4px rgba(0,0,0,0.5);">
+        🌊 這是一個未知的漂流瓶<br><span style="font-size:14px; color:#cfd9e0;">打開後將消耗 1 次撿取額度</span>
+    </div>
+    <div style="display:flex; gap:15px; margin-top:20px; width:80%; max-width:300px;">
+        <button onclick="openDriftLetter()" style="flex:1; background:linear-gradient(135deg, #f39c12, #ffb300); color:#fff; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);">打開瓶子</button>
+        <button onclick="closePickupAnimation()" style="flex:1; background:rgba(255,255,255,0.2); border:1px solid #fff; color:#fff; box-shadow:none;">放回海灘</button>
+    </div>
+</div>
+
+<div id="letter-modal-overlay" class="modal-overlay hidden" style="z-index:10002;">
+    <div class="modal-content" style="display:flex; flex-direction:column; max-height:95vh; background:transparent; overflow:hidden;">
+        <button class="close-modal-btn-sticky" onclick="closeLetter()">✕</button>
         
-        <div class="progress-bar">
-            <div class="progress-fill"></div>
+        <div style="overflow-y:auto; padding:15px; background:white; border-radius:16px 16px 0 0; flex-grow:1;">
+            <div class="letter-modal">
+                <div id="letter-content" style="min-height: 100px; white-space: pre-wrap;"></div>
+                <div id="letter-image-container"></div>
+                <p style="text-align: right; font-size: 12px; color: #888; margin-top: 20px;" id="letter-date"></p>
+            </div>
+            
+            <div class="comment-section" style="background: white; border-radius: 12px; padding: 15px; margin-top: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div id="bottle-comments" style="max-height: 150px; overflow-y: auto; padding-right:5px; font-size:14px;"></div>
+                <div class="comment-input-group" style="margin-top:10px;">
+                    <input type="text" id="bottle-reply-input" placeholder="寫下留言並塞回瓶子...">
+                    <button onclick="replyToBottle()" style="width: auto; padding: 10px 20px;">回覆</button>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="collectBottle()" style="flex:1; background:linear-gradient(135deg, #f39c12, #ffb300); box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);">⭐ 收下收藏</button>
+                <button onclick="throwBackBottle()" class="secondary" style="flex:1;">🌊 丟回大海</button>
+            </div>
         </div>
         
-        <div class="footer">
-            台東老闆專屬聚會 &copy; 系統工程部
+        <div style="background:white; padding:10px; border-radius:0 0 16px 16px; border-top:1px solid #e1e8ed; text-align:center;">
+            <button onclick="closeLetter()" style="background:#f0f4f8; color:#1a252f; box-shadow:none; margin:0; font-size:15px; padding:12px;">關閉信件視窗</button>
+        </div>
+    </div>
+</div>
+
+<div id="throw-animation-overlay" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(180deg, rgba(0,80,134,0.9), rgba(0,40,70,0.95)); z-index:10000; display:flex; justify-content:center; align-items:center;">
+    <div style="position:relative; width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+        <div id="bottle-emoji-animate" style="font-size:100px;">🍾</div>
+        <div id="splash-emoji-animate" class="splash-animate">💦</div>
+    </div>
+</div>
+
+<div id="loading-screen">
+    <div>連線至台東雲端大腦...</div>
+    <div class="spinner"></div>
+</div>
+
+<div class="app-container hidden" id="main-app-wrapper">
+    <div class="header">台東老闆專屬聚會</div>
+    
+    <div class="content">
+        <div id="login-section" class="hidden">
+            <h2 style="color: #005086; font-weight: 900;">台東老闆專屬聚會</h2>
+            <p style="font-size: 15px; color: #556068;">首次登入需輸入邀請碼，已註冊的老闆只要輸入電話即可快速登入。</p>
+            <label style="font-weight: 800; font-size: 15px;">手機號碼 (10碼)：</label>
+            <input type="tel" id="phone-input" placeholder="例如: 0912345678" maxlength="10">
+            <div id="invite-code-container">
+                <label style="font-weight: 800; font-size: 15px; margin-top: 10px; display: block;">專屬邀請碼 <span style="color:#888; font-size:13px; font-weight:600;">(已註冊免填)</span>：</label>
+                <input type="text" id="invite-code-input" placeholder="初次加入請輸入邀請碼">
+            </div>
+            <button onclick="login()" style="margin-top: 20px;">進入系統</button>
+        </div>
+
+        <div id="profile-section" class="hidden">
+            <h2 style="color: #005086; font-weight: 900;">設定基本資料</h2>
+            <p style="font-size: 15px; color: #556068;">歡迎加入！請輸入您的稱呼，系統將為您建立專屬會員卡。</p>
+            <input type="text" id="name-input" placeholder="請輸入您的稱呼或店名 (例: 王老闆)">
+            <button onclick="saveProfile()" style="margin-top: 20px;">儲存並進入</button>
+        </div>
+
+        <div id="locked-section" class="hidden" style="text-align: center; padding: 40px 20px;">
+            <h1 style="font-size: 65px; margin-bottom: 10px;">🔒</h1>
+            <h2 style="color: #d32f2f; font-weight: 900;" id="locked-title">帳號已鎖定</h2>
+            <div id="locked-desc">
+                <p style="font-size: 18px; font-weight: 800;">您的活躍度低於 60 分<br>(目前 <span id="locked-score" style="color:#d32f2f;"></span> 分)</p>
+                <p style="color: #444; font-size: 15px; line-height: 1.6; margin-top: 20px; padding: 18px; background: #ffebee; border-radius: 12px; border: 1px solid #ffcdd2; font-weight: 600;">因為您有一段時間沒有參與系統的投票或聚會，系統已暫時限制您的權限。<br><br>💡 <b style="color: #d32f2f;">請在群組呼叫管理員，請他們進入後台幫您「解鎖」！</b></p>
+            </div>
+            <button class="secondary" onclick="logout()" style="margin-top: 30px;">登出帳號</button>
+        </div>
+
+        <div id="main-section" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px;">
+                <div style="display: flex; align-items: center;">
+                    <div id="my-avatar" class="text-avatar" style="width:36px; height:36px; font-size:16px;"></div>
+                    <span id="welcome-msg" style="font-weight:800; color:#005086; font-size: 18px;">歡迎！</span>
+                </div>
+                <button style="width: auto; padding: 8px 18px; font-size: 14px; margin:0;" class="secondary" onclick="logout()">登出</button>
+            </div>
+            
+            <div id="home-view" class="hidden">
+                <div class="score-log-card">
+                    <div class="score-log-header" onclick="toggleLog()">
+                        <span>🏅 我的活躍度紀錄：<span id="home-current-score" style="color:#d35400;">0</span> 分</span>
+                        <span id="log-toggle-icon">🔽</span>
+                    </div>
+                    <div class="score-log-content hidden" id="score-log-content"></div>
+                </div>
+
+                <div id="announcement-board" class="announcement-board">
+                    <div class="announcement-title">
+                        <span style="color: #005086;">📌 老闆公告牆</span>
+                        <span id="edit-notice-container"></span>
+                    </div>
+                    <div class="announcement-text" id="announcement-text-display">載入中...</div>
+                </div>
+
+                <div class="post-input-area" id="post-creation-area">
+                    <h4 style="margin: 0 0 12px 0; color: #005086; font-weight: 900; font-size: 18px;">📷 分享動態</h4>
+                    <textarea id="post-text-input" placeholder="跟大家分享今天的心情或照片..." style="height: 70px; margin-bottom: 10px;"></textarea>
+                    <input type="file" id="post-image-input" accept="image/*">
+                    <button onclick="submitPost()" style="margin-top: 15px;">發佈動態</button>
+                </div>
+                <div id="not-elder-message" style="text-align:center; color:#005086; font-size:15px; margin-bottom:20px; background:#eaf4fc; padding:18px; border-radius:12px; display:none; border: 1px dashed #0081C9; font-weight: 700;">
+                    🔒 <b>發文權限已鎖定</b>：目前僅開放給元老與管理員發佈動態！
+                </div>
+
+                <div id="home-list" style="position: relative; z-index: 1;"></div>
+            </div>
+
+            <div id="directory-view" class="hidden">
+                <input type="text" id="search-user-input" placeholder="🔍 搜尋名稱、自我介紹或Emoji..." onkeyup="renderDirectory()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: #e1e8ed; margin-bottom: 20px;">
+                <div id="directory-list"></div>
+            </div>
+
+            <div id="events-view" class="hidden">
+                <div style="display:flex; gap:12px;" id="event-buttons-container">
+                    <button id="btn-create-event" onclick="showCreateForm('event')" style="flex:1; display:none;">＋ 發起聚會</button>
+                    <button onclick="showCreateForm('poll')" style="flex:1; background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);">＋ 建立投票</button>
+                </div>
+                <hr style="border: 0; height: 2px; background: #e1e8ed; margin: 25px 0;">
+                <div id="events-list"></div>
+                <div id="polls-list"></div>
+            </div>
+
+            <div id="feedbacks-view" class="hidden">
+                <button onclick="showCreateForm('feedback')" style="background: linear-gradient(135deg, #8e44ad, #c0392b); margin-bottom: 15px; box-shadow: 0 4px 12px rgba(142, 68, 173, 0.3);">＋ 聯絡管理員 / 提出建議</button>
+                <input type="text" id="search-feedback-input" placeholder="🔍 輸入案件編號 (例如: Case-123456) 查詢..." onkeyup="renderFeedbacks()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: #e1e8ed; margin-bottom: 20px;">
+                <div id="feedbacks-list"></div>
+            </div>
+
+            <div id="bottles-view" class="hidden">
+                <div class="bottle-sub-nav" id="bottle-nav-container" style="margin-bottom: 20px;">
+                    <div class="bottle-sub-tab active" id="btab-received" onclick="switchBottleTab('received')">🌊 海灘上</div>
+                    <div class="bottle-sub-tab" id="btab-mine" onclick="switchBottleTab('mine')">🍾 丟出/收藏</div>
+                </div>
+
+                <div id="beach-ui-container">
+                    <div class="beach-view" id="beach-view">
+                        <div id="bottle-in-sea" class="drifting-bottle hidden" onclick="triggerPickup()">🍾</div>
+                        <div style="z-index: 5; color: white; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.8); width:100%;">
+                            <p id="bottle-status-msg" style="font-size:18px; font-weight:900;">尋找漂流瓶中...</p>
+                        </div>
+                    </div>
+                    <div id="bottle-btn-container" style="text-align:center;"></div>
+                </div>
+
+                <div id="bottles-list" style="margin-top:20px;"></div>
+            </div>
+            
+            <div id="closures-view" class="hidden">
+                <h3 style="color: #005086; font-weight: 900; font-size: 20px; border-bottom: 3px solid #005086; padding-bottom: 8px; display: inline-block;">📍 固定店休一覽</h3>
+                <div class="custom-style-panel" id="regular-closures-list" style="margin-top: 10px;"></div>
+                
+                <h3 style="color: #d35400; font-weight: 900; font-size: 20px; border-bottom: 3px solid #d35400; padding-bottom: 8px; display: inline-block; margin-top: 30px;">🏖️ 近期臨時特休</h3>
+                <div class="custom-style-panel" id="temp-closures-list" style="background-color:#fffaf0; border: 1px solid #fbeee0; margin-top: 10px;"></div>
+            </div>
+
+            <div id="card-view" class="hidden">
+                <div id="my-membership-card"></div>
+                
+                <div class="custom-style-panel">
+                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">🚀 階級晉升進度</h4>
+                    <div id="tier-progress-container"></div>
+                </div>
+
+                <div class="custom-style-panel">
+                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">🎨 自訂會員卡風格</h4>
+                    <div style="display:flex; gap:15px;">
+                        <div style="flex:1;">
+                            <label style="font-size:15px; font-weight:800;">卡片主色調：</label>
+                            <input type="color" id="card-color-picker" value="#005086">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:15px; font-weight:800;">表情 (Emoji)：</label>
+                            <input type="text" id="card-emoji-input" placeholder="例如: 🦖 或 ☕" maxlength="2" value="✨">
+                        </div>
+                    </div>
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">專屬卡片動態特效：</label>
+                    <select id="card-effect-select">
+                        <option value="none">無特效</option>
+                        <option value="shimmer">✨ 流光掃過</option>
+                        <option value="glow">🌟 呼吸光暈</option>
+                        <option value="gradient">🌈 動態漸層</option>
+                    </select>
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">上傳自訂背景圖片 (選填)：</label>
+                    <input type="file" id="card-bg-input" accept="image/*">
+                    <p style="font-size:13px; color:#7f8c8d; margin-top:5px; margin-bottom:5px; font-weight: 600;">💡 會自動融合您的主色調呈現高質感濾鏡！</p>
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button onclick="saveCardStyle()" style="flex:2; margin:0;">儲存風格與特效</button>
+                        <button onclick="clearCardBg()" class="secondary" style="flex:1; margin:0;">清除背景</button>
+                    </div>
+                </div>
+
+                <div class="custom-style-panel">
+                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">📝 店家資訊、社群與名片圖片</h4>
+                    <label style="font-size:15px; font-weight:800; margin-top:10px; display:block;">Threads 個人檔案連結：</label>
+                    <input type="text" id="card-threads-input" placeholder="請貼上 Threads 網址 (https://www.threads.net/...)">
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">自我介紹 / 店家簡介：</label>
+                    <textarea id="card-bio-input" placeholder="介紹一下您的店或自己吧..." style="height: 90px;"></textarea>
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">Google Map 地標 (連結 或 嵌入碼)：</label>
+                    <input type="text" id="card-map-input" placeholder="請貼上 Google地圖的分享連結 或 <iframe> 嵌入碼">
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">📸 上傳專屬圖文名片/海報：</label>
+                    <input type="file" id="card-custom-image-input" accept="image/*">
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button onclick="saveShopInfo()" style="flex:2; margin:0; background: linear-gradient(135deg, #2196F3, #1565C0);">儲存資訊與圖片</button>
+                        <button onclick="clearCardImage()" class="secondary" style="flex:1; margin:0;">清除圖片</button>
+                    </div>
+                </div>
+
+                <div class="custom-style-panel">
+                    <h4 style="margin-top:0; color:#005086; border-bottom:2px dashed #cfd9e0; padding-bottom:10px; font-weight: 900; font-size: 18px;">📅 我的店休設定</h4>
+                    <div style="margin: 12px 0; font-size:15px;" id="closed-days-checkboxes">
+                        <label><input type="checkbox" value="一">一</label> <label><input type="checkbox" value="二">二</label>
+                        <label><input type="checkbox" value="三">三</label> <label><input type="checkbox" value="四">四</label>
+                        <label><input type="checkbox" value="五">五</label> <label><input type="checkbox" value="六">六</label>
+                        <label><input type="checkbox" value="日">日</label>
+                    </div>
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block;">新增臨時特休日期：</label>
+                    <div style="display:flex; gap:10px; margin-top:8px;">
+                        <input type="date" id="temp-close-date" style="margin:0;">
+                        <button onclick="addTempCloseDate()" style="margin:0; width:auto; white-space:nowrap; padding: 0 20px;">新增</button>
+                    </div>
+                    <div id="temp-close-list" style="margin-top:12px; font-size:14px; color:#556068;"></div>
+                    <button onclick="saveClosureSettings()" style="margin-top:20px; background: linear-gradient(135deg, #d35400, #e67e22); box-shadow: 0 4px 12px rgba(211, 84, 0, 0.3);">儲存店休設定</button>
+                </div>
+                
+                <div id="admin-panel-container"></div>
+            </div>
+        </div>
+
+        <div id="create-event-section" class="hidden">
+            <h2 style="color: #005086; font-weight: 900;">發起新聚會</h2>
+            <input type="text" id="event-title" placeholder="聚會名稱 (例: 週末喝一杯)">
+            <input type="text" id="event-date" placeholder="時間地點 (例: 週六晚上 8 點)">
+            <textarea id="event-description" placeholder="聚會詳細說明 (例: 需攜帶500元交換禮物、報名費300元請先匯款...)" style="height: 120px;"></textarea>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="submitEvent()" style="flex:2; margin:0;">發布聚會</button>
+                <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
+            </div>
+        </div>
+        
+        <div id="create-poll-section" class="hidden">
+            <h2 style="color: #005086; font-weight: 900;">建立新投票</h2>
+            <input type="text" id="poll-question" placeholder="投票問題 (例: 聚會想吃什麼？)">
+            <textarea id="poll-description" placeholder="投票詳細說明 (例: 請大家在週五前投完，餐廳需要提早訂位...)" style="height: 90px;"></textarea>
+            <textarea id="poll-options" placeholder="輸入選項 (請換行分隔)&#10;例如：&#10;披薩&#10;熱炒&#10;烤肉" style="height: 120px;"></textarea>
+            
+            <div style="display:flex; gap:15px; margin-bottom: 12px; margin-top: 10px;">
+                <div style="flex:1;">
+                    <label style="font-size:14px; font-weight:800;">投票類型：</label>
+                    <select id="poll-type" onchange="togglePollType()">
+                        <option value="general">一般投票 (不計分)</option>
+                        <option value="points" id="opt-poll-points">積分投票 (計分)</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex; gap:15px;">
+                <div style="flex:1;">
+                    <label style="font-size:14px; font-weight:800;">選項設定：</label>
+                    <select id="poll-multiple"><option value="single">單選</option><option value="multiple">多選</option></select>
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:14px; font-weight:800;">匿名設定：</label>
+                    <select id="poll-mode"><option value="realname">實名</option><option value="anonymous">匿名</option></select>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button onclick="submitPoll()" style="flex:2; margin:0;">發布投票</button>
+                <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
+            </div>
+        </div>
+
+        <div id="create-feedback-section" class="hidden">
+            <h2 style="color: #8e44ad; font-weight: 900;">聯絡管理員 / 提出建議</h2>
+            <p style="font-size: 14px; color: #7f8c8d;">您的意見對我們很重要。送出後將由管理員專人為您回覆處理。</p>
+            <textarea id="feedback-content" placeholder="請詳細描述您的問題或建議..." style="height: 150px;"></textarea>
+            
+            <label style="font-size:14px; font-weight:800; display:block; margin-top:10px;">上傳佐證圖片/截圖 (選填)：</label>
+            <input type="file" id="feedback-image" accept="image/*">
+
+            <label style="font-size:14px; font-weight:800; display:block; margin-top:15px;">發送模式：</label>
+            <select id="feedback-mode">
+                <option value="realname">實名發送</option>
+                <option value="anonymous">匿名發送</option>
+            </select>
+            
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button onclick="submitFeedback()" style="flex:2; margin:0; background: linear-gradient(135deg, #8e44ad, #c0392b);">送出投信</button>
+                <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
+            </div>
+        </div>
+
+        <div id="create-bottle-section" class="hidden">
+            <h2 style="color: #0081C9; font-weight: 900;">🌊 丟出漂流瓶</h2>
+            <p style="font-size: 14px; color: #7f8c8d;">每天最多拋出 5 個，每個瓶子可被 5 位有緣人撿起</p>
+            <textarea id="bottle-content" placeholder="寫下你的心情、秘密或故事..." style="height: 120px;"></textarea>
+            
+            <label style="font-size:14px; font-weight:800; display:block; margin-top:10px;">上傳照片 (選填)：</label>
+            <input type="file" id="bottle-image" accept="image/*">
+            
+            <div style="background: #ffebee; border: 1px solid #ffcdd2; padding: 12px; border-radius: 8px; margin-top: 15px;">
+                <p style="color: #d32f2f; font-weight: 800; font-size: 13px; margin: 0;">⚠️ 發送前請注意：<br>嚴禁發布任何不雅、色情或血腥內容。使用者可檢舉違規內容，管理員將進行審核，違規者將被封鎖！</p>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button onclick="submitBottle()" style="flex:2; margin:0; background: linear-gradient(135deg, #00c6ff, #0072ff);">丟出漂流瓶</button>
+                <button class="secondary" onclick="cancelCreate()" style="flex:1; margin:0;">取消</button>
+            </div>
         </div>
     </div>
 
+    <div id="nav-section" class="nav-tabs hidden">
+        <div class="nav-tab active" id="tab-home" onclick="switchTab('home')">🏠首頁</div>
+        <div class="nav-tab" id="tab-directory" onclick="switchTab('directory')">🔍老闆</div>
+        <div class="nav-tab" id="tab-events" onclick="switchTab('events')">🗓️活動</div>
+        <div class="nav-tab" id="tab-bottles" onclick="switchTab('bottles')">🌊瓶子</div>
+        <div class="nav-tab" id="tab-card" onclick="switchTab('card')">💳卡片</div>
+    </div>
+</div>
+
+<div id="user-card-modal" class="modal-overlay hidden">
+    <div class="modal-content" id="user-card-modal-content">
+        <button class="close-modal-btn" onclick="closeUserCard()">✕</button>
+        <div id="modal-card-container"></div>
+    </div>
+</div>
+
+<div id="edit-user-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25);">
+        <h3 style="color: #005086; margin-top: 0; border-bottom: 2px dashed #cfd9e0; padding-bottom: 15px; font-weight: 900; font-size: 20px;">✏️ 編輯會員資料</h3>
+        <input type="hidden" id="edit-target-phone">
+        
+        <label style="font-size:14px; font-weight:800;">顯示名稱：</label>
+        <input type="text" id="edit-user-name" placeholder="輸入新名稱" style="padding:10px; width:100%;">
+        
+        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block;">額外聚會參與次數 (直接設定)：</label>
+        <div class="stepper-group" style="margin-top: 8px;">
+            <button class="stepper-btn" onclick="changeSet('edit-user-attend-bonus', -1)">-</button>
+            <input type="number" id="edit-user-attend-bonus" value="0" class="stepper-input" min="0" style="width:100%;">
+            <button class="stepper-btn" onclick="changeSet('edit-user-attend-bonus', 1)">+</button>
+        </div>
+        
+        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block;">手動增減活躍分數 (目前手動加成: <span id="current-score-bonus" style="color:#0081C9;">0</span>)：</label>
+        <div class="stepper-group" style="margin-top: 8px;">
+            <button class="stepper-btn" onclick="changeSet('edit-user-score-bonus', -1)">-</button>
+            <input type="number" id="edit-user-score-bonus" value="0" class="stepper-input" style="width:100%;">
+            <button class="stepper-btn" onclick="changeSet('edit-user-score-bonus', 1)">+</button>
+        </div>
+        
+        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block;">加入日期 (系統資歷)：</label>
+        <input type="date" id="edit-user-join-date" style="padding:10px; width:100%;">
+        
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button onclick="saveUserEdit()" style="flex:1; margin:0; padding:12px;">儲存</button>
+            <button onclick="closeEditUserModal()" class="secondary" style="flex:1; margin:0; padding:12px;">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 請確認這部分包含您原本所有 2000 多行的邏輯內容
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWQ6GAMAsPESR3vPe7tqkGPg3KzUtSdJQ",
+      authDomain: "taitung-boss.firebaseapp.com",
+      projectId: "taitung-boss",
+      storageBucket: "taitung-boss.firebasestorage.app",
+      messagingSenderId: "466331597059",
+      appId: "1:466331597059:web:9d48ad26475fc71e721136",
+      measurementId: "G-69WW2E5L8L"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allUsers = {}, adminPhones = [], eventsData = [], pollsData = [], postsData = [], feedbacksData = [], bottlesData = [];
+    let systemInviteCode = '8888', announcementText = '歡迎來到台東老闆專屬聚會！\n這是一個私密的交流空間，大家可以在這裡發起聚餐、投票決定餐廳，或是分享開店日常。';
+    let ptsEventAttend = 5, ptsEventAbsent = 3, ptsEventNoResp = -3;
+    let ptsPollSingleVote = 3, ptsPollMultiVote = 1, ptsPollNoVote = -3;
+    let enableBottles = true; 
+
+    let currentUserPhone = null, currentTab = 'home', currentBottleTab = 'received', currentSectionId = 'login-section'; 
+    let isDataLoaded = false, expandedCards = [], activeInputs = {}, activePollVotes = {}, bottleCountdownInterval = null; 
+    let loadedFlags = { users: false, events: false, polls: false, posts: false, feedbacks: false, bottles: false, settings: false };
+
+    // --- (其餘 2000 行邏輯程式碼請務必維持不變) ---
+    function generateCardHtml(phone, showControls) {
+        const u = allUsers[phone];
+        if (!u) return '<p>資料載入中...</p>';
+        const stats = getUserStats(phone);
+        const score = calculateUserScore(phone);
+        const cardStyle = `background-color: ${u.customColor || '#005086'};`;
+        const cardEffectClass = u.cardEffect && u.cardEffect !== 'none' ? `effect-${u.cardEffect}` : '';
+        const cardBgStyle = u.cardBgImage ? `background-image: url('${u.cardBgImage}'); background-size: cover;` : '';
+        const cardImageHtml = u.cardImage ? `<div style="text-align:center; margin-top:10px;"><img src="${u.cardImage}" style="max-width:100%; border-radius:10px;"></div>` : '';
+
+        return `
+            <div class="membership-card ${cardEffectClass}" style="${cardStyle} ${cardBgStyle}">
+                <div class="member-tier-display">${stats.tier}</div>
+                <div class="card-name-title">${u.name} ${u.customEmoji || '✨'}</div>
+                <div class="member-info-row"><span>活躍分數</span><span>${score} 分</span></div>
+                <div class="member-info-row"><span>加入日期</span><span>${stats.joinDateStr}</span></div>
+                <div class="glass-panel">
+                    ${u.bio || '尚未設定自我介紹'}
+                </div>
+                ${cardImageHtml}
+            </div>
+        `;
+    }
+
+    function showUserCard(phone) {
+        const modal = document.getElementById('user-card-modal');
+        const container = document.getElementById('modal-card-container');
+        container.innerHTML = generateCardHtml(phone, false);
+        modal.classList.remove('hidden');
+    }
+
+    function closeUserCard() { document.getElementById('user-card-modal').classList.add('hidden'); }
+    
+    // ... (在此處貼上您原本的其他所有 JS 函式，直到結尾) ...
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-msg';
+        toast.innerHTML = `🔔 <span>${msg}</span>`;
+        document.getElementById('toast-container').appendChild(toast);
+        setTimeout(() => toast.style.opacity = '1', 10);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 5000);
+    }
+
+    function calculateUserScore(phone) {
+        const user = allUsers[phone];
+        if (!user) return 0;
+        let score = 80 + (user.manualBonus || 0);
+
+        (eventsData || []).forEach(evt => {
+            if (evt.isClosed) {
+                const status = evt.attendees ? evt.attendees[phone] : null;
+                if (status === 'attend') score += ptsEventAttend;
+                else if (status === 'absent') score += ptsEventAbsent;
+                else if (!status && evt.id >= user.joinDate) score += ptsEventNoResp;
+            }
+        });
+
+        (pollsData || []).forEach(poll => {
+            if (poll.pollType === 'points' || !poll.pollType) { 
+                if (poll.isClosed) {
+                    const userVote = poll.votes ? poll.votes.find(v => v.phone === phone) : null;
+                    if (userVote) { score += poll.isMultiple ? ptsPollMultiVote : ptsPollSingleVote; } 
+                    else if (!userVote && poll.id >= user.joinDate) { score += ptsPollNoVote; }
+                }
+            } 
+        });
+        return score;
+    }
+
+    function getInitial(name) { return name ? name.charAt(0).toUpperCase() : '?'; }
+    
+    function getUserStats(phone) {
+        const user = allUsers[phone];
+        if(!user) return { tier: '🌱 新人', months: 0, days: 1, attended: 0 };
+        const daysJoined = Math.floor((Date.now() - user.joinDate) / (1000 * 60 * 60 * 24)) + 1;
+        const monthsJoined = Math.floor(daysJoined / 30);
+        let attendedCount = user.manualAttendBonus || 0; 
+        (eventsData || []).forEach(e => { if(e.attendees && e.attendees[phone] === 'attend') attendedCount++; });
+        
+        let tier = '🌱 新人';
+        if (user.manualTier) tier = user.manualTier; 
+        else if (daysJoined >= 60 || attendedCount >= 3) tier = '👑 元老'; 
+        else if (daysJoined >= 30) tier = '⭐ 聚會成員';
+        
+        return { tier, months: monthsJoined, days: daysJoined, attended: attendedCount, joinDateStr: new Date(user.joinDate).toLocaleDateString('zh-TW') };
+    }
+
+    function compressImage(file, callback) {
+        if (!file) { callback(null); return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image(); 
+            img.onload = function() {
+                const canvas = document.createElement('canvas'); 
+                const MAX_WIDTH = 400; 
+                let width = img.width; let height = img.height;
+                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                canvas.width = width; canvas.height = height; 
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height); 
+                callback(canvas.toDataURL('image/jpeg', 0.6)); 
+            }; 
+            img.src = e.target.result;
+        }; 
+        reader.readAsDataURL(file);
+    }
+
+    function checkAllLoaded() {
+        if(Object.values(loadedFlags).every(v => v)) {
+            if(!isDataLoaded) {
+                isDataLoaded = true;
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('main-app-wrapper').classList.remove('hidden'); 
+                initApp();
+            } else if (currentUserPhone) {
+                const activeEl = document.activeElement;
+                const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+                if (!isTyping) {
+                    reRenderCurrentTab();
+                }
+            }
+        }
+    }
+
+    function renderScoreLog() {
+        const u = allUsers[currentUserPhone]; if(!u) return;
+        let logs = []; let score = 80;
+        logs.push({ time: u.joinDate, text: "🌱 系統預設初始分數", diff: 80 });
+
+        (eventsData || []).forEach(evt => {
+            if (evt.isClosed) {
+                const status = evt.attendees ? evt.attendees[currentUserPhone] : null;
+                if (status === 'attend') { score += ptsEventAttend; logs.push({ time: evt.id, text: `✅ 報名聚會: ${evt.title}`, diff: ptsEventAttend }); }
+                else if (status === 'absent') { score += ptsEventAbsent; logs.push({ time: evt.id, text: `❌ 無法參加: ${evt.title}`, diff: ptsEventAbsent }); }
+                else if (!status && evt.id >= u.joinDate) { score += ptsEventNoResp; logs.push({ time: evt.id, text: `⚠️ 聚會未回應: ${evt.title}`, diff: ptsEventNoResp }); }
+            }
+        });
+
+        (pollsData || []).forEach(poll => {
+            if (poll.pollType === 'points' || !poll.pollType) { 
+                if (poll.isClosed) {
+                    const userVote = poll.votes ? poll.votes.find(v => v.phone === currentUserPhone) : null;
+                    if (userVote) { 
+                        let pts = poll.isMultiple ? ptsPollMultiVote : ptsPollSingleVote;
+                        score += pts; logs.push({ time: poll.id, text: `🗳️ 參與投票: ${poll.question}`, diff: pts });
+                    } else if (!userVote && poll.id >= u.joinDate) { 
+                        score += ptsPollNoVote; logs.push({ time: poll.id, text: `⚠️ 未參與投票: ${poll.question}`, diff: ptsPollNoVote });
+                    }
+                }
+            } 
+        });
+
+        if (u.manualBonus) { score += u.manualBonus; logs.push({ time: Date.now(), text: "👑 管理員/系統結算 額外增減分", diff: u.manualBonus }); }
+        logs.sort((a, b) => b.time - a.time);
+
+        let html = '';
+        logs.forEach(l => {
+            if(l.diff === 0) return;
+            const dateObj = new Date(l.time);
+            const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
+            const sign = l.diff > 0 ? '+' : '';
+            const color = l.diff > 0 ? '#11998e' : '#d32f2f';
+            html += `<div class="score-log-item"><span style="color:#556068;">[${dateStr}] ${l.text}</span><strong style="color:${color}; font-size:15px;">${sign}${l.diff}</strong></div>`;
+        });
+        document.getElementById('score-log-content').innerHTML = html || '<div style="text-align:center; color:#888; padding:10px;">目前尚無紀錄</div>';
+        const scoreEl = document.getElementById('home-current-score');
+        if(scoreEl) scoreEl.innerText = score;
+    }
+
+    function toggleLog() {
+        const content = document.getElementById('score-log-content');
+        const icon = document.getElementById('log-toggle-icon');
+        if(content.classList.contains('hidden')){ content.classList.remove('hidden'); icon.innerText = '🔼'; } 
+        else { content.classList.add('hidden'); icon.innerText = '🔽'; }
+    }
+
+    function reRenderCurrentTab() {
+        if (currentTab === 'home') { renderScoreLog(); renderHome(); }
+        else if (currentTab === 'directory') renderDirectory();
+        else if (currentTab === 'events') { renderEvents(); renderPolls(); }
+        else if (currentTab === 'feedbacks') renderFeedbacks();
+        else if (currentTab === 'bottles') renderDriftBeach();
+        else if (currentTab === 'closures') renderClosures();
+        else if (currentTab === 'card') renderCardView();
+    }
+
+    db.collection("taitung_v2_users").onSnapshot(snap => {
+        allUsers = {}; snap.forEach(doc => allUsers[doc.id] = doc.data());
+        loadedFlags.users = true; checkAllLoaded();
+    });
+    db.collection("taitung_v2_events").onSnapshot(snap => {
+        eventsData = []; snap.forEach(doc => eventsData.push(doc.data())); eventsData.sort((a, b) => b.id - a.id);
+        loadedFlags.events = true; checkAllLoaded();
+    });
+    db.collection("taitung_v2_polls").onSnapshot(snap => {
+        pollsData = []; snap.forEach(doc => pollsData.push(doc.data())); pollsData.sort((a, b) => b.id - a.id);
+        loadedFlags.polls = true; checkAllLoaded();
+    });
+    db.collection("taitung_v2_posts").onSnapshot(snap => {
+        postsData = []; snap.forEach(doc => postsData.push(doc.data())); postsData.sort((a, b) => b.id - a.id);
+        loadedFlags.posts = true; checkAllLoaded();
+    });
+    db.collection("taitung_v2_feedbacks").onSnapshot(snap => {
+        feedbacksData = []; snap.forEach(doc => feedbacksData.push(doc.data())); feedbacksData.sort((a, b) => b.id - a.id);
+        loadedFlags.feedbacks = true; checkAllLoaded();
+    });
+    db.collection("taitung_v2_bottles").onSnapshot(snap => {
+        bottlesData = []; snap.forEach(doc => bottlesData.push(doc.data())); bottlesData.sort((a, b) => b.id - a.id);
+        loadedFlags.bottles = true; checkAllLoaded();
+    });
+    db.collection("taitung_v2_settings").doc("config").onSnapshot(doc => {
+        if (doc.exists) {
+            const parsed = doc.data();
+            systemInviteCode = parsed.inviteCode || '8888';
+            announcementText = parsed.announcement || '';
+            ptsEventAttend = parsed.ptsEventAttend !== undefined ? parsed.ptsEventAttend : 5;
+            ptsEventAbsent = parsed.ptsEventAbsent !== undefined ? parsed.ptsEventAbsent : 3;
+            ptsEventNoResp = parsed.ptsEventNoResp !== undefined ? parsed.ptsEventNoResp : -3;
+            ptsPollSingleVote = parsed.ptsPollSingleVote !== undefined ? parsed.ptsPollSingleVote : 3;
+            ptsPollMultiVote = parsed.ptsPollMultiVote !== undefined ? parsed.ptsPollMultiVote : 1;
+            ptsPollNoVote = parsed.ptsPollNoVote !== undefined ? parsed.ptsPollNoVote : -3;
+            enableBottles = parsed.enableBottles !== undefined ? parsed.enableBottles : true;
+            adminPhones = parsed.admins || [];
+        }
+        const tabBottlesBtn = document.getElementById('tab-bottles');
+        if(tabBottlesBtn) tabBottlesBtn.style.display = enableBottles ? 'flex' : 'none';
+        loadedFlags.settings = true; checkAllLoaded();
+    });
+
+    const DB = {
+        saveUser: (p) => { if(p && allUsers[p]) db.collection("taitung_v2_users").doc(p.toString()).set(allUsers[p]); },
+        delUser: (p) => { if(p) db.collection("taitung_v2_users").doc(p.toString()).delete(); },
+        savePost: (post) => db.collection("taitung_v2_posts").doc(post.id.toString()).set(post),
+        delPost: (id) => db.collection("taitung_v2_posts").doc(id.toString()).delete(),
+        saveEvent: (evt) => db.collection("taitung_v2_events").doc(evt.id.toString()).set(evt),
+        delEvent: (id) => db.collection("taitung_v2_events").doc(id.toString()).delete(),
+        savePoll: (poll) => db.collection("taitung_v2_polls").doc(poll.id.toString()).set(poll),
+        delPoll: (id) => db.collection("taitung_v2_polls").doc(poll.id.toString()).delete(),
+        saveFeedback: (fb) => db.collection("taitung_v2_feedbacks").doc(fb.id.toString()).set(fb),
+        delFeedback: (id) => db.collection("taitung_v2_feedbacks").doc(fb.id.toString()).delete(),
+        saveBottle: (b) => db.collection("taitung_v2_bottles").doc(b.id.toString()).set(b),
+        delBottle: (id) => db.collection("taitung_v2_bottles").doc(id.toString()).delete(),
+        saveSettings: () => db.collection("taitung_v2_settings").doc("config").set({
+            inviteCode: systemInviteCode, announcement: announcementText,
+            ptsEventAttend, ptsEventAbsent, ptsEventNoResp, ptsPollSingleVote, ptsPollMultiVote, ptsPollNoVote,
+            enableBottles, admins: adminPhones
+        })
+    };
+
+    function exportData() {
+        const backup = {
+            users: allUsers, posts: postsData, events: eventsData, polls: pollsData, feedbacks: feedbacksData, bottles: bottlesData,
+            settings: { inviteCode: systemInviteCode, announcement: announcementText, ptsEventAttend, ptsEventAbsent, ptsEventNoResp, ptsPollSingleVote, ptsPollMultiVote, ptsPollNoVote, enableBottles, admins: adminPhones }
+        };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
+        const dlAnchorElem = document.createElement('a');
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", "taitung_backup_" + new Date().toISOString().slice(0,10) + ".json");
+        dlAnchorElem.click();
+    }
+
+    function importData(event) {
+        const file = event.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if(confirm("⚠️ 警告：這將會【完全覆蓋】目前雲端上的所有資料，並還原至此備份檔的狀態！確定要繼續嗎？")) {
+                    document.getElementById('loading-screen').style.display = 'flex';
+                    document.getElementById('loading-screen').innerHTML = '<div>正在還原資料，請勿關閉網頁...</div><div class="spinner"></div>';
+                    if(data.settings) db.collection("taitung_v2_settings").doc("config").set(data.settings);
+                    Object.keys(data.users || {}).forEach(p => db.collection("taitung_v2_users").doc(p).set(data.users[p]));
+                    (data.posts || []).forEach(p => db.collection("taitung_v2_posts").doc(p.id.toString()).set(p));
+                    (data.events || []).forEach(ev => db.collection("taitung_v2_events").doc(ev.id.toString()).set(ev));
+                    (data.polls || []).forEach(p => db.collection("taitung_v2_polls").doc(p.id.toString()).set(p));
+                    (data.feedbacks || []).forEach(f => db.collection("taitung_v2_feedbacks").doc(f.id.toString()).set(f));
+                    (data.bottles || []).forEach(b => db.collection("taitung_v2_bottles").doc(b.id.toString()).set(b));
+                    setTimeout(() => { alert("✅ 系統還原指令已成功送出！畫面將自動重新載入。"); location.reload(); }, 3000);
+                }
+            } catch(err) { alert("檔案格式錯誤！請選擇正確的 JSON 系統備份檔。"); }
+        };
+        reader.readAsText(file);
+    }
+
+    function initApp() {
+        const savedPhone = localStorage.getItem('taitung_current_phone');
+        if (savedPhone && allUsers[savedPhone]) {
+            currentUserPhone = savedPhone;
+            const myUser = allUsers[currentUserPhone];
+            if (myUser.isSuspended) {
+                showSection('locked-section');
+                document.getElementById('locked-title').innerText = '帳號已被停權';
+                document.getElementById('locked-desc').innerHTML = '<p style="color: #444; font-size: 16px; line-height: 1.6; margin-top: 20px; padding: 18px; background: #ffebee; border-radius: 12px; border: 1px solid #ffcdd2; font-weight: 600;">您的帳號已被管理員強制停權。<br><br>💡 <b style="color: #d32f2f;">如有疑問，請聯繫管理員！</b></p>';
+                return;
+            }
+            const myScore = calculateUserScore(currentUserPhone);
+            if (myScore < 60) {
+                showSection('locked-section');
+                document.getElementById('locked-title').innerText = '帳號已鎖定';
+                document.getElementById('locked-desc').innerHTML = `<p style="font-size: 18px; font-weight: 800;">您的活躍度低於 60 分<br>(目前 <span style="color:#d32f2f;">${myScore}</span> 分)</p><p style="color: #444; font-size: 15px; line-height: 1.6; margin-top: 20px; padding: 18px; background: #ffebee; border-radius: 12px; border: 1px solid #ffcdd2; font-weight: 600;">因為您有一段時間沒有參與系統的投票或聚會，系統已暫時限制您的權限。<br><br>💡 <b style="color: #d32f2f;">請在群組呼叫管理員，請他們進入後台幫您「解鎖」！</b></p>`;
+                return;
+            }
+            showMain();
+        } else {
+            showSection('login-section');
+            document.getElementById('phone-input').addEventListener('input', function(e) {
+                const phoneVal = e.target.value.trim();
+                if(phoneVal.length === 10 && allUsers[phoneVal]) { document.getElementById('invite-code-container').style.display = 'none'; } 
+                else { document.getElementById('invite-code-container').style.display = 'block'; }
+            });
+        }
+    }
+
+    function showSection(id) {
+        currentSectionId = id; 
+        ['login-section', 'profile-section', 'main-section', 'create-event-section', 'create-poll-section', 'create-feedback-section', 'create-bottle-section', 'locked-section'].forEach(sec => {
+            const el = document.getElementById(sec);
+            if(el) el.classList.add('hidden');
+        });
+        
+        const targetEl = document.getElementById(id);
+        if(targetEl) targetEl.classList.remove('hidden');
+        
+        if (id === 'main-section') {
+            document.getElementById('nav-section').classList.remove('hidden');
+            const user = allUsers[currentUserPhone];
+            if(user) {
+                document.getElementById('welcome-msg').innerText = `${user.name} ${user.customEmoji || '✨'}`;
+                document.getElementById('my-avatar').innerText = getInitial(user.name);
+                document.getElementById('my-avatar').style.backgroundColor = user.customColor || '#005086';
+            }
+        } else { 
+            document.getElementById('nav-section').classList.add('hidden'); 
+        }
+    }
+
+    function showMain() { showSection('main-section'); switchTab(currentTab); }
+
+    function switchTab(tab) {
+        captureActiveStates(); 
+        currentTab = tab;
+        if(bottleCountdownInterval) clearInterval(bottleCountdownInterval);
+
+        ['home', 'directory', 'events', 'closures', 'card', 'feedbacks', 'bottles'].forEach(t => { 
+            const navBtn = document.getElementById(`tab-${t}`);
+            if(navBtn) navBtn.classList.remove('active'); 
+            const viewDiv = document.getElementById(`${t}-view`);
+            if(viewDiv) viewDiv.classList.add('hidden'); 
+        });
+        
+        const activeNav = document.getElementById(`tab-${tab}`);
+        if(activeNav) activeNav.classList.add('active'); 
+        const activeView = document.getElementById(`${tab}-view`);
+        if(activeView) activeView.classList.remove('hidden');
+
+        reRenderCurrentTab();
+        restoreActiveStates(); 
+    }
+
+    function captureActiveStates() {
+        activePollVotes = {};
+        document.querySelectorAll('input[name^="poll-"]:checked').forEach(inp => {
+            const name = inp.name;
+            if(!activePollVotes[name]) activePollVotes[name] = [];
+            activePollVotes[name].push(inp.value);
+        });
+        activeInputs = {};
+        document.querySelectorAll('input[type="text"], textarea').forEach(inp => { 
+            if(inp.id && inp.value !== undefined) activeInputs[inp.id] = inp.value; 
+        });
+    }
+
+    function restoreActiveStates() {
+        Object.keys(activePollVotes).forEach(name => {
+            const vals = activePollVotes[name];
+            vals.forEach(val => { const inp = document.querySelector(`input[name="${name}"][value="${val}"]`); if(inp) inp.checked = true; });
+        });
+        Object.keys(activeInputs).forEach(id => { 
+            const inp = document.getElementById(id); 
+            if(inp) inp.value = activeInputs[id]; 
+        });
+        expandedCards.forEach(id => {
+            const detailDiv = document.getElementById(`details-${id}`);
+            const iconSpan = document.getElementById(`icon-${id}`);
+            if(detailDiv && iconSpan) { detailDiv.classList.remove('hidden'); iconSpan.innerText = '🔼 收起'; }
+        });
+    }
+
+    function toggleCard(id) {
+        const detailDiv = document.getElementById(`details-${id}`); const iconSpan = document.getElementById(`icon-${id}`);
+        if(detailDiv.classList.contains('hidden')) { detailDiv.classList.remove('hidden'); iconSpan.innerText = '🔼 收起'; if(!expandedCards.includes(id)) expandedCards.push(id); } 
+        else { detailDiv.classList.add('hidden'); iconSpan.innerText = '🔽 展開'; expandedCards = expandedCards.filter(cid => cid !== id); }
+    }
+
+    function login() {
+        const phone = document.getElementById('phone-input').value.trim(); const inviteCode = document.getElementById('invite-code-input').value.trim();
+        if (!/^\d{10}$/.test(phone)) { alert("請輸入正確的 10 位數手機號碼！"); return; }
+        if (allUsers[phone]) { localStorage.setItem('taitung_current_phone', phone); currentUserPhone = phone; initApp(); } 
+        else {
+            if (!isDataLoaded) { alert("系統載入中，請稍候再試..."); return; }
+            if (inviteCode !== systemInviteCode) { alert("邀請碼錯誤！這是一個私密社群，請向管理員索取最新的邀請碼。"); return; }
+            localStorage.setItem('taitung_current_phone', phone); showSection('profile-section');
+        }
+    }
+
+    function saveProfile() {
+        if (!isDataLoaded) { alert("為保護資料安全，系統同步中請稍候！"); return; }
+        const name = document.getElementById('name-input').value.trim(); const phone = localStorage.getItem('taitung_current_phone');
+        if (!name) { alert("請輸入稱呼！"); return; }
+        if (adminPhones.length === 0) { adminPhones.push(phone); DB.saveSettings(); }
+        
+        allUsers[phone] = { phone: phone, name: name, joinDate: Date.now(), customColor: '#005086', customEmoji: '✨', manualTier: null, closedDays: [], tempClosedDates: [], bio: '', mapUrl: '', threadsUrl: '', manualBonus: 0, manualAttendBonus: 0, notifications: [], cardEffect: 'none', cardBgImage: null, cardImage: null, isSuspended: false, bottleThrows: [], bottlePickups: [] };
+        currentUserPhone = phone; 
+        DB.saveUser(phone); 
+        showMain();
+    }
+    
+    function logout() { localStorage.removeItem('taitung_current_phone'); location.reload(); }
+
+    function renderHome() {
+        renderAnnouncement();
+        const stats = getUserStats(currentUserPhone);
+        const isAdmin = adminPhones.includes(currentUserPhone);
+        const canPost = stats.tier === '👑 元老' || isAdmin;
+        
+        document.getElementById('post-creation-area').style.display = canPost ? 'block' : 'none';
+        document.getElementById('not-elder-message').style.display = canPost ? 'none' : 'block';
+
+        const list = document.getElementById('home-list');
+        list.innerHTML = '';
+        
+        let allItems = [...postsData].sort((a, b) => b.id - a.id);
+        if (allItems.length === 0) { 
+            list.innerHTML = '<p style="text-align:center; color:#7f8c8d; padding:30px;">目前還沒有任何動態喔！</p>'; 
+            return; 
+        }
+
+        let html = '';
+        allItems.forEach(post => {
+            const creator = allUsers[post.creatorPhone] || { name: '未知', customColor: '#ccc' };
+            const canManage = post.creatorPhone === currentUserPhone || isAdmin;
+            const actionHtml = canManage ? `<div class="card-actions"><button class="action-btn delete" onclick="deleteItem('post', ${post.id})">🗑️ 刪除</button></div>` : '';
+            
+            const commentsHtml = (post.comments || []).map((c, index) => {
+                const cUser = allUsers[c.phone] || { name: '未知', customColor: '#ccc' };
+                const delBtn = (c.phone === currentUserPhone || isAdmin) ? `<button style="background:none; border:none; box-shadow:none; color:#d32f2f; font-size:16px; cursor:pointer; padding:0;" onclick="deleteComment('post', ${post.id}, ${index})">✕</button>` : '';
+                return `
+                    <div class="comment-item">
+                        <strong onclick="showUserCard('${c.phone}')" style="cursor:pointer; display:inline-flex; align-items:center; color:#005086;">
+                            <span style="display:inline-block; width:22px; height:22px; border-radius:50%; background-color:${cUser.customColor||'#005086'}; color:white; text-align:center; line-height:22px; font-size:11px; margin-right:6px;">${getInitial(cUser.name)}</span> ${cUser.name}
+                        </strong> 
+                        <span style="color:#7f8c8d; font-size:12px; margin-left:8px;">${c.time}</span>
+                        <div style="position: absolute; right: 12px; top: 12px;">${delBtn}</div>
+                        <div style="margin-top: 6px; word-break: break-all; color:#2c3e50;">${c.text}</div>
+                    </div>`;
+            }).join('');
+
+            const imgHtml = post.image ? `<div style="position: relative; margin-top:10px;"><img src="${post.image}" class="post-image"><a href="${post.image}" download="post_${post.id}.jpg" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0, 80, 134, 0.85); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; text-decoration: none;">⬇️ 儲存</a></div>` : '';
+            const titleSnippet = post.text ? (post.text.length > 15 ? post.text.substring(0, 15) + '...' : post.text) : '[圖片分享]';
+
+            html += `
+                <div class="card">
+                    <div class="card-summary" onclick="toggleCard('post-${post.id}')">
+                        <div class="card-summary-left">
+                            <div class="text-avatar" style="background-color:${creator.customColor||'#005086'};" onclick="event.stopPropagation(); showUserCard('${post.creatorPhone}')">${getInitial(creator.name)}</div>
+                            <div style="flex:1; min-width:0;">
+                                <div class="badge badge-post">分享</div>
+                                <div class="card-title">${titleSnippet}</div>
+                                <div class="card-creator">${creator.name}</div>
+                            </div>
+                        </div>
+                        <div class="card-summary-right" id="icon-post-${post.id}">🔽 展開</div>
+                    </div>
+                    <div id="details-post-${post.id}" class="card-details hidden">
+                        ${actionHtml}
+                        <div class="post-text">${post.text}</div>
+                        ${imgHtml}
+                        <div class="comment-section">
+                            <div class="comment-list" id="comment-list-post-${post.id}">${commentsHtml}</div>
+                            <div class="comment-input-group">
+                                <input type="text" id="comment-input-post-${post.id}" placeholder="留言...">
+                                <button onclick="addComment('post', ${post.id})">送出</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+        
+        list.innerHTML = html;
+        
+        allItems.forEach(post => {
+            if(expandedCards.includes(`post-${post.id}`)) {
+                const el = document.getElementById(`details-post-${post.id}`);
+                const icon = document.getElementById(`icon-post-${post.id}`);
+                if(el && icon) { el.classList.remove('hidden'); icon.innerText = '🔼 收起'; }
+            }
+        });
+    }
+
+    function renderAnnouncement() {
+        document.getElementById('announcement-text-display').innerText = announcementText;
+        const editContainer = document.getElementById('edit-notice-container');
+        if (adminPhones.includes(currentUserPhone)) { editContainer.innerHTML = `<button class="edit-notice-btn" onclick="editAnnouncement()">📝 修改公告</button>`; } 
+        else { editContainer.innerHTML = ''; }
+    }
+
+    function editAnnouncement() { const newText = prompt("請輸入新的公告內容 (支援換行)：", announcementText); if(newText !== null) { announcementText = newText; DB.saveSettings(); renderAnnouncement(); } }
+
+    function renderDirectory() {
+        const keyword = document.getElementById('search-user-input').value.trim().toLowerCase();
+        const listDiv = document.getElementById('directory-list'); listDiv.innerHTML = '';
+
+        let matchedUsers = Object.keys(allUsers).filter(phone => {
+            const u = allUsers[phone]; const searchableText = `${u.name} ${u.bio || ''} ${u.customEmoji || ''}`.toLowerCase();
+            return searchableText.includes(keyword);
+        });
+
+        if (matchedUsers.length === 0) { listDiv.innerHTML = '<p style="text-align:center; color:#7f8c8d; font-weight: 600;">找不到符合的老闆喔！</p>'; return; }
+
+        let html = '';
+        matchedUsers.forEach(phone => {
+            const u = allUsers[phone]; const stats = getUserStats(phone); const score = calculateUserScore(phone);
+            let badgeText = '', tierClass = '';
+
+            if (score >= 200) { badgeText = '超級無敵霹靂活躍大隊長🔥'; tierClass = 'dir-tier-200'; } 
+            else if (score >= 150) { badgeText = '超級活躍成員🔥'; tierClass = 'dir-tier-150'; } 
+            else if (score >= 100) { badgeText = '活躍成員🔥'; tierClass = 'dir-tier-100'; }
+
+            const badgeHtml = badgeText ? `<div style="margin-top: 8px;"><span style="background: linear-gradient(135deg, #d32f2f, #e53935); color:white; font-size:11px; padding:4px 10px; border-radius:12px; font-weight:800; box-shadow: 0 2px 5px rgba(211,47,47,0.3); display:inline-block;">🎖️ ${badgeText}</span></div>` : '';
+            
+            html += `
+                <div class="directory-item ${tierClass}" onclick="showUserCard('${phone}')">
+                    <div class="text-avatar" style="background-color:${u.customColor||'#005086'};">${getInitial(u.name)}</div>
+                    <div style="flex:1; min-width:0; margin-left: 15px;">
+                        <div style="font-weight:900; font-size:18px; color:#0f2027;">${u.name} <span style="font-size:16px;">${u.customEmoji || ''}</span></div>
+                        ${badgeHtml}
+                        <div style="font-size:14px; color:#7f8c8d; margin-top:6px; font-weight:600;">${stats.tier} | 參與 ${stats.attended} 次聚會</div>
+                    </div>
+                </div>`;
+        });
+        listDiv.innerHTML = html;
+    }
+
+    function submitPost() {
+        const text = document.getElementById('post-text-input').value.trim(); const fileInput = document.getElementById('post-image-input');
+        if (!text && !fileInput.files[0]) { alert("請至少寫點文字或上傳一張照片喔！"); return; }
+        const createPostData = (imgBase64) => { 
+            const newPost = { id: Date.now(), type: 'post', text: text, image: imgBase64, creatorPhone: currentUserPhone, date: new Date().toLocaleDateString('zh-TW'), comments: [] }; 
+            DB.savePost(newPost);
+            document.getElementById('post-text-input').value = ''; 
+            fileInput.value = ''; 
+        };
+        if (fileInput.files[0]) compressImage(fileInput.files[0], createPostData); else createPostData(null);
+    }
+
+    function renderEvents() {
+        const list = document.getElementById('events-list'); if(!list) return;
+        list.innerHTML = '';
+        let html = '';
+        const isAdmin = adminPhones.includes(currentUserPhone);
+
+        (eventsData || []).forEach(evt => {
+            let attendCount = 0; let absentCount = 0; 
+            Object.values(evt.attendees||{}).forEach(status => { if (status === 'attend') attendCount++; if (status === 'absent') absentCount++; });
+            const total = attendCount + absentCount; 
+            const attendPercent = total === 0 ? 0 : Math.round((attendCount / total) * 100); 
+            const absentPercent = total === 0 ? 0 : Math.round((absentCount / total) * 100);
+            
+            const myStatus = (evt.attendees||{})[currentUserPhone]; 
+            const creator = allUsers[evt.creatorPhone] || {name: '已刪除的使用者', customColor: '#005086'};
+            const isClosed = evt.isClosed;
+            
+            const commentsHtml = (evt.comments || []).map((c, index) => {
+                const cUser = allUsers[c.phone] || {name: '未知', customColor: '#005086'};
+                const delBtn = (c.phone === currentUserPhone || isAdmin) ? `<button style="background:none; border:none; box-shadow:none; color:#d32f2f; font-size:16px; cursor:pointer; padding:0;" onclick="deleteComment('event', ${evt.id}, ${index})">✕</button>` : '';
+                return `
+                    <div class="comment-item">
+                        <strong onclick="showUserCard('${c.phone}')" style="cursor:pointer; display:inline-flex; align-items:center; color:#005086;">
+                            <span style="display:inline-block; width:22px; height:22px; border-radius:50%; background-color:${cUser.customColor||'#005086'}; color:white; text-align:center; line-height:22px; font-size:11px; margin-right:6px;">${getInitial(cUser.name)}</span> ${cUser.name}
+                        </strong> 
+                        <span style="color:#7f8c8d; font-size:12px; margin-left:8px;">${c.time}</span>
+                        <div style="position: absolute; right: 12px; top: 12px;">${delBtn}</div>
+                        <div style="margin-top: 6px; word-break: break-all; color:#2c3e50;">${c.text}</div>
+                    </div>`;
+            }).join('');
+            
+            const canManage = evt.creatorPhone === currentUserPhone || isAdmin;
+            let actionHtml = '';
+            if (canManage) {
+                const closeBtnHtml = !isClosed ? `<button class="action-btn close" onclick="closeItem('event', ${evt.id})">🛑 截止</button>` : '';
+                actionHtml = `<div class="card-actions">${closeBtnHtml}<button class="action-btn delete" onclick="deleteItem('event', ${evt.id})">🗑️ 刪除</button></div>`;
+            }
+            
+            const badgeHtml = isClosed ? `<div class="badge badge-closed">已截止</div>` : `<div class="badge">聚會</div>`;
+            const activityHtml = evt.latestActivity ? `<div style="font-size:14px; color:#005086; font-weight:800; margin-top:10px; background:#eaf4fc; padding:8px 12px; border-radius:8px;">✨ 最新動態：${evt.latestActivity}</div>` : '';
+            const descriptionHtml = evt.description ? `<div style="font-size:15px; color:#2c3e50; margin-bottom:15px; line-height:1.6; white-space:pre-wrap; background:#eaf4fc; padding:15px; border-radius:12px; border-left:5px solid #0081C9;">${evt.description}</div>` : '';
+            
+            let attendanceBtns = '';
+            if(isClosed) { 
+                attendanceBtns = `<div style="text-align:center; width:100%; color:#d32f2f; font-weight:900; padding:12px; background:#ffebee; border-radius:12px;">🛑 本活動已截止報名</div>`; 
+            } else { 
+                attendanceBtns = `<button class="secondary attendance-btn ${myStatus === 'attend' ? 'active-attend' : ''}" onclick="toggleAttendance(${evt.id}, 'attend')">✅ 我要參加</button><button class="secondary attendance-btn ${myStatus === 'absent' ? 'active-absent' : ''}" style="${myStatus === 'absent' ? '' : 'color:#d32f2f; border-color:#ffcdd2; background:#fffafa;'}" onclick="toggleAttendance(${evt.id}, 'absent')">❌ 無法出席</button>`; 
+            }
+
+            let adminListHtml = '';
+            if (isAdmin) {
+                const attendNames = Object.keys(evt.attendees||{}).filter(k => evt.attendees[k] === 'attend').map(k => allUsers[k] ? allUsers[k].name : '未知').join('、 ') || '無';
+                const absentNames = Object.keys(evt.attendees||{}).filter(k => evt.attendees[k] === 'absent').map(k => allUsers[k] ? allUsers[k].name : '未知').join('、 ') || '無';
+                adminListHtml = `<div style="background-color: #fff9f0; border: 1px dashed #f39c12; padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 14px; color: #d35400; line-height: 1.6;"><strong style="font-size:16px;">👑 管理員名單總覽</strong><br><strong style="color:#0081C9; margin-top:8px; display:inline-block;">✅ 參加 (${attendCount})：</strong><br><span style="color:#333;">${attendNames}</span><br><strong style="color:#d32f2f; margin-top:8px; display:inline-block;">❌ 不參加 (${absentCount})：</strong><br><span style="color:#333;">${absentNames}</span></div>`;
+            }
+
+            html += `
+                <div class="card">
+                    <div class="card-summary" onclick="toggleCard('event-${evt.id}')">
+                        <div class="card-summary-left" onclick="event.stopPropagation(); showUserCard('${evt.creatorPhone}')" style="cursor:pointer;">
+                            <div class="text-avatar" style="background-color:${creator.customColor||'#005086'};">${getInitial(creator.name)}</div>
+                            <div style="flex:1; min-width:0;">
+                                ${badgeHtml}
+                                <div class="card-title">${evt.title}</div>
+                                <div class="card-creator">${creator.name}</div>
+                            </div>
+                        </div>
+                        <div class="card-summary-right" id="icon-event-${evt.id}">🔽 展開</div>
+                    </div>
+                    
+                    <div id="details-event-${evt.id}" class="card-details hidden">
+                        ${actionHtml}
+                        <div style="font-size:16px; color:#005086; margin-bottom:15px; font-weight:900;">📍 時間地點：${evt.date}</div>
+                        ${descriptionHtml}
+                        <div class="progress-container"><div class="progress-fill" style="width: ${attendPercent}%; background:linear-gradient(90deg,#0081C9,#00c6ff);"></div></div>
+                        <div style="font-size:12px; color:#7f8c8d; text-align:right; margin-bottom:10px;">參加 ${attendCount} 人 / 不參加 ${absentCount} 人</div>
+                        <div class="attendance-group">${attendanceBtns}</div>
+                        ${adminListHtml}
+                        ${activityHtml}
+                        <div class="comment-section">
+                            <div class="comment-list" id="comment-list-event-${evt.id}">${commentsHtml}</div>
+                            <div class="comment-input-group">
+                                <input type="text" id="comment-input-event-${evt.id}" placeholder="留言...">
+                                <button onclick="addComment('event', ${evt.id})">送出</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+        list.innerHTML = html;
+        (eventsData || []).forEach(evt => {
+            if(expandedCards.includes(`event-${evt.id}`)) {
+                const el = document.getElementById(`details-event-${evt.id}`);
+                const icon = document.getElementById(`icon-event-${evt.id}`);
+                if(el && icon) { el.classList.remove('hidden'); icon.innerText = '🔼 收起'; }
+            }
+        });
+    }
+
+    function renderPolls() {
+        const list = document.getElementById('polls-list'); if(!list) return;
+        list.innerHTML = '';
+        let html = '';
+        const isAdmin = adminPhones.includes(currentUserPhone);
+
+        (pollsData || []).forEach(poll => {
+            const myVotes = (poll.votes||[]).filter(v => v.phone === currentUserPhone).map(v => v.option); 
+            const uniqueVotersCount = new Set((poll.votes||[]).map(v => v.phone)).size;
+            const creator = allUsers[poll.creatorPhone] || {name: '已刪除的使用者', customColor: '#005086'};
+            const isClosed = poll.isClosed; 
+            const isPointsPoll = poll.pollType === 'points';
+            
+            const optionsHtml = poll.options.map((opt, idx) => { 
+                const isChecked = myVotes.includes(opt) ? 'checked' : ''; const disabled = isClosed ? 'disabled' : '';
+                let pointHint = (isPointsPoll && !isClosed) ? ` <span style="color:#d32f2f; font-size:13px; font-weight:900;">(${poll.isMultiple ? ptsPollMultiVote : ptsPollSingleVote > 0 ? '+' : ''}${poll.isMultiple ? ptsPollMultiVote : ptsPollSingleVote}分)</span>` : '';
+                return `<div style="margin-bottom:12px; font-size:16px; font-weight:700;"><input type="${poll.isMultiple ? 'checkbox' : 'radio'}" name="poll-${poll.id}" value="${opt}" id="opt-${poll.id}-${idx}" ${isChecked} ${disabled}><label for="opt-${poll.id}-${idx}" style="cursor:pointer;">${opt}${pointHint}</label></div>`; 
+            }).join('');
+            
+            let resultsHtml = '';
+            if (uniqueVotersCount > 0) {
+                resultsHtml = `<div style="margin-top:20px; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #e1e8ed;"><strong style="font-size:16px; color:#005086;">📊 投票狀況 (共 ${uniqueVotersCount} 人參與)：</strong><br>`;
+                poll.options.forEach(opt => {
+                    const votesForOpt = (poll.votes||[]).filter(v => v.option === opt); const count = votesForOpt.length; const percent = uniqueVotersCount > 0 ? Math.round((count / uniqueVotersCount) * 100) : 0;
+                    resultsHtml += `<div style="margin-top:12px; display:flex; justify-content:space-between; font-size:14px; font-weight:800; color:#2c3e50;"><span>${opt}</span><span style="color:#0081C9;">${count}票 (${percent}%)</span></div><div class="progress-container"><div class="progress-fill" style="width: ${percent}%; background:#0081C9;"></div></div>`;
+                    if (poll.mode === 'realname' && count > 0) { const votersStr = votesForOpt.map(v => allUsers[v.phone] ? `<span onclick="showUserCard('${v.phone}')" style="cursor:pointer; color:#005086; text-decoration:underline;">${allUsers[v.phone].name}</span>` : '未知').join('、'); resultsHtml += `<div style="font-size:13px; color:#7f8c8d; margin-top:6px; font-weight:600;">🙋‍♂️ ${votersStr}</div>`; }
+                });
+                resultsHtml += '</div>';
+            }
+
+            const canManage = poll.creatorPhone === currentUserPhone || isAdmin;
+            let actionHtml = '';
+            if (canManage) {
+                const closeBtnHtml = !isClosed ? `<button class="action-btn close" onclick="closeItem('poll', ${poll.id})">🛑 截止</button>` : '';
+                actionHtml = `<div class="card-actions" style="margin-top:-10px;">${closeBtnHtml}<button class="action-btn delete" onclick="deleteItem('poll', ${poll.id})">🗑️ 刪除</button></div>`;
+            }
+
+            let adminListHtml = '';
+            if (isAdmin && uniqueVotersCount > 0) {
+                const uniqueVoters = [...new Set((poll.votes||[]).map(v => v.phone))].map(p => allUsers[p] ? `<span onclick="showUserCard('${p}')" style="cursor:pointer; color:#005086; text-decoration:underline;">${allUsers[p].name}</span>` : '未知').join('、 ');
+                const hintText = poll.mode === 'anonymous' ? ' (匿名保護：僅顯示有參與投票的人員)' : '';
+                adminListHtml = `
+                    <div style="background-color: #fff9f0; border: 1px dashed #f39c12; padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 14px; color: #d35400; line-height: 1.6;">
+                        <strong style="font-size:16px;">👑 管理員名單總覽</strong><br>
+                        <strong style="color:#0081C9; margin-top:8px; display:inline-block;">🗳️ 已參與人員${hintText}：</strong><br><span style="color:#333;">${uniqueVoters}</span>
+                    </div>
+                `;
+            }
+
+            let badgeType = poll.mode === 'anonymous' ? '匿名' : '實名'; badgeType += poll.isMultiple ? ' / 多選' : ' / 單選';
+            const pollTypeBadge = isPointsPoll ? `<div class="badge" style="background: linear-gradient(135deg, #e91e63, #c2185b);">積分投票</div>` : `<div class="badge badge-poll">一般投票</div>`;
+            const badgeHtml = isClosed ? `<div class="badge badge-closed">已截止</div>` : `${pollTypeBadge} <div class="badge" style="background-color:#556068;">${badgeType}</div>`;
+            
+            html += `
+                <div class="card">
+                    <div class="card-summary" onclick="toggleCard('poll-${poll.id}')">
+                        <div class="card-summary-left" onclick="event.stopPropagation(); showUserCard('${poll.creatorPhone}')" style="cursor:pointer;">
+                            <div class="text-avatar" style="background-color:${creator.customColor||'#005086'};">${getInitial(creator.name)}</div>
+                            <div style="flex:1; min-width:0;">
+                                ${badgeHtml}
+                                <div class="card-title">${poll.question}</div>
+                                <div class="card-creator">${creator.name}</div>
+                            </div>
+                        </div>
+                        <div class="card-summary-right" id="icon-poll-${poll.id}">🔽 展開</div>
+                    </div>
+
+                    <div id="details-poll-${poll.id}" class="card-details hidden">
+                        ${actionHtml}
+                        ${poll.description ? `<div style="font-size:15px; color:#2c3e50; margin-bottom:15px; line-height:1.6; white-space:pre-wrap; background:#fff9f0; padding:15px; border-radius:12px; border-left:5px solid #f39c12;">${poll.description}</div>` : ''}
+                        <div>${optionsHtml}
+                        ${isClosed ? `<div style="text-align:center; width:100%; color:#d32f2f; font-weight:900; padding:12px; background:#ffebee; border-radius:12px; margin-top:15px;">🛑 本投票已截止</div>` : `<button style="width: 100%; padding: 14px; margin-top:15px; border-radius:12px; font-size:16px;" onclick="submitVote(${poll.id})">送出選票</button>`}
+                        ${resultsHtml}${adminListHtml}
+                        ${poll.latestActivity ? `<div style="font-size:14px; color:#005086; font-weight:800; margin-top:15px; background:#eaf4fc; padding:8px 12px; border-radius:8px;">✨ 最新動態：${poll.latestActivity}</div>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+        });
+        list.innerHTML = html;
+        (pollsData || []).forEach(poll => {
+            if(expandedCards.includes(`poll-${poll.id}`)) {
+                const el = document.getElementById(`details-poll-${poll.id}`);
+                const icon = document.getElementById(`icon-poll-${poll.id}`);
+                if(el && icon) { el.classList.remove('hidden'); icon.innerText = '🔼 收起'; }
+            }
+        });
+    }
+
+    function submitEvent() {
+        const title = document.getElementById('event-title').value; const date = document.getElementById('event-date').value; const description = document.getElementById('event-description').value.trim();
+        if (!title || !date) { alert("請填寫聚會名稱與時間！"); return; }
+        const newEvt = { id: Date.now(), type: 'event', title: title, date: date, description: description, creatorPhone: currentUserPhone, attendees: {}, comments: [], latestActivity: '', isClosed: false };
+        DB.saveEvent(newEvt);
+        document.getElementById('event-title').value = ''; document.getElementById('event-date').value = ''; document.getElementById('event-description').value = ''; switchTab('events');
+    }
+
+    function togglePollType() { document.getElementById('poll-multiple').disabled = false; }
+
+    function submitPoll() {
+        const question = document.getElementById('poll-question').value; const description = document.getElementById('poll-description').value.trim(); const optionsRaw = document.getElementById('poll-options').value; const pollType = document.getElementById('poll-type').value; const mode = document.getElementById('poll-mode').value; const isMultiple = document.getElementById('poll-multiple').value === 'multiple';
+        if (!question || !optionsRaw) { alert("請填寫問題與選項！"); return; }
+        const options = optionsRaw.split('\n').map(opt => opt.trim()).filter(opt => opt !== "");
+        if(options.length < 2) { alert("至少需輸入兩個選項，請記得換行喔！"); return; }
+        const newPoll = { id: Date.now(), type: 'poll', pollType: pollType, question: question, description: description, options: options, mode: mode, isMultiple: isMultiple, creatorPhone: currentUserPhone, votes: [], latestActivity: '', isClosed: false };
+        DB.savePoll(newPoll);
+        document.getElementById('poll-question').value = ''; document.getElementById('poll-description').value = ''; document.getElementById('poll-options').value = ''; switchTab('events');
+    }
+
+    function submitVote(pollId) {
+        const poll = pollsData.find(p => p.id === pollId); if(poll.isClosed) { alert("此投票已截止！"); return; }
+        const selectedOptions = document.querySelectorAll(`input[name="poll-${pollId}"]:checked`);
+        if (selectedOptions.length === 0) { alert("請至少選擇一個選項！"); return; }
+        poll.votes = poll.votes.filter(v => v.phone !== currentUserPhone); 
+        selectedOptions.forEach(opt => { poll.votes.push({ phone: currentUserPhone, option: opt.value }); });
+        poll.latestActivity = poll.mode === 'anonymous' ? `剛剛有人投了票！` : `${allUsers[currentUserPhone].name} 參與了投票！`;
+        DB.savePoll(poll);
+        if(!expandedCards.includes(`poll-${pollId}`)) expandedCards.push(`poll-${pollId}`);
+    }
+
+    function toggleAttendance(eventId, status) {
+        const evt = eventsData.find(e => e.id === eventId); if(evt.isClosed) { alert("此活動已截止報名！"); return; }
+        const me = allUsers[currentUserPhone];
+        if (evt) {
+            if (evt.attendees[currentUserPhone] === status) { delete evt.attendees[currentUserPhone]; evt.latestActivity = `${me.name} 取消了報名。`; } 
+            else { evt.attendees[currentUserPhone] = status; evt.latestActivity = status === 'attend' ? `${me.name} 決定參加了！` : `${me.name} 殘念不能來。`; }
+            DB.saveEvent(evt);
+            if(!expandedCards.includes(`event-${eventId}`)) expandedCards.push(`event-${eventId}`);
+        }
+    }
+
+    function showCreateForm(type) { 
+        const isAdmin = adminPhones.includes(currentUserPhone);
+        if (type === 'poll') {
+            const pointsOpt = document.getElementById('opt-poll-points');
+            if (pointsOpt) {
+                if (!isAdmin) { pointsOpt.disabled = true; pointsOpt.innerText = "積分投票 (僅限管理員)"; } 
+                else { pointsOpt.disabled = false; pointsOpt.innerText = "積分投票 (計分)"; }
+            }
+            document.getElementById('poll-type').value = 'general';
+            togglePollType(); showSection('create-poll-section');
+        } else if (type === 'feedback') {
+            showSection('create-feedback-section');
+        } else if (type === 'bottle') {
+            showSection('create-bottle-section');
+        } else {
+            if (!isAdmin) { alert("目前只有管理員可以發起聚會喔！"); return; }
+            showSection('create-event-section');
+        }
+    }
+    
+    function cancelCreate() { showMain(); }
+
+    function renderClosures() {
+        const days = ['一', '二', '三', '四', '五', '六', '日']; let regularHtml = '';
+        days.forEach(day => {
+            const closedUsers = Object.values(allUsers).filter(u => u.closedDays && u.closedDays.includes(day));
+            if(closedUsers.length > 0) {
+                const names = closedUsers.map(u => `<span onclick="showUserCard('${u.phone}')" style="cursor:pointer; color:#0081C9; font-weight:800; text-decoration:none; background:#eaf4fc; padding:4px 10px; border-radius:15px; display:inline-block; margin:2px 0;">${u.name} ${u.customEmoji||''}</span>`).join(' ');
+                regularHtml += `<div class="closure-day-row"><div class="closure-day-label">星期${day}</div><div class="closure-day-list" style="display:flex; flex-wrap:wrap; gap:6px;">${names}</div></div>`;
+            }
+        });
+        if(!regularHtml) regularHtml = '<p style="text-align:center; color:#7f8c8d; font-size:15px; font-weight:600; padding:20px 0;">目前還沒有人設定固定店休喔！</p>';
+        document.getElementById('regular-closures-list').innerHTML = regularHtml;
+
+        let tempDatesMap = {};
+        Object.values(allUsers).forEach(u => { if(u.tempClosedDates) { u.tempClosedDates.forEach(date => { if(!tempDatesMap[date]) tempDatesMap[date] = []; tempDatesMap[date].push(`<span onclick="showUserCard('${u.phone}')" style="cursor:pointer; color:#d35400; font-weight:800; text-decoration:none; background:#fff2e0; padding:4px 10px; border-radius:15px; display:inline-block; margin:2px 0;">${u.name} ${u.customEmoji||''}</span>`); }); } });
+        const sortedDates = Object.keys(tempDatesMap).sort(); let tempHtml = '';
+        sortedDates.forEach(date => {
+            const dateObj = new Date(date); const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} (${['日','一','二','三','四','五','六'][dateObj.getDay()]})`;
+            tempHtml += `<div class="closure-day-row"><div class="closure-day-label" style="width:100px; color:#d35400; font-size:15px;">${dateStr}</div><div class="closure-day-list" style="display:flex; flex-wrap:wrap; gap:6px;">${tempDatesMap[date].join(' ')}</div></div>`;
+        });
+        if(!tempHtml) tempHtml = '<p style="text-align:center; color:#7f8c8d; font-size:15px; font-weight:600; padding:20px 0;">近期大家都在認真賺錢，沒有臨時特休！</p>';
+        document.getElementById('temp-closures-list').innerHTML = tempHtml;
+    }
+
+    function addTempCloseDate() {
+        const date = document.getElementById('temp-close-date').value; if(!date) return;
+        let me = allUsers[currentUserPhone]; if(!me.tempClosedDates) me.tempClosedDates = [];
+        if(!me.tempClosedDates.includes(date)) me.tempClosedDates.push(date);
+        me.tempClosedDates.sort(); DB.saveUser(currentUserPhone);
+    }
+    
+    function removeTempCloseDate(date) { 
+        let me = allUsers[currentUserPhone]; 
+        me.tempClosedDates = me.tempClosedDates.filter(d => d !== date); 
+        DB.saveUser(currentUserPhone); 
+    }
+    
+    function saveClosureSettings() {
+        let me = allUsers[currentUserPhone]; 
+        const checkboxes = document.querySelectorAll('#closed-days-checkboxes input:checked');
+        me.closedDays = Array.from(checkboxes).map(cb => cb.value); 
+        DB.saveUser(currentUserPhone); 
+        alert("📅 店休設定已儲存成功！"); 
+    }
+
+    function renderCardView() {
+        const me = allUsers[currentUserPhone]; if(!me) return;
+        
+        document.getElementById('my-membership-card').innerHTML = generateCardHtml(currentUserPhone, true);
+        document.getElementById('card-color-picker').value = me.customColor || '#005086'; 
+        document.getElementById('card-emoji-input').value = me.customEmoji || '✨';
+        document.getElementById('card-effect-select').value = me.cardEffect || 'none';
+        document.getElementById('card-bio-input').value = me.bio || '';
+        document.getElementById('card-map-input').value = me.mapUrl || '';
+        document.getElementById('card-threads-input').value = me.threadsUrl || '';
+
+        const checkboxes = document.querySelectorAll('#closed-days-checkboxes input'); checkboxes.forEach(cb => { cb.checked = me.closedDays && me.closedDays.includes(cb.value); });
+        let tempListHtml = '';
+        if(me.tempClosedDates && me.tempClosedDates.length > 0) { me.tempClosedDates.forEach(d => { tempListHtml += `<div style="display:inline-block; background:#eaf4fc; color:#005086; font-weight:800; padding:6px 12px; border-radius:20px; margin:4px 6px 4px 0; border:1px solid #bbdefb;">${d} <span style="cursor:pointer; color:#d32f2f; margin-left:6px;" onclick="removeTempCloseDate('${d}')">✕</span></div>`; }); } else { tempListHtml = '無臨時特休'; }
+        document.getElementById('temp-close-list').innerHTML = tempListHtml;
+
+        const stats = getUserStats(currentUserPhone);
+        let progressHtml = '';
+        if (!me.manualTier) {
+            if (stats.tier === '🌱 新人') {
+                let p = Math.min((stats.days / 30) * 100, 100);
+                progressHtml = `<div style="font-size:14px; color:#556068; font-weight:800; margin-bottom:4px;">距離【⭐ 聚會成員】: 加入滿 30 天 (累積 ${stats.days} 天)</div><div class="progress-container"><div class="progress-fill" style="width:${p}%"></div></div>`;
+            } else if (stats.tier === '⭐ 聚會成員') {
+                let p1 = Math.min((stats.days / 60) * 100, 100); let p2 = Math.min((stats.attended / 3) * 100, 100); let bestP = Math.max(p1, p2);
+                progressHtml = `<div style="font-size:14px; color:#556068; font-weight:800; margin-bottom:4px;">距離【👑 元老】: 加入滿 60 天 (${stats.days}/60) 或 聚會 3 場 (${stats.attended}/3)</div><div class="progress-container"><div class="progress-fill" style="width:${bestP}%"></div></div>`;
+            } else if (stats.tier === '👑 元老') {
+                progressHtml = `<div style="font-size:15px; color:#d35400; font-weight:900;">🎉 您已達成最高基本階級【👑 元老】！</div>`;
+            }
+        } else { progressHtml = `<div style="font-size:15px; color:#005086; font-weight:900;">👑 管理員已為您手動設定專屬階級</div>`; }
+        document.getElementById('tier-progress-container').innerHTML = progressHtml;
+
+        const adminContainer = document.getElementById('admin-panel-container');
+        if (adminPhones.includes(currentUserPhone)) {
+            let usersListHtml = '';
+            for (let p in allUsers) {
+                const u = allUsers[p]; const uStats = getUserStats(p); const isMe = p === currentUserPhone ? '(您自己)' : '';
+                const uScore = calculateUserScore(p);
+                const adminBadge = adminPhones.includes(p) ? '<span style="color:#d32f2f; font-weight:900; font-size:12px; margin-left:5px; background:#ffebee; padding:2px 6px; border-radius:10px;">[管理員]</span>' : '';
+                const lockedWarning = uScore < 60 ? `<span style="color:#d32f2f; font-weight:900; font-size:12px; margin-left:5px; background:#ffebee; padding:2px 6px; border-radius:10px;">(鎖定中)</span>` : '';
+                let actionsHtml = '';
+                if(p !== currentUserPhone) {
+                    const unlockBtn = uScore < 60 ? `<button class="promote-btn" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);" onclick="unlockUser('${p}', ${uScore})">🔓 解鎖</button>` : '';
+                    const promoteBtn = (!u.manualTier && uStats.tier !== '👑 元老') ? `<button class="promote-btn" onclick="promoteUser('${p}')">🌟 升元老</button>` : '';
+                    const adminToggleBtn = adminPhones.includes(p) ? `<button class="secondary" style="font-size:13px; padding:6px 12px; margin:0;" onclick="toggleAdmin('${p}')">撤銷管理</button>` : `<button class="secondary" style="width:auto; margin:0 2px; padding:6px 12px; font-size:13px;" onclick="toggleAdmin('${p}')">設為管理</button>`;
+                    const editDataBtn = `<button class="secondary" style="font-size:13px; padding:6px 12px; margin:0 2px;" onclick="openEditUserModal('${p}')">✏️ 編輯資料</button>`;
+                    const suspendBtn = `<button class="${u.isSuspended ? 'promote-btn' : 'suspend-btn'}" style="margin:0 2px; padding:6px 12px; font-size:13px;" onclick="toggleSuspend('${p}')">${u.isSuspended ? '🔓 解除停權' : '🚫 停權'}</button>`;
+                    actionsHtml = `<div class="admin-actions" style="margin-top:8px;">${unlockBtn}${editDataBtn}${adminToggleBtn}${promoteBtn}${suspendBtn}<button class="kick-btn" onclick="kickUser('${p}')">踢除</button></div>`;
+                }
+                usersListHtml += `<div class="admin-user-row"><div style="line-height:1.6;"><strong onclick="showUserCard('${p}')" style="cursor:pointer; color:#005086; text-decoration:none; font-size:16px;">${u.name} ${u.customEmoji || ''}</strong> <span style="color:#7f8c8d; font-size:13px;">${isMe}</span> ${adminBadge} ${lockedWarning}<br><span style="font-size:13px; color:#556068; font-weight:600;">${p} | ${uStats.tier} | 活躍度: <span style="color:#0081C9; font-weight:800;">${uScore}</span></span></div>${actionsHtml}</div>`;
+            }
+            
+            const totalUsers = Object.keys(allUsers).length;
+            const bottleStatusColor = enableBottles ? '#2E7D32' : '#d32f2f';
+            const bottleStatusText = enableBottles ? '🟢 已開啟' : '🔴 已關閉';
+
+            adminContainer.innerHTML = `
+                <div class="admin-panel">
+                    <div class="admin-title">🛡️ 團隊與權限管理 (目前共 ${totalUsers} 人)</div>
+                    <p style="font-size:14px; color:#556068; margin-top:0; margin-bottom:10px; line-height:1.6;">若成員活躍度低於 60，可點擊「解鎖」為他補足分數。亦可「編輯資料」調整名稱、加入時間與參與數。</p>
+                    <input type="text" id="admin-search-input" placeholder="🔍 搜尋名稱、電話或狀態..." onkeyup="filterAdminUsers()" style="border-radius: 20px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #cfd9e0; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                    <div id="admin-user-list-container">${usersListHtml}</div>
+                </div>
+
+                <div class="admin-panel">
+                    <div class="admin-title">💾 系統備份與還原</div>
+                    <p style="font-size:14px; color:#556068; margin-top:0; margin-bottom:15px; line-height:1.6;">建議定期下載備份檔。若系統發生意外，可直接上傳還原所有人資料。</p>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="exportData()" style="flex:1; background:linear-gradient(135deg, #2E7D32, #1B5E20); margin:0;">📥 下載備份</button>
+                        <button onclick="document.getElementById('import-file').click()" class="secondary" style="flex:1; margin:0; border-color:#2E7D32; color:#2E7D32;">📤 上傳還原</button>
+                        <input type="file" id="import-file" style="display:none;" accept=".json" onchange="importData(event)">
+                    </div>
+                </div>
+
+                <div class="admin-panel">
+                    <div class="admin-title">🌊 漂流瓶系統全域開關</div>
+                    <p style="font-size:13px; color:#556068; margin-top:0; margin-bottom:12px;">目前狀態：<span style="font-weight:900; color:${bottleStatusColor};">${bottleStatusText}</span></p>
+                    <button class="secondary" onclick="toggleBottleFeature()" style="margin:0; width:auto; padding:8px 20px; font-size:14px;">切換系統狀態</button>
+                </div>
+
+                <div class="admin-panel">
+                    <div class="admin-title">⚙️ 活躍度計分設定</div>
+                    <p style="font-size:13px; color:#556068; margin-top:0; margin-bottom:12px;">自訂聚會與投票的預設積分規則。點擊增減按鈕後記得儲存。</p>
+                    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px; font-size:14px;">
+                        <div style="flex:1; min-width:140px;"><label style="font-weight:800; display:block; margin-bottom:6px; font-size:13px; color:#005086;">聚會:參加</label><div class="stepper-group"><button class="stepper-btn" onclick="changeSet('set-evt-attend', -1)">-</button><input type="number" id="set-evt-attend" value="${ptsEventAttend}" class="stepper-input"><button class="stepper-btn" onclick="changeSet('set-evt-attend', 1)">+</button></div></div>
+                        <div style="flex:1; min-width:140px;"><label style="font-weight:800; display:block; margin-bottom:6px; font-size:13px; color:#005086;">聚會:無法參加</label><div class="stepper-group"><button class="stepper-btn" onclick="changeSet('set-evt-absent', -1)">-</button><input type="number" id="set-evt-absent" value="${ptsEventAbsent}" class="stepper-input"><button class="stepper-btn" onclick="changeSet('set-evt-absent', 1)">+</button></div></div>
+                        <div style="flex:1; min-width:140px;"><label style="font-weight:800; display:block; margin-bottom:6px; font-size:13px; color:#005086;">聚會:未回應(扣分)</label><div class="stepper-group"><button class="stepper-btn" onclick="changeSet('set-evt-noresp', -1)">-</button><input type="number" id="set-evt-noresp" value="${ptsEventNoResp}" class="stepper-input"><button class="stepper-btn" onclick="changeSet('set-evt-noresp', 1)">+</button></div></div>
+                        <div style="flex:1; min-width:140px;"><label style="font-weight:800; display:block; margin-bottom:6px; font-size:13px; color:#005086;">單選投票:參與</label><div class="stepper-group"><button class="stepper-btn" onclick="changeSet('set-poll-single', -1)">-</button><input type="number" id="set-poll-single" value="${ptsPollSingleVote}" class="stepper-input"><button class="stepper-btn" onclick="changeSet('set-poll-single', 1)">+</button></div></div>
+                        <div style="flex:1; min-width:140px;"><label style="font-weight:800; display:block; margin-bottom:6px; font-size:13px; color:#005086;">多選投票:參與</label><div class="stepper-group"><button class="stepper-btn" onclick="changeSet('set-poll-multi', -1)">-</button><input type="number" id="set-poll-multi" value="${ptsPollMultiVote}" class="stepper-input"><button class="stepper-btn" onclick="changeSet('set-poll-multi', 1)">+</button></div></div>
+                        <div style="flex:1; min-width:140px;"><label style="font-weight:800; display:block; margin-bottom:6px; font-size:13px; color:#005086;">投票:未投票(扣分)</label><div class="stepper-group"><button class="stepper-btn" onclick="changeSet('set-poll-novote', -1)">-</button><input type="number" id="set-poll-novote" value="${ptsPollNoVote}" class="stepper-input"><button class="stepper-btn" onclick="changeSet('set-poll-novote', 1)">+</button></div></div>
+                    </div>
+                    <button onclick="saveScoreSettings()" style="margin:0; width:auto; padding:8px 20px; font-size:14px;">儲存計分設定</button>
+                </div>
+                <div class="admin-panel"><div class="admin-title">🔑 邀請碼管理</div><div style="display: flex; gap: 10px; margin-bottom: 10px;"><input type="text" id="admin-invite-code" value="${systemInviteCode}" style="margin:0;"><button onclick="changeInviteCode()" style="margin:0; width:auto; white-space:nowrap; padding: 0 20px;">更新密碼</button></div><p style="font-size:13px; color:#7f8c8d; font-weight:600;">更改邀請碼可防堵非相關人士註冊。</p></div>
+            `;
+        } else { adminContainer.innerHTML = ''; }
+    }
+
+    function saveCardStyle() {
+        let me = allUsers[currentUserPhone];
+        me.customColor = document.getElementById('card-color-picker').value;
+        me.customEmoji = document.getElementById('card-emoji-input').value;
+        me.cardEffect = document.getElementById('card-effect-select').value;
+        
+        const file = document.getElementById('card-bg-input').files[0];
+        if(file) {
+            compressImage(file, (base64) => {
+                me.cardBgImage = base64;
+                DB.saveUser(currentUserPhone);
+                renderCardView(); alert("✅ 風格已儲存！");
+            });
+        } else {
+            DB.saveUser(currentUserPhone);
+            renderCardView(); alert("✅ 風格已儲存！");
+        }
+    }
+    
+    function clearCardBg() {
+        allUsers[currentUserPhone].cardBgImage = null;
+        DB.saveUser(currentUserPhone); renderCardView();
+    }
+
+    function saveShopInfo() {
+        let me = allUsers[currentUserPhone];
+        me.bio = document.getElementById('card-bio-input').value;
+        me.mapUrl = document.getElementById('card-map-input').value;
+        me.threadsUrl = document.getElementById('card-threads-input').value;
+        
+        const file = document.getElementById('card-custom-image-input').files[0];
+        if(file) {
+            compressImage(file, (base64) => {
+                me.cardImage = base64;
+                DB.saveUser(currentUserPhone);
+                renderCardView(); alert("✅ 資料與圖片已儲存！");
+            });
+        } else {
+            DB.saveUser(currentUserPhone);
+            renderCardView(); alert("✅ 資料已儲存！");
+        }
+    }
+
+    function clearCardImage() {
+        allUsers[currentUserPhone].cardImage = null;
+        DB.saveUser(currentUserPhone); renderCardView();
+    }
+
+    function toggleBottleFeature() {
+        enableBottles = !enableBottles;
+        DB.saveSettings();
+        renderCardView();
+    }
+
+    function filterAdminUsers() {
+        const keyword = document.getElementById('admin-search-input').value.trim().toLowerCase();
+        const rows = document.querySelectorAll('#admin-user-list-container .admin-user-row');
+        rows.forEach(row => { row.style.display = row.innerText.toLowerCase().includes(keyword) ? 'flex' : 'none'; });
+    }
+
+    function openEditUserModal(phone) {
+        const u = allUsers[phone]; if(!u) return;
+        document.getElementById('edit-target-phone').value = phone;
+        document.getElementById('edit-user-name').value = u.name;
+        document.getElementById('edit-user-attend-bonus').value = u.manualAttendBonus || 0;
+        document.getElementById('edit-user-score-bonus').value = '0';
+        document.getElementById('current-score-bonus').innerText = u.manualBonus || 0;
+        const d = new Date(u.joinDate);
+        document.getElementById('edit-user-join-date').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        document.getElementById('edit-user-modal').classList.remove('hidden');
+    }
+
+    function closeEditUserModal() { document.getElementById('edit-user-modal').classList.add('hidden'); }
+
+    function saveUserEdit() {
+        const phone = document.getElementById('edit-target-phone').value;
+        const u = allUsers[phone]; if(!u) return;
+
+        const newName = document.getElementById('edit-user-name').value.trim();
+        if (newName !== '') u.name = newName;
+        
+        const attendBonus = parseInt(document.getElementById('edit-user-attend-bonus').value);
+        if (!isNaN(attendBonus)) u.manualAttendBonus = attendBonus;
+        
+        const scoreBonus = parseInt(document.getElementById('edit-user-score-bonus').value);
+        if (!isNaN(scoreBonus) && scoreBonus !== 0) u.manualBonus = (u.manualBonus || 0) + scoreBonus;
+
+        const newDateStr = document.getElementById('edit-user-join-date').value;
+        if (newDateStr) {
+            const parsedDate = new Date(newDateStr);
+            if (!isNaN(parsedDate.getTime())) u.joinDate = parsedDate.getTime();
+        }
+
+        DB.saveUser(phone); renderCardView(); closeEditUserModal(); alert("📝 會員資料已成功更新！");
+    }
+
+    function unlockUser(targetPhone, currentScore) {
+        if(confirm(`確定要幫此人解鎖嗎？系統將為他補足活躍度至 60 分。`)) {
+            const needed = 60 - currentScore;
+            allUsers[targetPhone].manualBonus = (allUsers[targetPhone].manualBonus || 0) + needed;
+            DB.saveUser(targetPhone); renderCardView(); alert("已成功解鎖該帳號！");
+        }
+    }
+
+    function toggleSuspend(targetPhone) {
+        const u = allUsers[targetPhone]; if(!u) return;
+        if(u.isSuspended) { u.isSuspended = false; DB.saveUser(targetPhone); renderCardView(); alert("已解除該帳號停權限制！"); } 
+        else {
+            if(confirm("確定要將此帳號【停權】嗎？\n該帳號將立刻無法登入與進行任何操作！")) {
+                u.isSuspended = true; DB.saveUser(targetPhone); renderCardView(); alert("該帳號已遭停權！");
+            }
+        }
+    }
+
+    function changeInviteCode() { const newCode = document.getElementById('admin-invite-code').value.trim(); if(!newCode) { alert("不能為空！"); return; } systemInviteCode = newCode; DB.saveSettings(); alert(`更新成功：${newCode}`); }
+    function promoteUser(targetPhone) { if(confirm(`確定晉升為「👑 元老」？`)) { allUsers[targetPhone].manualTier = '👑 元老'; DB.saveUser(targetPhone); renderCardView(); alert("提拔成功！"); } }
+    function toggleAdmin(targetPhone) {
+        if(adminPhones.includes(targetPhone)) { if(confirm("確定要撤銷此人的管理員權限嗎？")) { adminPhones = adminPhones.filter(phone => phone !== targetPhone); DB.saveSettings(); renderCardView(); } } 
+        else { if(confirm("確定要將此人設為管理員嗎？他將可以幫忙刪除文章與管理成員。")) { adminPhones.push(targetPhone); DB.saveSettings(); renderCardView(); alert("已成功授權管理員！"); } }
+    }
+    function kickUser(targetPhone) { 
+        if(confirm(`⚠️ 第一道確認：您確定要踢除此人嗎？`)) { 
+            if(confirm(`🚨 第二道防呆確認：此操作無法復原，您確定要永久刪除該帳號的所有資料嗎？`)) {
+                delete allUsers[targetPhone]; adminPhones = adminPhones.filter(phone => phone !== targetPhone);
+                eventsData.forEach(e => { if(e.attendees && e.attendees[targetPhone]) { delete e.attendees[targetPhone]; DB.saveEvent(e); }}); 
+                DB.delUser(targetPhone); DB.saveSettings(); renderCardView(); 
+            }
+        } 
+    }
+
+    function changeSet(id, delta) {
+        const input = document.getElementById(id);
+        if (input) { input.value = parseInt(input.value || 0) + delta; }
+    }
+    
+    function saveScoreSettings() {
+        ptsEventAttend = parseInt(document.getElementById('set-evt-attend').value) || 0;
+        ptsEventAbsent = parseInt(document.getElementById('set-evt-absent').value) || 0;
+        ptsEventNoResp = parseInt(document.getElementById('set-evt-noresp').value) || 0;
+        ptsPollSingleVote = parseInt(document.getElementById('set-poll-single').value) || 0;
+        ptsPollMultiVote = parseInt(document.getElementById('set-poll-multi').value) || 0;
+        ptsPollNoVote = parseInt(document.getElementById('set-poll-novote').value) || 0;
+        DB.saveSettings(); alert("⚙️ 計分設定已成功更新！系統將自動重新結算全體會員的活躍度！"); renderCardView();
+    }
+
+    function renderFeedbacks() {
+        const listDiv = document.getElementById('feedbacks-list');
+        listDiv.innerHTML = '';
+        const keyword = document.getElementById('search-feedback-input').value.trim().toLowerCase();
+        const isAdmin = adminPhones.includes(currentUserPhone);
+
+        let visibleFeedbacks = (feedbacksData || []).filter(fb => {
+            if (!isAdmin && fb.creatorPhone !== currentUserPhone) return false;
+            if (keyword && !fb.caseNo.toLowerCase().includes(keyword)) return false;
+            return true;
+        });
+
+        if (visibleFeedbacks.length === 0) {
+            listDiv.innerHTML = '<p style="text-align:center; color:#7f8c8d; font-weight:600; padding:30px;">目前尚無相關的投信紀錄喔！</p>';
+            return;
+        }
+
+        let html = '';
+        visibleFeedbacks.forEach(fb => {
+            const creator = allUsers[fb.creatorPhone] || { name: '未知使用者', customColor: '#ccc' };
+            let displayName = creator.name, displayColor = creator.customColor || '#005086', initial = getInitial(creator.name);
+            
+            if (fb.mode === 'anonymous') {
+                if (fb.creatorPhone === currentUserPhone) { displayName = `匿名 (這是我發的)`; displayColor = '#556068'; initial = '匿'; } 
+                else {
+                    displayName = '匿名用戶'; displayColor = '#556068'; initial = '匿';
+                    if (isAdmin) displayName += ` <span style="color:#d32f2f; font-size:12px;">(真實身分: ${creator.name})</span>`;
+                }
+            }
+
+            const statusBadge = fb.status === 'open' ? `<div class="badge badge-post" style="background:#f39c12;">處理中</div>` : `<div class="badge badge-success">✅ 已完成</div>`;
+
+            const commentsHtml = (fb.comments || []).map((c, index) => {
+                const isCommentAdmin = c.isAdmin;
+                const cUser = allUsers[c.phone] || { name: '未知' };
+                let cName = cUser.name, cColor = cUser.customColor || '#005086', cInitial = getInitial(cUser.name);
+                if (fb.mode === 'anonymous' && c.phone === fb.creatorPhone && !isCommentAdmin) { cName = '發信人'; cColor = '#556068'; cInitial = '匿'; }
+                const adminTag = isCommentAdmin ? `<span style="background:#0081C9; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px;">管理員回覆</span>` : '';
+                return `
+                    <div class="comment-item ${isCommentAdmin ? 'admin-reply' : ''}">
+                        <strong style="display:inline-flex; align-items:center; color:#005086;">
+                            <span style="display:inline-block; width:22px; height:22px; border-radius:50%; background-color:${cColor}; color:white; text-align:center; line-height:22px; font-size:11px; margin-right:6px;">${cInitial}</span> ${cName} ${adminTag}
+                        </strong> 
+                        <span style="color:#7f8c8d; font-size:12px; margin-left:8px;">${c.time}</span>
+                        <div style="margin-top: 6px; word-break: break-all; color:#2c3e50; white-space:pre-wrap;">${c.text}</div>
+                    </div>`;
+            }).join('');
+
+            let actionHtml = '';
+            if (isAdmin) {
+                const deleteBtn = `<button class="action-btn delete" onclick="deleteItem('feedback', ${fb.id})">🗑️ 刪除</button>`;
+                if (fb.status === 'open') { actionHtml = `<div class="card-actions" style="margin-bottom:10px;"><button class="action-btn complete" onclick="toggleFeedbackStatus(${fb.id}, 'closed')">✅ 標示為已完成案件</button>${deleteBtn}</div>`; } 
+                else if (fb.status === 'closed') { actionHtml = `<div class="card-actions" style="margin-bottom:10px;"><button class="action-btn" onclick="toggleFeedbackStatus(${fb.id}, 'open')">🔄 重新開啟案件</button>${deleteBtn}</div>`; }
+            }
+
+            const imgHtml = fb.image ? `<div style="position: relative; margin-top:10px;"><img src="${fb.image}" class="post-image"><a href="${fb.image}" download="${fb.caseNo}.jpg" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0, 80, 134, 0.85); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight:800; text-decoration: none;">⬇️ 儲存圖片</a></div>` : '';
+            const replyBoxHtml = fb.status === 'open' 
+                ? `<div class="comment-input-group"><input type="text" id="comment-input-feedback-${fb.id}" placeholder="回覆案件..."><button onmousedown="addComment('feedback', ${fb.id}); event.preventDefault();">傳送</button></div>`
+                : `<div style="text-align:center; padding:12px; background:#e8f5e9; color:#2e7d32; border-radius:12px; font-weight:800;">🔒 案件已完成，雙方無法再進行回覆</div>`;
+
+            html += `
+                <div class="card" style="border-left: 4px solid #8e44ad;">
+                    <div class="card-summary" onclick="toggleCard('feedback-${fb.id}')">
+                        <div class="card-summary-left" style="pointer-events:none;">
+                            <div class="text-avatar" style="background-color:${displayColor};">${initial}</div>
+                            <div style="flex:1; min-width:0;">
+                                <div class="badge badge-feedback" style="margin-bottom:3px;">編號: ${fb.caseNo}</div>
+                                <div class="card-title" style="font-size:16px;">${displayName}</div>
+                                <div class="card-creator" style="color:#95a5a6;">發送日: ${fb.date}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            ${statusBadge}
+                            <div class="card-summary-right" id="icon-feedback-${fb.id}" style="margin-top:5px; margin-left:0; background:none; color:#7f8c8d; padding:0;">🔽 展開</div>
+                        </div>
+                    </div>
+                    <div id="details-feedback-${fb.id}" class="card-details hidden">
+                        ${actionHtml}
+                        <div style="background:#fff9f0; padding:15px; border-radius:12px; border-left:4px solid #f39c12; margin-bottom:15px;">
+                            <div style="color:#d35400; font-weight:900; margin-bottom:5px; font-size:14px;">📝 投信內容：</div>
+                            <div class="post-text" style="margin:0;">${fb.content}</div>
+                        </div>
+                        ${imgHtml}
+                        <div class="comment-section">
+                            <div class="comment-list" id="comment-list-feedback-${fb.id}">${commentsHtml}</div>
+                            ${replyBoxHtml}
+                        </div>
+                    </div>
+                </div>`;
+        });
+        listDiv.innerHTML = html;
+        feedbacksData.forEach(fb => {
+            if(expandedCards.includes(`feedback-${fb.id}`)) {
+                const el = document.getElementById(`details-feedback-${fb.id}`);
+                const icon = document.getElementById(`icon-feedback-${fb.id}`);
+                if(el && icon) { el.classList.remove('hidden'); icon.innerText = '🔼 收起'; }
+            }
+        });
+    }
+
+    function submitFeedback() {
+        const content = document.getElementById('feedback-content').value.trim();
+        const mode = document.getElementById('feedback-mode').value;
+        const fileInput = document.getElementById('feedback-image');
+
+        if (!content && !fileInput.files[0]) return alert("請至少輸入文字內容或上傳一張圖片！");
+
+        const now = Date.now();
+        const caseNo = 'Case-' + now.toString().slice(-6);
+
+        const createData = (imgBase64) => {
+            const newFb = { id: now, caseNo: caseNo, content: content, image: imgBase64, mode: mode, creatorPhone: currentUserPhone, status: 'open', date: new Date().toLocaleDateString('zh-TW'), comments: [] };
+            DB.saveFeedback(newFb);
+            document.getElementById('feedback-content').value = '';
+            if(fileInput) fileInput.value = '';
+            alert(`✅ 投信已成功送出！您的案件編號為：${caseNo}`);
+            switchTab('feedbacks');
+        };
+        if (fileInput.files[0]) compressImage(fileInput.files[0], createData); else createData(null);
+    }
+
+    function toggleFeedbackStatus(id, newStatus) {
+        const fb = feedbacksData.find(f => f.id === id);
+        if (fb) { 
+            fb.status = newStatus; 
+            DB.saveFeedback(fb); 
+            if(!expandedCards.includes(`feedback-${id}`)) expandedCards.push(`feedback-${id}`); 
+            renderFeedbacks();
+        }
+    }
+
+    function switchBottleTab(tabName) {
+        currentBottleTab = tabName;
+        document.getElementById('btab-received').classList.remove('active');
+        document.getElementById('btab-mine').classList.remove('active');
+        const adminTab = document.getElementById('btab-admin');
+        if(adminTab) adminTab.classList.remove('admin-active');
+
+        if(tabName === 'received') document.getElementById('btab-received').classList.add('active');
+        if(tabName === 'mine') document.getElementById('btab-mine').classList.add('active');
+        if(tabName === 'admin' && adminTab) adminTab.classList.add('admin-active');
+        renderDriftBeach();
+    }
+
+    function renderDriftBeach() {
+        const isAdmin = adminPhones.includes(currentUserPhone);
+        const navContainer = document.getElementById('bottle-nav-container');
+        if (isAdmin && !document.getElementById('btab-admin')) {
+            navContainer.innerHTML += `<div class="bottle-sub-tab" id="btab-admin" onclick="switchBottleTab('admin')">👑 海巡署</div>`;
+        }
+
+        let me = allUsers[currentUserPhone];
+        if (!me.bottleThrows) me.bottleThrows = [];
+        if (!me.bottlePickups) me.bottlePickups = [];
+
+        const now = Date.now();
+        const startOfDay = new Date(new Date(now).getFullYear(), new Date(now).getMonth(), new Date(now).getDate()).getTime();
+        me.bottleThrows = me.bottleThrows.filter(t => t >= startOfDay);
+        me.bottlePickups = me.bottlePickups.filter(t => t >= startOfDay);
+        
+        const throwsLeft = 5 - me.bottleThrows.length;
+        const pickLeft = 5 - me.bottlePickups.length;
+
+        const beachUI = document.getElementById('beach-ui-container');
+        if (currentBottleTab === 'mine' || currentBottleTab === 'admin') {
+            beachUI.style.display = 'none';
+        } else {
+            beachUI.style.display = 'block';
+            
+            let validBottles = (bottlesData || []).filter(b => b.creatorPhone !== currentUserPhone && (!b.pickups || !b.pickups.includes(currentUserPhone)) && (b.pickups || []).length < 5);
+            
+            if (validBottles.length > 0) {
+                document.getElementById('bottle-in-sea').classList.remove('hidden');
+                document.getElementById('bottle-status-msg').innerHTML = `海面上發現了未知的漂流瓶！<br><span style="font-size:14px; opacity:0.8;">今日還可撿起 ${pickLeft} 個</span>`;
+            } else {
+                document.getElementById('bottle-in-sea').classList.add('hidden');
+                document.getElementById('bottle-status-msg').innerHTML = '目前海面上空空如也...<br><span style="font-size:14px; opacity:0.8;">大家都去認真賺錢了</span>';
+            }
+
+            const btnContainer = document.getElementById('bottle-btn-container');
+            if (throwsLeft > 0) {
+                btnContainer.innerHTML = `<button onclick="showCreateForm('bottle')" style="background: linear-gradient(135deg, #00c6ff, #0072ff); box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 16px; padding: 12px 24px; border-radius: 30px; margin:0; width:auto; color: white;">＋ 丟出漂流瓶 (今日剩 ${throwsLeft} 次)</button>`;
+            } else {
+                const nextMidnight = startOfDay + 86400000;
+                btnContainer.innerHTML = `<div style="display:inline-block; padding:10px 20px; background:rgba(0, 0, 0, 0.5); border-radius:15px; border: 1px solid rgba(255,255,255,0.2);"><div style="font-size:14px; font-weight:800; color:#e1e8ed;">今日丟出額度已滿，重置倒數</div><div id="bottle-countdown" style="font-size:20px; font-weight:900; color:#FFD700; margin-top:5px;">計算中...</div></div>`;
+                
+                if(bottleCountdownInterval) clearInterval(bottleCountdownInterval);
+                bottleCountdownInterval = setInterval(() => {
+                    let diff = nextMidnight - Date.now();
+                    if (diff <= 0) { clearInterval(bottleCountdownInterval); renderDriftBeach(); return; }
+                    let h = Math.floor(diff/3600000); let m = Math.floor((diff%3600000)/60000); let s = Math.floor((diff%60000)/1000);
+                    let el = document.getElementById('bottle-countdown'); if(el) el.innerText = `${h}時 ${m}分 ${s}秒`;
+                }, 1000);
+            }
+        }
+        renderBottles();
+    }
+
+    function renderBottles() {
+        const listDiv = document.getElementById('bottles-list'); listDiv.innerHTML = '';
+        const isAdmin = adminPhones.includes(currentUserPhone);
+
+        let visibleBottles = (bottlesData || []).filter(bottle => {
+            if (!bottle.pickups) bottle.pickups = [];
+            if (currentBottleTab === 'admin' && isAdmin) return true; 
+            if (currentBottleTab === 'mine') { return bottle.creatorPhone === currentUserPhone || bottle.pickups.includes(currentUserPhone); }
+            return false;
+        });
+
+        if (visibleBottles.length === 0 && (currentBottleTab === 'mine' || currentBottleTab === 'admin')) {
+            let emptyMsg = currentBottleTab === 'admin' ? '海域非常乾淨，沒有任何漂流瓶！' : '您還沒有丟出過漂流瓶，或還沒有撿到任何瓶子喔！';
+            listDiv.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-weight:600; padding:30px;">${emptyMsg}</p>`;
+            return;
+        }
+
+        let html = '';
+        visibleBottles.forEach(bottle => {
+            const creator = allUsers[bottle.creatorPhone] || { name: '未知', customColor: '#ccc' };
+            let displayName = '🌊 匿名漂流瓶', initial = '🍾', color = 'linear-gradient(135deg, #00c6ff, #0072ff)';
+            
+            if (currentBottleTab === 'admin') { displayName += ` <span style="color:#d32f2f; font-size:12px; font-weight:900;">(發起人: ${creator.name})</span>`; } 
+            else if (bottle.creatorPhone === currentUserPhone) { displayName += ` <span style="color:#7f8c8d; font-size:12px;">(這是我丟的)</span>`; }
+
+            let badgeHtml = '';
+            if (bottle.reported) badgeHtml += `<div class="badge" style="background:#d32f2f;">🚨 被檢舉</div> `;
+            if (currentBottleTab === 'mine' && bottle.pickups.includes(currentUserPhone) && bottle.creatorPhone !== currentUserPhone) { badgeHtml += `<div class="badge" style="background:#f39c12;">⭐ 我已撿起</div> `; }
+            if (currentBottleTab === 'mine' && bottle.creatorPhone === currentUserPhone) { badgeHtml += `<div class="badge" style="background:#11998e;">已被 ${bottle.pickups.length} 人撿起</div> `; }
+            
+            let actionHtml = `<div class="card-actions" style="margin-bottom:10px;">`;
+            if (currentBottleTab === 'admin') { actionHtml += `<button class="action-btn delete" onclick="deleteItem('bottle', ${bottle.id})">🗑️ 海巡強制打破</button>`; } 
+            else if (currentBottleTab === 'mine') {
+                if (bottle.creatorPhone !== currentUserPhone) {
+                    actionHtml += `<button class="action-btn throwback" onclick="throwBackBottle(${bottle.id})">🌊 丟回大海</button>`;
+                    actionHtml += `<button class="action-btn report" onclick="reportBottle(${bottle.id})">🚨 檢舉</button>`;
+                } else { actionHtml += `<button class="action-btn delete" onclick="deleteItem('bottle', ${bottle.id})">🗑️ 打破/刪除</button>`; }
+            }
+            actionHtml += `</div>`;
+
+            html += `
+                <div class="card" style="border-left: 5px solid #00c6ff; background: #fff;">
+                    <div class="card-summary" onclick="openHistoryLetter(${bottle.id})">
+                        <div class="card-summary-left" style="pointer-events:none;">
+                            <div class="text-avatar" style="background: ${color}; font-size:18px; box-shadow: 0 4px 10px rgba(0, 198, 255, 0.3);">${initial}</div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="margin-bottom:3px;">${badgeHtml}</div>
+                                <div class="card-title" style="font-size:16px;">${displayName}</div>
+                                <div class="card-creator" style="color:#95a5a6;">時間: ${bottle.date}</div>
+                            </div>
+                        </div>
+                        <div class="card-summary-right" style="background:none; color:#7f8c8d; padding:0;">📖 點擊閱讀</div>
+                    </div>
+                    <div id="details-bottle-${bottle.id}" class="card-details hidden">${actionHtml}</div>
+                </div>`;
+        });
+        listDiv.innerHTML = html;
+        (bottlesData || []).forEach(bottle => { 
+            if(expandedCards.includes(`bottle-${bottle.id}`)) {
+                const el = document.getElementById(`details-bottle-${bottle.id}`);
+                if(el) el.classList.remove('hidden');
+            }
+        });
+    }
+
+    function renderBottleComments(bottle) {
+        const commentsHtml = (bottle.comments || []).map(c => {
+            let cName = '🌊 撿到的人', cColor = '#00c6ff', cInitial = '拾';
+            if (c.phone === bottle.creatorPhone) { cName = '🍾 發起人'; cColor = '#556068'; cInitial = '發'; } 
+            else if (adminPhones.includes(c.phone) && currentBottleTab === 'admin') { cName = '👑 海巡署'; cColor = '#d32f2f'; cInitial = '管'; }
+
+            return `
+                <div style="background: rgba(255,255,255,0.6); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-family:sans-serif; border:1px solid #d4c0a8;">
+                    <strong style="color:#4a3b32; font-size:14px;">
+                        <span style="display:inline-block; width:18px; height:18px; border-radius:50%; background:${cColor}; color:white; text-align:center; line-height:18px; font-size:10px; margin-right:4px; box-shadow:0 1px 3px rgba(0,0,0,0.3);">${cInitial}</span>${cName}
+                    </strong>
+                    <span style="color:#888; font-size:12px; margin-left:8px;">${c.time}</span>
+                    <div style="margin-top:4px; color:#333; font-weight:700;">${c.text}</div>
+                </div>`;
+        }).join('');
+        document.getElementById('bottle-comments').innerHTML = commentsHtml || '<div style="color:#888; font-size:14px; text-align:center; padding:10px;">這封信還沒有任何留言喔！</div>';
+    }
+
+    function triggerPickup() {
+        let me = allUsers[currentUserPhone];
+        if(!me.bottlePickups) me.bottlePickups = [];
+        const startOfDay = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime();
+        const pickLeft = 5 - me.bottlePickups.filter(x => x >= startOfDay).length;
+        if(pickLeft <= 0) return alert("🌊 今日撿瓶子額度 (5/5) 已用盡！明天再來海灘碰碰運氣吧！");
+        
+        const overlay = document.getElementById('pickup-animation-overlay');
+        overlay.classList.remove('hidden');
+        document.getElementById('pickup-bottle-emoji').style.transform = "scale(1.5) translateY(-20px)";
+    }
+
+    function closePickupAnimation() {
+        document.getElementById('pickup-animation-overlay').classList.add('hidden');
+        document.getElementById('pickup-bottle-emoji').style.transform = "scale(1) translateY(0)";
+    }
+
+    function openDriftLetter() {
+        const validBottles = (bottlesData||[]).filter(b => b.creatorPhone !== currentUserPhone && (!b.pickups || !b.pickups.includes(currentUserPhone)) && (b.pickups || []).length < 5);
+        if (validBottles.length === 0) { alert("哎呀！瓶子剛剛被海浪沖走了！"); closePickupAnimation(); renderDriftBeach(); return; }
+        
+        allUsers[currentUserPhone].bottlePickups.push(Date.now());
+        DB.saveUser(currentUserPhone);
+
+        const b = validBottles[Math.floor(Math.random() * validBottles.length)];
+        currentBottleId = b.id; 
+        b.pickups.push(currentUserPhone); 
+        DB.saveBottle(b);
+
+        document.getElementById('letter-content').innerText = b.content;
+        document.getElementById('letter-date').innerText = new Date(b.id).toLocaleString();
+        document.getElementById('letter-image-container').innerHTML = b.image ? `<img src="${b.image}" class="letter-img">` : '';
+        renderBottleComments(b);
+        closePickupAnimation(); document.getElementById('letter-modal-overlay').classList.remove('hidden');
+    }
+
+    function openHistoryLetter(id) {
+        currentBottleId = id; const b = (bottlesData||[]).find(x => x.id === id); if(!b) return;
+        document.getElementById('letter-content').innerText = b.content;
+        document.getElementById('letter-date').innerText = new Date(b.id).toLocaleString();
+        document.getElementById('letter-image-container').innerHTML = b.image ? `<img src="${b.image}" class="letter-img">` : '';
+        renderBottleComments(b); document.getElementById('letter-modal-overlay').classList.remove('hidden');
+    }
+
+    function closeLetter() { document.getElementById('letter-modal-overlay').classList.add('hidden'); currentBottleId = null; renderDriftBeach(); }
+
+    function submitBottle() {
+        const content = document.getElementById('bottle-content').value.trim(); const fileInput = document.getElementById('bottle-image');
+        if (!content && !fileInput.files[0]) return alert("請寫點文字或上傳一張照片放進瓶子裡！");
+
+        const overlay = document.getElementById('throw-animation-overlay');
+        const bottleAnim = document.getElementById('bottle-emoji-animate'), splashAnim = document.getElementById('splash-emoji-animate');
+        overlay.classList.remove('hidden'); bottleAnim.classList.remove('bottle-animate'); splashAnim.classList.remove('splash-animate'); void bottleAnim.offsetWidth; 
+        
+        bottleAnim.classList.add('bottle-animate'); setTimeout(() => { splashAnim.classList.add('splash-animate'); }, 1400);
+
+        setTimeout(() => {
+            const now = Date.now();
+            let me = allUsers[currentUserPhone]; if (!me.bottleThrows) me.bottleThrows = []; me.bottleThrows.push(now);
+            DB.saveUser(currentUserPhone);
+
+            const createData = (imgBase64) => {
+                const newBottle = { id: now, content: content, image: imgBase64, creatorPhone: currentUserPhone, pickups: [], status: 'drifting', reported: false, date: new Date().toLocaleDateString('zh-TW') + ' ' + new Date().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}), comments: [] };
+                DB.saveBottle(newBottle);
+                document.getElementById('bottle-content').value = ''; if(fileInput) fileInput.value = '';
+                overlay.classList.add('hidden'); alert(`🌊 漂流瓶已成功丟向大海深處！`); switchTab('bottles');
+            };
+            if (fileInput.files[0]) compressImage(fileInput.files[0], createData); else createData(null);
+        }, 2200); 
+    }
+
+    function throwBackBottle() {
+        if(!confirm("確定要將這個瓶子丟回大海嗎？它將會重新釋出名額，讓其他人有機會撿到！")) return;
+        const b = bottlesData.find(x => x.id === currentBottleId);
+        if(b && b.pickups) { b.pickups = b.pickups.filter(p => p !== currentUserPhone); DB.saveBottle(b); alert("已將漂流瓶重新丟回大海！"); closeLetter(); }
+    }
+
+    function collectBottle() { alert("⭐ 已成功收藏此漂流瓶，隨時可以在「丟出/收藏」中查看。"); closeLetter(); switchBottleTab('mine'); }
+
+    function reportBottle(id) {
+        if(!confirm("確定要檢舉這個瓶子的內容嗎？管理員將會介入審核。")) return;
+        const b = bottlesData.find(x => x.id === id);
+        if(b) { b.reported = true; DB.saveBottle(b); renderDriftBeach(); alert("🚨 已檢舉此漂流瓶，管理員將盡快處理！"); }
+    }
+
+    function addComment(type, id) {
+        let input;
+        if(type === 'post') input = document.getElementById(`comment-input-post-${id}`);
+        else if (type === 'event') input = document.getElementById(`comment-input-event-${id}`);
+        else if (type === 'feedback') input = document.getElementById(`comment-input-feedback-${id}`);
+        else input = document.getElementById(`comment-input-${id}`);
+        
+        if(!input) return;
+        const text = input.value.trim(); if (!text) return;
+        
+        const newComment = { phone: currentUserPhone, text: text, time: new Date().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}) };
+        if (type === 'post') { 
+            const post = postsData.find(p => p.id === id); post.comments.push(newComment); 
+            DB.savePost(post);
+        } else if (type === 'event') { 
+            const evt = eventsData.find(e => e.id === id); evt.comments.push(newComment); evt.latestActivity = `${allUsers[currentUserPhone].name} 剛剛留言了！`; 
+            DB.saveEvent(evt);
+        } else if (type === 'feedback') {
+            const fb = feedbacksData.find(f => f.id === id); 
+            fb.comments.push({...newComment, isAdmin: adminPhones.includes(currentUserPhone)});
+            DB.saveFeedback(fb);
+        }
+        
+        input.value = ''; 
+        if(!expandedCards.includes(`${type}-${id}`)) expandedCards.push(`${type}-${id}`);
+        reRenderCurrentTab();
+    }
+
+    function replyToBottle() {
+        const input = document.getElementById('bottle-reply-input'); if(!input) return;
+        const text = input.value.trim(); if (!text) return;
+        const b = bottlesData.find(x => x.id === currentBottleId);
+        if (b) {
+            if(!b.comments) b.comments = [];
+            b.comments.push({ phone: currentUserPhone, text: text, time: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }), isAdmin: adminPhones.includes(currentUserPhone) && currentBottleTab === 'admin' });
+            DB.saveBottle(b); input.value = ''; renderBottleComments(b);
+        }
+    }
+
+    function closeItem(type, id) {
+        if(!confirm("確定要截止嗎？截止後大家就不能再報名或投票囉！(系統將會同步結算積分)")) return;
+        if(type === 'event') { const item = eventsData.find(e => e.id === id); if(item) { item.isClosed = true; DB.saveEvent(item); } } 
+        else if (type === 'poll') { const item = pollsData.find(p => p.id === id); if(item) { item.isClosed = true; DB.savePoll(item); } }
+    }
+    
+    function deleteItem(type, id) {
+        if(type === 'feedback') {
+            if(!confirm("確定要刪除這個意見信箱案件嗎？")) return;
+            DB.delFeedback(id);
+        } else if (type === 'bottle') {
+            if(!confirm("確定要打破並刪除這個漂流瓶嗎？")) return;
+            DB.delBottle(id);
+        } else {
+            if(!confirm("確定要刪除這篇文章/活動嗎？\n(若為已截止的聚會或投票，刪除後大家已結算的積分將永久保留)")) return;
+            if(type === 'event') { 
+                const item = eventsData.find(e => e.id === id);
+                if (item && item.isClosed) { 
+                    Object.keys(allUsers).forEach(phone => {
+                        const u = allUsers[phone]; let pts = 0; const status = item.attendees ? item.attendees[phone] : null;
+                        if (status === 'attend') pts = ptsEventAttend; else if (status === 'absent') pts = ptsEventAbsent; else if (!status && item.id >= u.joinDate) pts = ptsEventNoResp;
+                        if (pts !== 0) { u.manualBonus = (u.manualBonus || 0) + pts; DB.saveUser(phone); }
+                    });
+                }
+                DB.delEvent(id);
+            } else if(type === 'poll') { 
+                const item = pollsData.find(p => p.id === id);
+                if (item && item.isClosed) { 
+                    if (item.pollType === 'points' || !item.pollType) {
+                        Object.keys(allUsers).forEach(phone => {
+                            const u = allUsers[phone]; const userVote = item.votes ? item.votes.find(v => v.phone === phone) : null; let pts = 0;
+                            if (userVote) pts = item.isMultiple ? ptsPollMultiVote : ptsPollSingleVote; else if (!userVote && item.id >= u.joinDate) pts = ptsPollNoVote;
+                            if (pts !== 0) { u.manualBonus = (u.manualBonus || 0) + pts; DB.saveUser(phone); }
+                        });
+                    }
+                }
+                DB.delPoll(id); 
+            } else if(type === 'post') { DB.delPost(id); }
+        }
+    }
+
+    function deleteComment(type, itemId, commentIndex) {
+        if(!confirm("確定要刪除這則留言嗎？")) return;
+        let dataArray; if(type === 'event') dataArray = eventsData; else if(type === 'post') dataArray = postsData;
+        const item = dataArray.find(i => i.id === itemId);
+        if(item) { 
+            item.comments.splice(commentIndex, 1); 
+            if(type === 'event') DB.saveEvent(item);
+            else if (type === 'post') DB.savePost(item);
+        }
+    }
+
+</script>
 </body>
 </html>
