@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台東老闆專屬聚會 - 液態玻璃完整版</title>
+    <title>台東老闆專屬聚會 - 終極流暢液態玻璃版</title>
     
     <script>
         window.onerror = function(msg, url, line, col, error) {
@@ -24,172 +24,77 @@
             液態玻璃 (Liquid Glass) 基礎樣式與排版
             ========================================= */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            font-family: 'PingFang TC', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); 
-            color: #1a252f; 
-            margin: 0; padding: 0;
-            display: flex; justify-content: center;
-            font-weight: 600; 
-            padding-bottom: 120px;
-        }
+        body { font-family: 'PingFang TC', 'Helvetica Neue', Helvetica, Arial, sans-serif; background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); color: #1a252f; margin: 0; padding: 0; display: flex; justify-content: center; font-weight: 600; padding-bottom: 120px; }
         
-        /* 🚨 補回來的載入畫面樣式 */
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #005086 0%, #0081C9 100%); 
-            color: white; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; font-size: 22px; font-weight: 800; z-index: 99999;
-        }
-
-        .spinner { 
-            margin-top: 20px; width: 45px; height: 45px; 
-            border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid white; 
-            border-radius: 50%; animation: spin 1s linear infinite; 
-        }
-
-        @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-        }
-
-        .app-container {
-            width: 100%; max-width: 480px; 
-            min-height: 100vh; border: none; 
-            position: relative;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            color: #005086; text-align: center;
-            padding: 18px; font-size: 22px; font-weight: 900; letter-spacing: 2px;
-            position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.3);
-        }
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #005086 0%, #0081C9 100%); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; z-index: 99999; }
+        .spinner { margin-top: 20px; width: 45px; height: 45px; border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid white; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* --- 蘋果風懸浮毛玻璃導覽列 --- */
-        .nav-tabs { 
-            position: fixed; 
-            bottom: 20px; left: 15px; right: 15px; margin: 0 auto;
-            max-width: 450px;
-            display: flex; justify-content: space-around; align-items: center;
-            background-color: rgba(255, 255, 255, 0.7); 
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
-            padding: 10px; border-radius: 25px;
-            border: 1px solid rgba(255,255,255,0.5);
-            z-index: 10000;
-        }
-
-        .nav-tab {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 5px; font-size: 11px;
-            font-weight: 800; cursor: pointer; color: #556068; 
-            transition: 0.3s; white-space: nowrap; flex: 1;
-        }
-
+        .app-container { width: 100%; max-width: 480px; min-height: 100vh; border: none; position: relative; }
+        .header { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); color: #005086; text-align: center; padding: 18px; font-size: 22px; font-weight: 900; letter-spacing: 2px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.3); }
+        
+        /* 蘋果風懸浮毛玻璃導覽列 */
+        .nav-tabs { position: fixed; bottom: 20px; left: 15px; right: 15px; margin: 0 auto; max-width: 450px; display: flex; justify-content: space-around; align-items: center; background-color: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); padding: 10px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.5); z-index: 10000; }
+        .nav-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 5px; font-size: 11px; font-weight: 800; cursor: pointer; color: #556068; transition: 0.3s; white-space: nowrap; flex: 1; }
         .nav-tab.active { color: #0081C9; }
-
         .content { padding: 20px; }
         
         /* 液態玻璃卡片與面板 */
-        .card, .custom-style-panel, .admin-panel, .announcement-board, .score-log-card { 
-            background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; 
-            padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-        }
-        
-        input, select, textarea {
-            width: 100%; padding: 14px; margin: 8px 0; border: 1px solid rgba(255,255,255,0.5); 
-            border-radius: 12px; font-size: 16px; font-family: inherit; font-weight: 600; 
-            background-color: rgba(255,255,255,0.7); transition: 0.3s;
-        }
-
-        input:focus, select:focus, textarea:focus { 
-            border-color: #0081C9; box-shadow: 0 0 0 4px rgba(0, 129, 201, 0.15); outline: none; background-color: #ffffff;
-        }
-
+        .card, .custom-style-panel, .admin-panel, .announcement-board, .score-log-card { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); }
+        input, select, textarea { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid rgba(255,255,255,0.5); border-radius: 12px; font-size: 16px; font-family: inherit; font-weight: 600; background-color: rgba(255,255,255,0.7); transition: 0.3s; color: #1a252f; }
+        input:focus, select:focus, textarea:focus { border-color: #0081C9; box-shadow: 0 0 0 4px rgba(0, 129, 201, 0.15); outline: none; background-color: #ffffff; }
         input[type="color"] { padding: 5px; height: 55px; cursor: pointer; border-radius: 12px; }
         input[type="file"] { padding: 10px; font-size: 14px; border: 2px dashed #cfd9e0; background: rgba(255,255,255,0.5); }
         input[type="checkbox"], input[type="radio"] { width: auto; margin-right: 8px; transform: scale(1.3); }
-        
         .stepper-group { display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.5); border-radius: 12px; background: rgba(255,255,255,0.7); overflow: hidden; height: 48px; width: 100%; }
         .stepper-btn { flex: 1; background: transparent; color: #005086; border: none; height: 100%; font-size: 22px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0 !important; border-radius: 0 !important; box-shadow: none; }
         .stepper-btn:hover { background: rgba(0,0,0,0.05); }
         .stepper-input { flex: 1; border: none !important; background: transparent !important; text-align: center; margin: 0 !important; font-size: 16px; font-weight: 900; color: #1a252f; -moz-appearance: textfield; box-shadow: none !important;}
-
-        button { 
-            background: linear-gradient(135deg, #005086, #0081C9); color: #ffffff; 
-            font-weight: 800; font-size: 16px; padding: 14px; margin: 8px 0; width: 100%;
-            border: none; border-radius: 12px; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 4px 12px rgba(0, 80, 134, 0.25); letter-spacing: 1px; 
-        }
-
+        button { background: linear-gradient(135deg, #005086, #0081C9); color: #ffffff; font-weight: 800; font-size: 16px; padding: 14px; margin: 8px 0; width: 100%; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0, 80, 134, 0.25); letter-spacing: 1px; }
         button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 80, 134, 0.35); }
         button:active { transform: translateY(0); }
         button.secondary { background: rgba(255,255,255,0.8); color: #005086; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         button.secondary:hover { background: #ffffff; }
 
-        /* =========================================
-            卡片與內部元件調整
-            ========================================= */
         .announcement-title { color: #d35400; font-weight: 800; margin-bottom: 10px; font-size: 18px; display: flex; justify-content: space-between; align-items: center;}
         .announcement-text { font-size: 15px; color: #444; line-height: 1.6; white-space: pre-wrap; font-weight: 600;}
         .edit-notice-btn { background: none; border: none; box-shadow: none; color: #d35400; text-decoration: underline; cursor: pointer; font-size: 13px; padding: 0; width: auto; font-weight: 600;}
-
         .score-log-header { display: flex; justify-content: space-between; align-items: center; color: #005086; font-weight: 900; font-size: 16px; cursor: pointer; }
         .score-log-content { margin-top: 15px; padding-top: 10px; border-top: 1px dashed rgba(0,0,0,0.1); max-height: 250px; overflow-y: auto; }
         .score-log-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 14px; }
-        
         .card { padding: 0; overflow: hidden; }
         .card-summary { display: flex; align-items: center; justify-content: space-between; padding: 18px; cursor: pointer; }
         .card-summary-left { display: flex; align-items: center; flex: 1; min-width: 0; }
         .card-summary-right { font-size: 14px; color: #0081C9; font-weight: 800; flex-shrink: 0; margin-left: 10px; background: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px; }
         .card-details { padding: 0 18px 18px 18px; border-top: 1px solid rgba(0,0,0,0.05); margin-top: -5px; padding-top: 18px; position: relative;}
-        
         .text-avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #005086, #0081C9); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; margin-right: 15px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0, 80, 134, 0.2); }
         .card-title { font-size: 18px; font-weight: 800; color: #003b73; padding-right: 10px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;}
         .card-creator { font-size: 14px; color: #7f8c8d; margin-top: 5px; font-weight: 600; }
-        
         .badge { background-color: #005086; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; margin-bottom: 6px; display: inline-block; font-weight: 800; }
-        .badge-poll { background-color: #ff9800; }
-        .badge-post { background-color: #2196F3; }
-        .badge-closed { background-color: #7f8c8d; }
-        .badge-feedback { background-color: #8e44ad; }
-        .badge-success { background-color: #4CAF50; }
-        
+        .badge-poll { background-color: #ff9800; } .badge-post { background-color: #2196F3; } .badge-closed { background-color: #7f8c8d; } .badge-feedback { background-color: #8e44ad; } .badge-success { background-color: #4CAF50; }
         .post-image { width: 100%; max-height: 350px; object-fit: cover; border-radius: 12px; margin-top: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .post-text { font-size: 16px; color: #2c3e50; line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap; font-weight: 600; }
         .post-input-area { background-color: rgba(255,255,255,0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.5); }
-        
         .card-actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 15px; width: 100%; flex-wrap: wrap;}
         .action-btn { background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.1); padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 8px; width: auto; font-weight: 700; color: #333; margin: 0; box-shadow: none; }
-        .action-btn.delete { color: #d32f2f; background-color: rgba(255,235,238,0.8); border-color: #ffcdd2;}
-        .action-btn.close { color: #d35400; background-color: rgba(255,243,224,0.8); border-color: #ffe0b2;}
+        .action-btn.delete { color: #d32f2f; background-color: rgba(255,235,238,0.9); border-color: #ffcdd2;}
+        .action-btn.close { color: #d35400; background-color: rgba(255,243,224,0.9); border-color: #ffe0b2;}
         .action-btn.complete { color: #2E7D32; border-color: #A5D6A7; background-color: rgba(232,245,233,0.8); }
-        .action-btn.report { color: #d32f2f; background-color: rgba(255,235,238,0.8); border-color: #ffcdd2; }
-        .action-btn.collect { color: #f39c12; background-color: rgba(255,249,230,0.8); border-color: #ffe0b2; }
-        .action-btn.throwback { color: #0081C9; background-color: rgba(234,244,252,0.8); border-color: #bbdefb; }
-        
         .attendance-group { display: flex; gap: 12px; margin-bottom: 18px; margin-top: 12px;}
-        .attendance-btn { flex: 1; padding: 12px; font-size: 15px; border-radius: 12px; }
+        .attendance-btn { flex: 1; padding: 12px; font-size: 15px; border-radius: 12px; font-weight:800; cursor:pointer; }
         .attendance-btn.active-attend { background: linear-gradient(135deg, #005086, #0081C9); color: white; border: none; box-shadow: 0 4px 12px rgba(0, 80, 134, 0.3); }
         .attendance-btn.active-absent { background: linear-gradient(135deg, #d32f2f, #e53935); color: white; border: none; box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3); }
-        
         .comment-section { border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 18px; margin-top: 12px;}
         .comment-list { max-height: 280px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px; }
         .comment-item { background-color: rgba(255,255,255,0.6); padding: 12px 16px; border-radius: 16px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.4); font-size: 15px; position: relative; padding-right: 40px; }
         .comment-item.admin-reply { background-color: rgba(234,244,252,0.8); border-left: 4px solid #0081C9; }
-        
         .comment-input-group { display: flex; gap: 8px; background: rgba(255,255,255,0.6); padding: 6px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.5);}
         .comment-input-group input { margin: 0; flex: 1; border: none; background: transparent; padding: 10px 15px; box-shadow: none;}
         .comment-input-group button { width: auto; margin: 0; padding: 10px 20px; white-space: nowrap; border-radius: 20px; box-shadow: none; }
-
         .closure-day-row { display: flex; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); align-items: center; }
         .closure-day-label { width: 65px; font-weight: 800; color: #005086; flex-shrink: 0; font-size: 16px;}
         .closure-day-list { color: #556068; font-size: 15px; line-height: 1.6; font-weight: 600;}
         
-        /* 💳 電子會員卡 */
         .membership-card { color: white; border-radius: 16px; padding: 25px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); margin-bottom: 25px; position: relative; overflow: hidden; transition: background 0.3s ease; word-wrap: break-word; overflow-wrap: break-word; z-index: 1;}
         .membership-card::after { content: '台東開店人生'; position: absolute; font-size: 65px; color: rgba(255,255,255,0.05); top: 10px; right: -20px; font-weight: 900; line-height: 1; white-space: nowrap; pointer-events: none; z-index: -1;}
         .member-tier-display { font-size: 26px; font-weight: 900; color: #ffd700; margin-bottom: 15px; display: flex; align-items: center; text-shadow: 0 2px 4px rgba(0,0,0,0.6); z-index: 2; position: relative;}
@@ -198,115 +103,56 @@
         .glass-panel { margin-top: 15px; font-size: 15px; line-height: 1.6; background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); z-index: 2; position: relative; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(6px); font-weight: 600; }
         .progress-container { width: 100%; height: 14px; background-color: rgba(255,255,255,0.3); border-radius: 10px; overflow: hidden; margin-top: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #ffeb3b); border-radius: 10px; transition: width 0.5s ease-in-out; }
-
         @keyframes shimmer-sweep { 0% { transform: translateX(-100%) skewX(-15deg); } 100% { transform: translateX(200%) skewX(-15deg); } }
         .effect-shimmer::before { content: ''; position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%); transform: skewX(-15deg); animation: shimmer-sweep 3s infinite; pointer-events: none; z-index: 1; }
         @keyframes breathe-glow { 0%, 100% { box-shadow: 0 0 15px rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 30px rgba(255,215,0,0.9), 0 0 15px white inset; } }
         .effect-glow { animation: breathe-glow 2.5s infinite; border: 1px solid rgba(255,215,0,0.5); }
         @keyframes animated-gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .effect-gradient { background-size: 300% 300% !important; animation: animated-gradient 5s ease infinite; }
-
-        /* 👑 管理員金邊特效 */
         @keyframes royal-glow { 0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); border: 2px solid rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.9); border: 2px solid rgba(255,215,0,1); } }
         .admin-glow { animation: royal-glow 3s infinite ease-in-out; }
-
         .admin-title { color: #005086; font-weight: 900; margin-bottom: 15px; font-size: 18px; border-bottom: 1px dashed rgba(0,0,0,0.1); padding-bottom: 10px;}
         .admin-user-row { padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .admin-actions button { width: auto; margin: 2px; padding: 6px 12px; font-size: 13px; box-shadow: none; }
         .kick-btn { background: linear-gradient(135deg, #d32f2f, #e53935); color:white; }
         .promote-btn { background: linear-gradient(135deg, #f39c12, #ffb300); color:white; }
         .suspend-btn { background: linear-gradient(135deg, #7f8c8d, #34495e); color:white; }
-        
         .directory-item { display: flex; align-items: center; padding: 15px; background: rgba(255,255,255,0.5); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;}
         .directory-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); background: rgba(255,255,255,0.8); }
-        .directory-item .text-avatar { width: 55px; height: 55px; font-size: 22px; }
-        
         .dir-tier-100 { border: 2px solid transparent; background: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)) padding-box, linear-gradient(135deg, #00C9FF, #0081C9) border-box; box-shadow: 0 4px 15px rgba(0, 129, 201, 0.2); }
         .dir-tier-150 { border: 2px solid transparent; background: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)) padding-box, linear-gradient(135deg, #FF6F00, #FF9100) border-box; box-shadow: 0 6px 20px rgba(255, 111, 0, 0.35); }
         @keyframes legendary-fire-glow { 0%, 100% { box-shadow: 0 8px 30px rgba(211, 47, 47, 0.6), 0 0 10px rgba(211, 47, 47, 0.4); } 50% { box-shadow: 0 12px 40px rgba(211, 47, 47, 0.9), 0 0 20px rgba(255, 152, 0, 0.7); border-color: #ff5252; } }
         .dir-tier-200 { border: 3px solid #D32F2F; background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,235,238,0.8)); animation: legendary-fire-glow 2s infinite ease-in-out; position: relative; }
         .dir-tier-200::before { content: '🔥'; position: absolute; top: 10px; right: 15px; font-size: 24px; opacity: 0.8; filter: drop-shadow(0 0 5px rgba(211,47,47,0.5)); }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.5); backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { width: 100%; max-width: 420px; position: relative; max-height: 90vh; border-radius: 20px; box-sizing: border-box; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: auto; }
         
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { width: 100%; max-width: 420px; position: relative; max-height: 90vh; border-radius: 20px; box-sizing: border-box; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow-y: auto; padding: 20px; }
         .close-modal-btn-sticky { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); color: #d32f2f; border-radius: 50%; width: 36px; height: 36px; border: 1px solid #ffcdd2; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10005; }
         .close-modal-btn { position: absolute; top: -15px; right: -5px; background: white; color: #1a252f; border-radius: 50%; width: 36px; height: 36px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
-
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px; }
         .toast-msg { background: linear-gradient(135deg, #f39c12, #ffb300); color: white; padding: 14px 24px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); font-size: 15px; font-weight: 800; opacity: 0; transition: opacity 0.3s ease-in-out; display: flex; align-items: center; gap: 10px;}
 
         /* 🌊 漂流瓶特效 */
-        .ocean-bg {
-            position: relative; overflow: hidden;
-            background: linear-gradient(180deg, #5ce1e6 0%, #0081C9 50%, #003b73 100%);
-            background-size: 400% 400%; animation: ocean-gradient 10s ease infinite;
-            border-radius: 16px; padding: 35px 20px; color: white;
-            box-shadow: 0 8px 32px rgba(0, 80, 134, 0.4); margin-bottom: 20px; text-align: center;
-        }
-        .ocean-wave-layer {
-            position: absolute; bottom: 0; left: 0; width: 200%; height: 50px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 50"><path d="M0 25 Q 100 0 200 25 T 400 25 T 600 25 T 800 25 L 800 50 L 0 50 Z" fill="rgba(255,255,255,0.15)"/></svg>') repeat-x;
-            background-size: 400px 50px; animation: move-wave 4s linear infinite;
-        }
-        .ocean-wave-layer:nth-child(2) { bottom: 5px; opacity: 0.5; animation: move-wave 6s linear infinite reverse; background-size: 300px 40px; }
-        
-        @keyframes ocean-gradient { 0% { background-position: 50% 0%; } 50% { background-position: 50% 100%; } 100% { background-position: 50% 0%; } }
-        @keyframes move-wave { 0% { transform: translateX(0); } 100% { transform: translateX(-400px); } }
-        
+        .ocean-bg { position: relative; overflow: hidden; background: linear-gradient(180deg, #5ce1e6 0%, #0081C9 50%, #003b73 100%); background-size: 400% 400%; animation: ocean-gradient 10s ease infinite; border-radius: 16px; padding: 35px 20px; color: white; box-shadow: 0 8px 32px rgba(0, 80, 134, 0.4); margin-bottom: 20px; text-align: center; }
         .bottle-sub-nav { display:flex; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.5); backdrop-filter:blur(10px); padding:6px; border-radius:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.4); }
         .bottle-sub-tab { flex:1; text-align:center; padding:10px; font-size:14px; font-weight:800; border-radius:15px; cursor:pointer; color:#556068; }
         .bottle-sub-tab.active { background:rgba(255,255,255,0.8); color:#0081C9; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .bottle-sub-tab.admin-active { background:rgba(255,235,238,0.8); color:#d32f2f; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-
-        .beach-view {
-            background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
-            height: 250px; border-radius: 16px; position: relative; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 20px;
-            box-shadow: inset 0 -60px 80px rgba(0,0,0,0.4); margin-bottom: 15px;
-        }
-        .drifting-bottle {
-            font-size: 60px; cursor: pointer; position: absolute; bottom: 30%;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
-            animation: float-bottle 3s infinite ease-in-out;
-        }
+        .beach-view { background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80') center/cover no-repeat; height: 250px; border-radius: 16px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 20px; box-shadow: inset 0 -60px 80px rgba(0,0,0,0.4); margin-bottom: 15px; }
+        .drifting-bottle { font-size: 60px; cursor: pointer; position: absolute; bottom: 30%; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); animation: float-bottle 3s infinite ease-in-out; }
         @keyframes float-bottle { 0%, 100% { transform: translateY(0) rotate(-10deg); } 50% { transform: translateY(-15px) rotate(10deg); } }
-
-        /* ✉️ 絕美羊皮信封 */
-        .letter-modal {
-            background: #fdfaf0; border-radius: 12px; padding: 45px 25px 25px;
-            box-shadow: inset 0 0 60px rgba(139,69,19,0.08);
-            position: relative; font-family: 'Courier New', Courier, serif;
-            border: 1px solid #d4c0a8; color: #4a3b32; font-size: 16px; font-weight: 900; line-height: 1.6;
-        }
-        .letter-modal::before {
-            content: ''; position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
-            width: 55px; height: 55px; background: radial-gradient(circle, #c0392b, #922b21);
-            border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.4); border: 2px solid #7b241c; z-index: 10;
-        }
-        .letter-modal::after {
-            content: '✉️'; position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
-            z-index: 11; font-size: 22px; filter: sepia(1) hue-rotate(-50deg) saturate(3) brightness(0.8);
-        }
-        .letter-img { width: 100%; border-radius: 8px; margin-top: 15px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-
-        @keyframes throwBottleArc {
-            0% { transform: translate(0, 150px) scale(1.5) rotate(0deg); opacity: 1; }
-            40% { transform: translate(50px, -150px) scale(1) rotate(120deg); opacity: 1; }
-            80% { transform: translate(0px, 0px) scale(0.3) rotate(360deg); opacity: 0.8; }
-            90% { transform: translate(0px, 20px) scale(0.1) rotate(400deg); opacity: 0; }
-            100% { transform: translate(0px, 20px) scale(0); opacity: 0; }
-        }
-        @keyframes splashEffect { 0% { transform: scale(0.5); opacity: 0; } 80% { transform: scale(0.5); opacity: 0; } 85% { transform: scale(1.5); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
-        .bottle-animate { animation: throwBottleArc 2s forwards cubic-bezier(0.25, 0.8, 0.25, 1); }
         .splash-animate { position: absolute; bottom: 30%; font-size: 60px; animation: splashEffect 2s forwards ease-out; opacity: 0; }
-
+        @keyframes splashEffect { 0% { transform: scale(0.5); opacity: 0; } 80% { transform: scale(0.5); opacity: 0; } 85% { transform: scale(1.5); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+        @keyframes throwBottleArc { 0% { transform: translate(0, 150px) scale(1.5) rotate(0deg); opacity: 1; } 40% { transform: translate(50px, -150px) scale(1) rotate(120deg); opacity: 1; } 80% { transform: translate(0px, 0px) scale(0.3) rotate(360deg); opacity: 0.8; } 90% { transform: translate(0px, 20px) scale(0.1) rotate(400deg); opacity: 0; } 100% { transform: translate(0px, 20px) scale(0); opacity: 0; } }
+        .bottle-animate { animation: throwBottleArc 2s forwards cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .letter-modal { background: #fdfaf0 !important; border-radius: 12px; padding: 45px 20px 20px 20px !important; box-shadow: inset 0 0 50px rgba(139,69,19,0.06); position: relative; border: 1px solid #d4c0a8; color: #4a3b32 !important; font-size: 16px; font-weight: 800; line-height: 1.6; margin-bottom: 15px; }
+        .letter-modal::before { content: ''; position: absolute; top: -22px; left: 50%; transform: translateX(-50%); width: 44px; height: 44px; background: radial-gradient(circle, #c0392b, #922b21); border-radius: 50%; border: 2px solid #7b241c; z-index: 10; }
+        .letter-img { width: 100%; border-radius: 8px; margin-top: 15px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<!-- 🚨 絕對不能漏掉的 Loading Screen 🚨 -->
 <div id="loading-screen">
     <div>連線至台東雲端大腦...</div>
     <div class="spinner"></div>
@@ -314,7 +160,6 @@
 
 <div id="toast-container"></div>
 
-<!-- 漂流瓶動畫與內容 Modal 區塊 -->
 <div id="pickup-animation-overlay" class="modal-overlay hidden" style="flex-direction: column; z-index:10001;">
     <div id="pickup-bottle-emoji" style="font-size: 100px; transition: 0.8s transform ease-in-out;">🍾</div>
     <div style="color: white; font-size: 18px; margin-top: 20px; text-align: center; padding: 20px; font-weight:800; text-shadow:0 2px 4px rgba(0,0,0,0.5);">
@@ -327,31 +172,27 @@
 </div>
 
 <div id="letter-modal-overlay" class="modal-overlay hidden" style="z-index:10002;">
-    <div class="modal-content" style="display:flex; flex-direction:column; max-height:95vh; background:transparent; overflow:hidden; border:none; box-shadow:none;">
+    <div class="modal-content" style="display:flex; flex-direction:column; max-height:95vh; background:transparent; overflow:hidden; border:none; box-shadow:none; padding:0;">
         <button class="close-modal-btn-sticky" onclick="closeLetter()">✕</button>
         
-        <div style="overflow-y:auto; padding:15px; background:rgba(255,255,255,0.9); backdrop-filter:blur(20px); border-radius:20px 20px 0 0; flex-grow:1; border:1px solid rgba(255,255,255,0.6);">
+        <div style="overflow-y:auto; padding:20px; background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); border-radius:20px 20px 0 0; flex-grow:1; border:1px solid rgba(255,255,255,0.6);">
             <div class="letter-modal">
                 <div id="letter-content" style="min-height: 100px; white-space: pre-wrap;"></div>
                 <div id="letter-image-container"></div>
                 <p style="text-align: right; font-size: 12px; color: #888; margin-top: 20px;" id="letter-date"></p>
             </div>
             
-            <div class="comment-section" style="background: rgba(255,255,255,0.5); border-radius: 16px; padding: 15px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.5);">
-                <div id="bottle-comments" style="max-height: 150px; overflow-y: auto; padding-right:5px; font-size:14px;"></div>
+            <div class="comment-section" style="background: rgba(255,255,255,0.6); border-radius: 16px; padding: 15px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.5);">
+                <div id="bottle-comments" style="max-height: 150px; overflow-y: auto; padding-right:5px; font-size:14px; color:#2c3e50;"></div>
                 <div class="comment-input-group" style="margin-top:10px;">
                     <input type="text" id="bottle-reply-input" placeholder="寫下留言並塞回瓶子...">
                     <button onclick="replyToBottle()" style="width: auto; padding: 10px 20px; box-shadow:none;">回覆</button>
                 </div>
             </div>
             
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button onclick="collectBottle()" style="flex:1; background:linear-gradient(135deg, #f39c12, #ffb300); box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);">⭐ 收下收藏</button>
-                <button onclick="throwBackBottle()" class="secondary" style="flex:1; background:rgba(255,255,255,0.8);">🌊 丟回大海</button>
-            </div>
+            <div id="letter-action-buttons" style="display: flex; gap: 10px; margin-top: 15px;"></div>
         </div>
-        
-        <div style="background:rgba(255,255,255,0.8); backdrop-filter:blur(20px); padding:10px; border-radius:0 0 20px 20px; border-top:1px solid rgba(0,0,0,0.05); text-align:center;">
+        <div style="background:rgba(255,255,255,0.95); padding:10px; border-radius:0 0 20px 20px; border-top:1px solid rgba(0,0,0,0.05); text-align:center;">
             <button onclick="closeLetter()" style="background:rgba(0,0,0,0.05); color:#1a252f; box-shadow:none; margin:0; font-size:15px; padding:12px;">關閉信件視窗</button>
         </div>
     </div>
@@ -398,11 +239,25 @@
     </div>
 </div>
 
-<!-- ================= 主程式容器 ================= -->
 <div class="app-container hidden" id="main-app-wrapper">
+    <div id="admin-maintenance-banner" class="hidden" style="background: rgba(211, 47, 47, 0.9); color: white; text-align: center; padding: 10px; font-size: 14px; font-weight: 900; z-index: 98; position: sticky; top: 69px; backdrop-filter: blur(10px);">
+        ⚠️ 系統目前正在維護中～ (僅管理員可見及操作)
+    </div>
+
     <div class="header">台東老闆專屬聚會</div>
     
     <div class="content">
+        <div id="maintenance-section" class="hidden" style="text-align: center; padding: 40px 20px;">
+            <div class="card" style="border:none; box-shadow:none; background:transparent;">
+                <h1 style="font-size: 65px; margin-top:0; margin-bottom: 10px;">🛠️</h1>
+                <h2 style="color: #005086; font-weight: 900;">系統維護中</h2>
+                <div style="color: #444; font-size: 16px; line-height: 1.6; margin-top: 20px; padding: 18px; background: rgba(255,255,255,0.8); border-radius: 16px; border: 1px solid rgba(255,255,255,0.5); font-weight: 600;">
+                    系統目前正在優化中～請稍候再試！<br><br>💡 工程師正在火速處理中 🏃‍♂️💨
+                </div>
+                <button class="secondary" onclick="logout()" style="margin-top: 30px;">登出帳號</button>
+            </div>
+        </div>
+
         <div id="login-section" class="hidden">
             <div class="card" style="border:none;">
                 <h2 style="color: #005086; font-weight: 900; margin-top:0;">台東老闆專屬聚會</h2>
@@ -414,6 +269,11 @@
                     <input type="text" id="invite-code-input" placeholder="初次加入請輸入邀請碼">
                 </div>
                 <button onclick="login()" style="margin-top: 20px;">進入系統</button>
+            </div>
+            
+            <div id="login-announcement-box" class="announcement-board hidden" style="margin-top: 25px; border-left: 5px solid #d35400;">
+                <div class="announcement-title">📌 最新社群公告</div>
+                <div id="login-announcement-text" class="announcement-text" style="color: #2c3e50;"></div>
             </div>
         </div>
 
@@ -463,6 +323,11 @@
                     </div>
                     <div class="announcement-text" id="announcement-text-display">載入中...</div>
                 </div>
+                
+                <div id="home-map-section" class="custom-style-panel hidden">
+                    <h3 style="margin-top:0; color:#005086; border-bottom:2px dashed rgba(0,0,0,0.1); padding-bottom:10px; font-weight: 900; font-size: 18px;">📍 台東聯盟商家地圖</h3>
+                    <div id="home-map-list"></div>
+                </div>
 
                 <div class="post-input-area" id="post-creation-area">
                     <h4 style="margin: 0 0 12px 0; color: #005086; font-weight: 900; font-size: 18px;">📷 分享動態</h4>
@@ -494,7 +359,7 @@
 
             <div id="feedbacks-view" class="hidden">
                 <button onclick="showCreateForm('feedback')" style="background: linear-gradient(135deg, #8e44ad, #c0392b); margin-bottom: 15px; box-shadow: 0 4px 12px rgba(142, 68, 173, 0.3);">＋ 聯絡管理員 / 提出建議</button>
-                <input type="text" id="search-feedback-input" placeholder="🔍 輸入案件編號 (例如: Case-123456) 查詢..." onkeyup="renderFeedbacks()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                <input type="text" id="search-feedback-input" placeholder="🔍 輸入案件編號查詢..." onkeyup="renderFeedbacks()" style="border-radius: 25px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px;">
                 <div id="feedbacks-list"></div>
             </div>
 
@@ -562,13 +427,13 @@
                 </div>
 
                 <div class="custom-style-panel">
-                    <h4 style="margin-top:0; color:#005086; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:10px; font-weight: 900; font-size: 18px;">📝 店家資訊、社群與名片圖片</h4>
+                    <h4 style="margin-top:0; color:#005086; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:10px; font-weight: 900; font-size: 18px;">📝 店家社群資訊</h4>
                     <label style="font-size:15px; font-weight:800; margin-top:10px; display:block; color:#333;">Threads 個人檔案連結：</label>
                     <input type="text" id="card-threads-input" placeholder="請貼上 Threads 網址">
                     <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">自我介紹 / 店家簡介：</label>
                     <textarea id="card-bio-input" placeholder="介紹一下您的店或自己吧..." style="height: 90px;"></textarea>
-                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">Google Map 地標 (連結 或 嵌入碼)：</label>
-                    <input type="text" id="card-map-input" placeholder="請貼上 Google地圖的分享連結">
+                    <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">Google Map 地標分享連結：</label>
+                    <input type="text" id="card-map-input" placeholder="請貼上地圖連結">
                     <label style="font-size:15px; font-weight:800; margin-top:15px; display:block; color:#333;">📸 上傳專屬圖文名片/海報：</label>
                     <input type="file" id="card-custom-image-input" accept="image/*">
                     <div style="display:flex; gap:10px; margin-top:20px;">
@@ -598,7 +463,6 @@
             </div>
         </div>
 
-        <!-- 🌟 發起/編輯聚會表單 -->
         <div id="create-event-section" class="hidden">
             <div class="card">
                 <h2 id="event-form-title" style="color: #005086; font-weight: 900; margin-top:0;">發起新聚會</h2>
@@ -619,7 +483,6 @@
             </div>
         </div>
         
-        <!-- 🌟 建立/編輯投票表單 -->
         <div id="create-poll-section" class="hidden">
             <div class="card">
                 <h2 id="poll-form-title" style="color: #005086; font-weight: 900; margin-top:0;">建立新投票</h2>
@@ -699,7 +562,6 @@
         </div>
     </div>
 
-    <!-- 🍎 液態玻璃懸浮導覽列 (單排呈現) -->
     <div id="nav-section" class="nav-tabs hidden">
         <div class="nav-tab active" id="tab-home" onclick="switchTab('home')"><span style="font-size:18px; margin-bottom:2px;">🏠</span>首頁</div>
         <div class="nav-tab" id="tab-directory" onclick="switchTab('directory')"><span style="font-size:18px; margin-bottom:2px;">🔍</span>老闆</div>
@@ -715,6 +577,12 @@
     // ==========================================
     // 您的核心 JavaScript 邏輯從此開始
     // ==========================================
+    
+    // 🌟 全域變數定義 (已修復：確保絕無重複宣告)
+    let editingItemId = null;
+    let editingItemType = null;
+    let maintenanceMode = false; // 🌟 系統維護狀態全域變數
+
     const firebaseConfig = {
       apiKey: "AIzaSyBWQ6GAMAsPESR3vPe7tqkGPg3KzUtSdJQ",
       authDomain: "taitung-boss.firebaseapp.com",
@@ -728,17 +596,54 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let allUsers = {}, adminPhones = [], eventsData = [], pollsData = [], postsData = [], feedbacksData = [], bottlesData = [];
-    let systemInviteCode = '8888', announcementText = '歡迎來到台東老闆專屬聚會！\n這是一個私密的交流空間，大家可以在這裡發起聚餐、投票決定餐廳，或是分享開店日常。';
+    let allUsers = {}, adminPhones = [], eventsData = [], pollsData = [], postsData = [], feedbacksData = [], bottlesData = [], mapShopsData = [];
+    let systemInviteCode = '8888', announcementText = '歡迎來到台東老闆專屬聚會！', enableAnnouncement = true;
     let ptsEventAttend = 5, ptsEventAbsent = 3, ptsEventNoResp = -3;
     let ptsPollSingleVote = 3, ptsPollMultiVote = 1, ptsPollNoVote = -3;
     let enableBottles = true; 
 
     let currentUserPhone = null, currentTab = 'home', currentBottleTab = 'received', currentSectionId = 'login-section'; 
-    let isDataLoaded = false, expandedCards = [], activeInputs = {}, activePollVotes = {}, bottleCountdownInterval = null; 
-    let loadedFlags = { users: false, events: false, polls: false, posts: false, feedbacks: false, bottles: false, settings: false };
-    
-    let editingItemType = null;
+    let isDataLoaded = false, expandedCards = [], activeInputs = {}, activePollVotes = {}, bottleCountdownInterval = null, currentBottleId = null; 
+    let loadedFlags = { users: false, events: false, polls: false, posts: false, feedbacks: false, bottles: false, settings: false, mapShops: false };
+
+    // 🌟 流暢登出功能 (防卡死修復)
+    function logout() { 
+        localStorage.removeItem('taitung_current_phone'); 
+        currentUserPhone = null;
+        currentTab = 'home';
+        document.getElementById('phone-input').value = '';
+        document.getElementById('invite-code-input').value = '';
+        showSection('login-section');
+        showToast("✅ 已安全登出！");
+    }
+
+    // 🌟 修復發文與上傳邏輯
+    function submitPost() {
+        const text = document.getElementById('post-text-input').value.trim(); 
+        const fileInput = document.getElementById('post-image-input');
+        if (!text && (!fileInput || !fileInput.files[0])) { alert("請至少寫點文字或上傳一張照片喔！"); return; }
+        
+        document.getElementById('loading-screen').style.display = 'flex'; // 上傳動畫開啟
+
+        const createPostData = (imgBase64) => { 
+            const newPost = { id: Date.now(), type: 'post', text: text, image: imgBase64, creatorPhone: currentUserPhone, date: new Date().toLocaleDateString('zh-TW'), comments: [] }; 
+            db.collection("taitung_v2_posts").doc(newPost.id.toString()).set(newPost).then(() => {
+                document.getElementById('post-text-input').value = ''; 
+                if(fileInput) fileInput.value = ''; 
+                document.getElementById('loading-screen').style.display = 'none'; // 上傳動畫關閉
+                showToast("✅ 動態發佈成功！");
+            }).catch(err => {
+                document.getElementById('loading-screen').style.display = 'none';
+                alert("發佈失敗，請檢查網路連線！");
+            });
+        };
+
+        if (fileInput && fileInput.files[0]) {
+            compressImage(fileInput.files[0], createPostData); 
+        } else {
+            createPostData(null);
+        }
+    }
 
     function generateCardHtml(phone, showControls) {
         const u = allUsers[phone];
@@ -749,12 +654,14 @@
         const cardEffectClass = u.cardEffect && u.cardEffect !== 'none' ? `effect-${u.cardEffect}` : '';
         const cardBgStyle = u.cardBgImage ? `background-image: url('${u.cardBgImage}'); background-size: cover;` : '';
         const cardImageHtml = u.cardImage ? `<div style="text-align:center; margin-top:10px;"><img src="${u.cardImage}" style="max-width:100%; border-radius:10px;"></div>` : '';
+        
+        const canSeeScore = (phone === currentUserPhone || adminPhones.includes(currentUserPhone));
 
         return `
             <div class="membership-card ${cardEffectClass}" style="${cardStyle} ${cardBgStyle}">
                 <div class="member-tier-display">${stats.tier}</div>
                 <div class="card-name-title">${u.name} ${u.customEmoji || '✨'}</div>
-                <div class="member-info-row"><span>活躍分數</span><span>${score} 分</span></div>
+                <div class="member-info-row"><span>活躍分數</span><span>${canSeeScore ? score + ' 分' : '🔒 僅自己與管理員可見'}</span></div>
                 <div class="member-info-row"><span>加入日期</span><span>${stats.joinDateStr}</span></div>
                 <div class="glass-panel">
                     ${u.bio || '尚未設定自我介紹'}
@@ -833,17 +740,36 @@
             const img = new Image(); 
             img.onload = function() {
                 const canvas = document.createElement('canvas'); 
-                const MAX_WIDTH = 400; 
+                const MAX_WIDTH = 600; 
                 let width = img.width; let height = img.height;
                 if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                 canvas.width = width; canvas.height = height; 
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height); 
-                callback(canvas.toDataURL('image/jpeg', 0.6)); 
+                callback(canvas.toDataURL('image/jpeg', 0.5)); 
             }; 
             img.src = e.target.result;
         }; 
         reader.readAsDataURL(file);
+    }
+
+    function enforceMaintenance() {
+        const isAdmin = currentUserPhone && adminPhones.includes(currentUserPhone);
+        const banner = document.getElementById('admin-maintenance-banner');
+        
+        if (maintenanceMode) {
+            if (isAdmin) {
+                if (banner) banner.classList.remove('hidden');
+            } else {
+                if (banner) banner.classList.add('hidden');
+                showSection('maintenance-section');
+            }
+        } else {
+            if (banner) banner.classList.add('hidden');
+            if (currentSectionId === 'maintenance-section') {
+                initApp();
+            }
+        }
     }
 
     function checkAllLoaded() {
@@ -864,6 +790,7 @@
     }
 
     function renderScoreLog() {
+        if(!currentUserPhone) return;
         const u = allUsers[currentUserPhone]; if(!u) return;
         let logs = []; let score = 80;
         logs.push({ time: u.joinDate, text: "🌱 系統預設初始分數", diff: 80 });
@@ -916,7 +843,8 @@
     }
 
     function reRenderCurrentTab() {
-        if (currentTab === 'home') { renderScoreLog(); renderHome(); }
+        if(!currentUserPhone) return; // 防呆登出後報錯
+        if (currentTab === 'home') { renderScoreLog(); renderHome(); renderMapShops(); }
         else if (currentTab === 'directory') renderDirectory();
         else if (currentTab === 'events') { renderEvents(); renderPolls(); }
         else if (currentTab === 'feedbacks') renderFeedbacks();
@@ -949,6 +877,10 @@
         bottlesData = []; snap.forEach(doc => bottlesData.push(doc.data())); bottlesData.sort((a, b) => b.id - a.id);
         loadedFlags.bottles = true; checkAllLoaded();
     });
+    db.collection("taitung_v2_map_shops").onSnapshot(snap => {
+        mapShopsData = []; snap.forEach(doc => mapShopsData.push(doc.data())); mapShopsData.sort((a, b) => b.id - a.id);
+        loadedFlags.mapShops = true; checkAllLoaded();
+    });
     db.collection("taitung_v2_settings").doc("config").onSnapshot(doc => {
         if (doc.exists) {
             const parsed = doc.data();
@@ -962,10 +894,13 @@
             ptsPollNoVote = parsed.ptsPollNoVote !== undefined ? parsed.ptsPollNoVote : -3;
             enableBottles = parsed.enableBottles !== undefined ? parsed.enableBottles : true;
             adminPhones = parsed.admins || [];
+            enableAnnouncement = parsed.enableAnnouncement !== undefined ? parsed.enableAnnouncement : true;
+            maintenanceMode = parsed.maintenanceMode || false;
         }
         const tabBottlesBtn = document.getElementById('tab-bottles');
         if(tabBottlesBtn) tabBottlesBtn.style.display = enableBottles ? 'flex' : 'none';
         loadedFlags.settings = true; checkAllLoaded();
+        if(isDataLoaded) enforceMaintenance();
     });
 
     const DB = {
@@ -984,14 +919,14 @@
         saveSettings: () => db.collection("taitung_v2_settings").doc("config").set({
             inviteCode: systemInviteCode, announcement: announcementText,
             ptsEventAttend, ptsEventAbsent, ptsEventNoResp, ptsPollSingleVote, ptsPollMultiVote, ptsPollNoVote,
-            enableBottles, admins: adminPhones
+            enableBottles, admins: adminPhones, enableAnnouncement: enableAnnouncement, maintenanceMode: maintenanceMode
         })
     };
 
     function exportData() {
         const backup = {
-            users: allUsers, posts: postsData, events: eventsData, polls: pollsData, feedbacks: feedbacksData, bottles: bottlesData,
-            settings: { inviteCode: systemInviteCode, announcement: announcementText, ptsEventAttend, ptsEventAbsent, ptsEventNoResp, ptsPollSingleVote, ptsPollMultiVote, ptsPollNoVote, enableBottles, admins: adminPhones }
+            users: allUsers, posts: postsData, events: eventsData, polls: pollsData, feedbacks: feedbacksData, bottles: bottlesData, mapShops: mapShopsData,
+            settings: { inviteCode: systemInviteCode, announcement: announcementText, ptsEventAttend, ptsEventAbsent, ptsEventNoResp, ptsPollSingleVote, ptsPollMultiVote, ptsPollNoVote, enableBottles, admins: adminPhones, enableAnnouncement: enableAnnouncement, maintenanceMode: maintenanceMode }
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
         const dlAnchorElem = document.createElement('a');
@@ -1016,6 +951,7 @@
                     (data.polls || []).forEach(p => db.collection("taitung_v2_polls").doc(p.id.toString()).set(p));
                     (data.feedbacks || []).forEach(f => db.collection("taitung_v2_feedbacks").doc(f.id.toString()).set(f));
                     (data.bottles || []).forEach(b => db.collection("taitung_v2_bottles").doc(b.id.toString()).set(b));
+                    (data.mapShops || []).forEach(s => db.collection("taitung_v2_map_shops").doc(s.id.toString()).set(s));
                     setTimeout(() => { alert("✅ 系統還原指令已成功送出！畫面將自動重新載入。"); location.reload(); }, 3000);
                 }
             } catch(err) { alert("檔案格式錯誤！請選擇正確的 JSON 系統備份檔。"); }
@@ -1027,11 +963,17 @@
         const savedPhone = localStorage.getItem('taitung_current_phone');
         if (savedPhone && allUsers[savedPhone]) {
             currentUserPhone = savedPhone;
+            
+            if (maintenanceMode && !adminPhones.includes(currentUserPhone)) {
+                showSection('maintenance-section');
+                return;
+            }
+
             const myUser = allUsers[currentUserPhone];
             if (myUser.isSuspended) {
                 showSection('locked-section');
                 document.getElementById('locked-title').innerText = '帳號已被停權';
-                document.getElementById('locked-desc').innerHTML = '<p style="color: #444; font-size: 16px; line-height: 1.6; margin-top: 20px; padding: 18px; background: #ffebee; border-radius: 12px; border: 1px solid #ffcdd2; font-weight: 600;">您的帳號已被管理員強制停權。<br><br>💡 <b style="color: #d32f2f;">如有疑問，請聯繫管理員！</b></p>';
+                document.getElementById('locked-desc').innerHTML = '<p style="color: #444; font-size: 16px; line-height: 1.6; margin-top: 20px; padding: 18px; background: rgba(255,235,238,0.8); border-radius: 12px; border: 1px solid #ffcdd2; font-weight: 600;">您的帳號已被管理員強制停權。<br><br>💡 <b style="color: #d32f2f;">如有疑問，請聯繫管理員！</b></p>';
                 return;
             }
             const myScore = calculateUserScore(currentUserPhone);
@@ -1043,18 +985,24 @@
             }
             showMain();
         } else {
+            if (maintenanceMode) {
+                showSection('maintenance-section');
+                return;
+            }
             showSection('login-section');
             document.getElementById('phone-input').addEventListener('input', function(e) {
                 const phoneVal = e.target.value.trim();
                 if(phoneVal.length === 10 && allUsers[phoneVal]) { document.getElementById('invite-code-container').style.display = 'none'; } 
                 else { document.getElementById('invite-code-container').style.display = 'block'; }
             });
+            renderAnnouncement();
         }
+        enforceMaintenance(); 
     }
 
     function showSection(id) {
         currentSectionId = id; 
-        ['login-section', 'profile-section', 'main-section', 'create-event-section', 'create-poll-section', 'create-feedback-section', 'create-bottle-section', 'locked-section'].forEach(sec => {
+        ['login-section', 'profile-section', 'main-section', 'create-event-section', 'create-poll-section', 'create-feedback-section', 'create-bottle-section', 'locked-section', 'maintenance-section'].forEach(sec => {
             const el = document.getElementById(sec);
             if(el) el.classList.add('hidden');
         });
@@ -1155,11 +1103,11 @@
         DB.saveUser(phone); 
         showMain();
     }
-    
-    function logout() { localStorage.removeItem('taitung_current_phone'); location.reload(); }
 
     function renderHome() {
+        if(!currentUserPhone) return;
         renderAnnouncement();
+        renderMapShops(); 
         const stats = getUserStats(currentUserPhone);
         const isAdmin = adminPhones.includes(currentUserPhone);
         const canPost = stats.tier === '👑 元老' || isAdmin;
@@ -1200,7 +1148,7 @@
             const titleSnippet = post.text ? (post.text.length > 15 ? post.text.substring(0, 15) + '...' : post.text) : '[圖片分享]';
 
             html += `
-                <div class="card">
+                <div class="card" style="padding:15px;">
                     <div class="card-summary" onclick="toggleCard('post-${post.id}')">
                         <div class="card-summary-left">
                             <div class="text-avatar" style="background-color:${creator.customColor||'#005086'};" onclick="event.stopPropagation(); showUserCard('${post.creatorPhone}')">${getInitial(creator.name)}</div>
@@ -1214,7 +1162,7 @@
                     </div>
                     <div id="details-post-${post.id}" class="card-details hidden">
                         ${actionHtml}
-                        <div class="post-text">${post.text}</div>
+                        <div class="post-text" style="margin-top:10px;">${post.text}</div>
                         ${imgHtml}
                         <div class="comment-section">
                             <div class="comment-list" id="comment-list-post-${post.id}">${commentsHtml}</div>
@@ -1238,11 +1186,68 @@
         });
     }
 
+    function renderMapShops() {
+        const section = document.getElementById('home-map-section');
+        const container = document.getElementById('home-map-list');
+        if(!section || !container) return;
+        
+        if(mapShopsData.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+        
+        section.classList.remove('hidden');
+        let html = '';
+        mapShopsData.forEach(shop => {
+            let isIframe = shop.link.includes('<iframe');
+            let cleanLink = shop.link;
+            if (isIframe) {
+                cleanLink = cleanLink.replace(/width="[^"]+"/, 'width="100%"').replace(/height="[^"]+"/, 'height="250"');
+            }
+            
+            let linkHtml = isIframe ? `<div style="margin-top:10px; border-radius:12px; overflow:hidden;">${cleanLink}</div>` : `<a href="${shop.link}" target="_blank" style="display:inline-block; margin-top:10px; background:linear-gradient(135deg, #005086, #0081C9); color:white; padding:8px 15px; border-radius:8px; text-decoration:none; font-size:14px; font-weight:800; box-shadow:0 4px 10px rgba(0,129,201,0.3);">📍 開啟 Google 地圖</a>`;
+            
+            html += `
+                <div style="background:rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.05); padding:15px; border-radius:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="font-size:16px; font-weight:900; color:#d35400;">🏪 ${shop.name}</div>
+                    ${shop.desc ? `<div style="font-size:14px; color:#556068; margin-top:5px; line-height:1.5;">${shop.desc}</div>` : ''}
+                    ${linkHtml}
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
     function renderAnnouncement() {
-        document.getElementById('announcement-text-display').innerText = announcementText;
+        const show = enableAnnouncement && announcementText;
+        const loginAnnoBox = document.getElementById('login-announcement-box');
+        if(loginAnnoBox) {
+            if(show) {
+                loginAnnoBox.classList.remove('hidden');
+                document.getElementById('login-announcement-text').innerText = announcementText;
+            } else {
+                loginAnnoBox.classList.add('hidden');
+            }
+        }
+
+        const homeAnnoBox = document.getElementById('announcement-board');
+        if(homeAnnoBox) {
+            if(show) {
+                homeAnnoBox.classList.remove('hidden');
+                document.getElementById('announcement-text-display').innerText = announcementText;
+            } else {
+                homeAnnoBox.classList.add('hidden');
+            }
+        }
+
         const editContainer = document.getElementById('edit-notice-container');
-        if (adminPhones.includes(currentUserPhone)) { editContainer.innerHTML = `<button class="edit-notice-btn" onclick="editAnnouncement()">📝 修改公告</button>`; } 
-        else { editContainer.innerHTML = ''; }
+        if (editContainer) {
+            if (adminPhones.includes(currentUserPhone)) { 
+                editContainer.innerHTML = `<button class="edit-notice-btn" onclick="editAnnouncement()">📝 修改公告</button>`; 
+            } else { 
+                editContainer.innerHTML = ''; 
+            }
+        }
     }
 
     function editAnnouncement() { const newText = prompt("請輸入新的公告內容 (支援換行)：", announcementText); if(newText !== null) { announcementText = newText; DB.saveSettings(); renderAnnouncement(); } }
@@ -1269,13 +1274,16 @@
 
             const badgeHtml = badgeText ? `<div style="margin-top: 8px;"><span style="background: linear-gradient(135deg, #d32f2f, #e53935); color:white; font-size:11px; padding:4px 10px; border-radius:12px; font-weight:800; box-shadow: 0 2px 5px rgba(211,47,47,0.3); display:inline-block;">🎖️ ${badgeText}</span></div>` : '';
             
+            const canSeeScore = (phone === currentUserPhone || adminPhones.includes(currentUserPhone));
+            const scoreDisplay = canSeeScore ? `<span style="color:#0081C9; font-weight:800;">${score}</span>` : `<span style="color:#7f8c8d; font-weight:800;">🔒 不公開</span>`;
+
             html += `
                 <div class="directory-item ${tierClass}" onclick="showUserCard('${phone}')">
                     <div class="text-avatar" style="background-color:${u.customColor||'#005086'};">${getInitial(u.name)}</div>
                     <div style="flex:1; min-width:0; margin-left: 15px;">
                         <div style="font-weight:900; font-size:18px; color:#0f2027;">${u.name} <span style="font-size:16px;">${u.customEmoji || ''}</span></div>
                         ${badgeHtml}
-                        <div style="font-size:14px; color:#7f8c8d; margin-top:6px; font-weight:600;">${stats.tier} | 參與 ${stats.attended} 次聚會</div>
+                        <div style="font-size:14px; color:#7f8c8d; margin-top:6px; font-weight:600;">${stats.tier} | 活躍度: ${scoreDisplay}</div>
                     </div>
                 </div>`;
         });
@@ -1350,14 +1358,14 @@
             }
 
             html += `
-                <div class="card">
+                <div class="card" style="padding:15px;">
                     <div class="card-summary" onclick="toggleCard('event-${evt.id}')">
                         <div class="card-summary-left" onclick="event.stopPropagation(); showUserCard('${evt.creatorPhone}')" style="cursor:pointer;">
                             <div class="text-avatar" style="background-color:${creator.customColor||'#005086'};">${getInitial(creator.name)}</div>
                             <div style="flex:1; min-width:0;">
                                 ${badgeHtml}
                                 <div class="card-title">${evt.title}</div>
-                                <div class="card-creator">${creator.name}</div>
+                                <div class="card-creator">發起人：${creator.name}</div>
                             </div>
                         </div>
                         <div class="card-summary-right" id="icon-event-${evt.id}">🔽 展開</div>
@@ -1452,7 +1460,7 @@
             const deadlineDisplay = poll.deadline ? `<div style="font-size:14px; color:#d32f2f; font-weight:900; margin-bottom:10px;">⏳ 投票截止：${new Date(poll.deadline).toLocaleString('zh-TW', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</div>` : '';
 
             html += `
-                <div class="card">
+                <div class="card" style="padding:15px;">
                     <div class="card-summary" onclick="toggleCard('poll-${poll.id}')">
                         <div class="card-summary-left" onclick="event.stopPropagation(); showUserCard('${poll.creatorPhone}')" style="cursor:pointer;">
                             <div class="text-avatar" style="background-color:${creator.customColor||'#005086'};">${getInitial(creator.name)}</div>
@@ -1649,7 +1657,7 @@
         days.forEach(day => {
             const closedUsers = Object.values(allUsers).filter(u => u.closedDays && u.closedDays.includes(day));
             if(closedUsers.length > 0) {
-                const names = closedUsers.map(u => `<span onclick="showUserCard('${u.phone}')" style="cursor:pointer; color:#0081C9; font-weight:800; text-decoration:none; background:#eaf4fc; padding:4px 10px; border-radius:15px; display:inline-block; margin:2px 0;">${u.name} ${u.customEmoji||''}</span>`).join(' ');
+                const names = closedUsers.map(u => `<span onclick="showUserCard('${u.phone}')" style="cursor:pointer; color:#0081C9; font-weight:800; text-decoration:none; background:rgba(255,255,255,0.7); padding:4px 10px; border-radius:15px; display:inline-block; margin:2px 0;">${u.name} ${u.customEmoji||''}</span>`).join(' ');
                 regularHtml += `<div class="closure-day-row"><div class="closure-day-label">星期${day}</div><div class="closure-day-list" style="display:flex; flex-wrap:wrap; gap:6px;">${names}</div></div>`;
             }
         });
@@ -1657,7 +1665,7 @@
         document.getElementById('regular-closures-list').innerHTML = regularHtml;
 
         let tempDatesMap = {};
-        Object.values(allUsers).forEach(u => { if(u.tempClosedDates) { u.tempClosedDates.forEach(date => { if(!tempDatesMap[date]) tempDatesMap[date] = []; tempDatesMap[date].push(`<span onclick="showUserCard('${u.phone}')" style="cursor:pointer; color:#d35400; font-weight:800; text-decoration:none; background:#fff2e0; padding:4px 10px; border-radius:15px; display:inline-block; margin:2px 0;">${u.name} ${u.customEmoji||''}</span>`); }); } });
+        Object.values(allUsers).forEach(u => { if(u.tempClosedDates) { u.tempClosedDates.forEach(date => { if(!tempDatesMap[date]) tempDatesMap[date] = []; tempDatesMap[date].push(`<span onclick="showUserCard('${u.phone}')" style="cursor:pointer; color:#d35400; font-weight:800; text-decoration:none; background:rgba(255,255,255,0.7); padding:4px 10px; border-radius:15px; display:inline-block; margin:2px 0;">${u.name} ${u.customEmoji||''}</span>`); }); } });
         const sortedDates = Object.keys(tempDatesMap).sort(); let tempHtml = '';
         sortedDates.forEach(date => {
             const dateObj = new Date(date); const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} (${['日','一','二','三','四','五','六'][dateObj.getDay()]})`;
@@ -1701,7 +1709,7 @@
 
         const checkboxes = document.querySelectorAll('#closed-days-checkboxes input'); checkboxes.forEach(cb => { cb.checked = me.closedDays && me.closedDays.includes(cb.value); });
         let tempListHtml = '';
-        if(me.tempClosedDates && me.tempClosedDates.length > 0) { me.tempClosedDates.forEach(d => { tempListHtml += `<div style="display:inline-block; background:#eaf4fc; color:#005086; font-weight:800; padding:6px 12px; border-radius:20px; margin:4px 6px 4px 0; border:1px solid #bbdefb;">${d} <span style="cursor:pointer; color:#d32f2f; margin-left:6px;" onclick="removeTempCloseDate('${d}')">✕</span></div>`; }); } else { tempListHtml = '無臨時特休'; }
+        if(me.tempClosedDates && me.tempClosedDates.length > 0) { me.tempClosedDates.forEach(d => { tempListHtml += `<div style="display:inline-block; background:rgba(255,255,255,0.7); color:#005086; font-weight:800; padding:6px 12px; border-radius:20px; margin:4px 6px 4px 0; border:1px solid rgba(255,255,255,0.4);">${d} <span style="cursor:pointer; color:#d32f2f; margin-left:6px;" onclick="removeTempCloseDate('${d}')">✕</span></div>`; }); } else { tempListHtml = '無臨時特休'; }
         document.getElementById('temp-close-list').innerHTML = tempListHtml;
 
         const stats = getUserStats(currentUserPhone);
@@ -1725,8 +1733,8 @@
             for (let p in allUsers) {
                 const u = allUsers[p]; const uStats = getUserStats(p); const isMe = p === currentUserPhone ? '(您自己)' : '';
                 const uScore = calculateUserScore(p);
-                const adminBadge = adminPhones.includes(p) ? '<span style="color:#d32f2f; font-weight:900; font-size:12px; margin-left:5px; background:#ffebee; padding:2px 6px; border-radius:10px;">[管理員]</span>' : '';
-                const lockedWarning = uScore < 60 ? `<span style="color:#d32f2f; font-weight:900; font-size:12px; margin-left:5px; background:#ffebee; padding:2px 6px; border-radius:10px;">(鎖定中)</span>` : '';
+                const adminBadge = adminPhones.includes(p) ? '<span style="color:#d32f2f; font-weight:900; font-size:12px; margin-left:5px; background:rgba(255,235,238,0.7); padding:2px 6px; border-radius:10px;">[管理員]</span>' : '';
+                const lockedWarning = uScore < 60 ? `<span style="color:#d32f2f; font-weight:900; font-size:12px; margin-left:5px; background:rgba(255,235,238,0.7); padding:2px 6px; border-radius:10px;">(鎖定中)</span>` : '';
                 let actionsHtml = '';
                 if(p !== currentUserPhone) {
                     const unlockBtn = uScore < 60 ? `<button class="promote-btn" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);" onclick="unlockUser('${p}', ${uScore})">🔓 解鎖</button>` : '';
@@ -1742,13 +1750,52 @@
             const totalUsers = Object.keys(allUsers).length;
             const bottleStatusColor = enableBottles ? '#2E7D32' : '#d32f2f';
             const bottleStatusText = enableBottles ? '🟢 已開啟' : '🔴 已關閉';
+            const annoStatusColor = enableAnnouncement ? '#2E7D32' : '#d32f2f';
+            const annoStatusText = enableAnnouncement ? '🟢 已顯示' : '🔴 已隱藏';
+
+            // 🌟 商家地圖管理清單 HTML
+            let adminMapListHtml = mapShopsData.map(s => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.7); padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid rgba(0,0,0,0.05);">
+                    <div><b style="color:#005086;">${s.name}</b></div>
+                    <button class="action-btn delete" onclick="deleteMapShop(${s.id})" style="margin:0;">刪除</button>
+                </div>
+            `).join('');
 
             adminContainer.innerHTML = `
                 <div class="admin-panel">
+                    <div class="admin-title">🛠️ 系統維護模式 (緊急開關)</div>
+                    <p style="font-size:13px; color:#556068; margin-top:0; margin-bottom:12px;">目前狀態：<span style="font-weight:900; color:${maintenanceMode ? '#d32f2f' : '#2E7D32'};">${maintenanceMode ? '🔴 維護中 (阻擋一般用戶)' : '🟢 正常運作'}</span></p>
+                    <button class="secondary" onclick="toggleMaintenance()" style="margin:0; width:auto; padding:8px 20px; font-size:14px; background:rgba(255,255,255,0.8); color:${maintenanceMode ? '#2E7D32' : '#d32f2f'}; border-color:${maintenanceMode ? '#A5D6A7' : '#ffcdd2'};">${maintenanceMode ? '關閉維護 (開放登入)' : '開啟維護模式'}</button>
+                </div>
+
+                <div class="admin-panel">
+                    <div class="admin-title">📍 首頁商家地標管理</div>
+                    <p style="font-size:13px; color:#556068; margin-top:0; margin-bottom:12px;">在此加入的地圖會統一顯示在「首頁」，方便大家互相交流串門子。</p>
+                    <input type="text" id="map-shop-name" placeholder="商家名稱 (例：小時候早午餐)" style="margin-bottom:8px;">
+                    <textarea id="map-shop-desc" placeholder="商家簡單介紹 (選填)" style="height:60px; margin-bottom:8px;"></textarea>
+                    <input type="text" id="map-shop-link" placeholder="Google 地圖連結 (也支援 iframe 嵌入碼)" style="margin-bottom:8px;">
+                    <button onclick="addMapShop()" style="margin-bottom:15px; box-shadow:0 4px 10px rgba(0,129,201,0.2);">＋ 新增地標到首頁</button>
+                    <div style="border-top:1px dashed rgba(0,0,0,0.1); padding-top:15px;">
+                        <div style="font-size:14px; font-weight:800; color:#556068; margin-bottom:10px;">目前已加入的商家：</div>
+                        ${adminMapListHtml || '<div style="color:#999; font-size:13px; text-align:center; padding:10px;">尚未加入任何地標</div>'}
+                    </div>
+                </div>
+
+                <div class="admin-panel">
                     <div class="admin-title">🛡️ 團隊與權限管理 (目前共 ${totalUsers} 人)</div>
                     <p style="font-size:14px; color:#556068; margin-top:0; margin-bottom:10px; line-height:1.6;">若成員活躍度低於 60，可點擊「解鎖」為他補足分數。亦可「編輯資料」調整名稱、加入時間與參與數。</p>
-                    <input type="text" id="admin-search-input" placeholder="🔍 搜尋名稱、電話或狀態..." onkeyup="filterAdminUsers()" style="border-radius: 20px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #cfd9e0; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                    <input type="text" id="admin-search-input" placeholder="🔍 搜尋名稱、電話或狀態..." onkeyup="filterAdminUsers()" style="border-radius: 20px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.7);">
                     <div id="admin-user-list-container">${usersListHtml}</div>
+                </div>
+
+                <div class="admin-panel">
+                    <div class="admin-title">📌 公告欄全域管理</div>
+                    <p style="font-size:13px; color:#556068; margin-top:0; margin-bottom:12px;">當前狀態：<span style="font-weight:900; color:${annoStatusColor};">${annoStatusText}</span></p>
+                    <textarea id="admin-anno-text-input" placeholder="在這裡編輯公告內容..." style="height: 100px; margin-bottom:10px;">${announcementText}</textarea>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="saveAnnoSettings(true)" style="flex:2; margin:0; background: linear-gradient(135deg, #2E7D32, #1B5E20);">儲存並顯示公告</button>
+                        <button onclick="saveAnnoSettings(false)" class="secondary" style="flex:1; margin:0; color:#d32f2f; border-color:rgba(211,47,47,0.3); background:rgba(255,255,255,0.8);">隱藏公告欄</button>
+                    </div>
                 </div>
 
                 <div class="admin-panel">
@@ -1756,7 +1803,7 @@
                     <p style="font-size:14px; color:#556068; margin-top:0; margin-bottom:15px; line-height:1.6;">建議定期下載備份檔。若系統發生意外，可直接上傳還原所有人資料。</p>
                     <div style="display:flex; gap:10px;">
                         <button onclick="exportData()" style="flex:1; background:linear-gradient(135deg, #2E7D32, #1B5E20); margin:0;">📥 下載備份</button>
-                        <button onclick="document.getElementById('import-file').click()" class="secondary" style="flex:1; margin:0; border-color:#2E7D32; color:#2E7D32;">📤 上傳還原</button>
+                        <button onclick="document.getElementById('import-file').click()" class="secondary" style="flex:1; margin:0; border-color:rgba(46,125,50,0.3); color:#2E7D32; background:rgba(255,255,255,0.8);">📤 上傳還原</button>
                         <input type="file" id="import-file" style="display:none;" accept=".json" onchange="importData(event)">
                     </div>
                 </div>
@@ -1764,7 +1811,7 @@
                 <div class="admin-panel">
                     <div class="admin-title">🌊 漂流瓶系統全域開關</div>
                     <p style="font-size:13px; color:#556068; margin-top:0; margin-bottom:12px;">目前狀態：<span style="font-weight:900; color:${bottleStatusColor};">${bottleStatusText}</span></p>
-                    <button class="secondary" onclick="toggleBottleFeature()" style="margin:0; width:auto; padding:8px 20px; font-size:14px;">切換系統狀態</button>
+                    <button class="secondary" onclick="toggleBottleFeature()" style="margin:0; width:auto; padding:8px 20px; font-size:14px; background:rgba(255,255,255,0.8);">切換系統狀態</button>
                 </div>
 
                 <div class="admin-panel">
@@ -1778,11 +1825,40 @@
                         <div style="flex:1; min-width:140px;"><label style="font-weight:800; display:block; margin-bottom:6px; font-size:13px; color:#005086;">多選投票:參與</label><div class="stepper-group"><button class="stepper-btn" onclick="changeSet('set-poll-multi', -1)">-</button><input type="number" id="set-poll-multi" value="${ptsPollMultiVote}" class="stepper-input"><button class="stepper-btn" onclick="changeSet('set-poll-multi', 1)">+</button></div></div>
                         <div style="flex:1; min-width:140px;"><label style="font-weight:800; display:block; margin-bottom:6px; font-size:13px; color:#005086;">投票:未投票(扣分)</label><div class="stepper-group"><button class="stepper-btn" onclick="changeSet('set-poll-novote', -1)">-</button><input type="number" id="set-poll-novote" value="${ptsPollNoVote}" class="stepper-input"><button class="stepper-btn" onclick="changeSet('set-poll-novote', 1)">+</button></div></div>
                     </div>
-                    <button onclick="saveScoreSettings()" style="margin:0; width:auto; padding:8px 20px; font-size:14px;">儲存計分設定</button>
+                    <button onclick="saveScoreSettings()" style="margin:0; width:auto; padding:8px 20px; font-size:14px; background:rgba(255,255,255,0.8); color:#005086; border:1px solid rgba(0,0,0,0.1); box-shadow:none;">儲存計分設定</button>
                 </div>
-                <div class="admin-panel"><div class="admin-title">🔑 邀請碼管理</div><div style="display: flex; gap: 10px; margin-bottom: 10px;"><input type="text" id="admin-invite-code" value="${systemInviteCode}" style="margin:0;"><button onclick="changeInviteCode()" style="margin:0; width:auto; white-space:nowrap; padding: 0 20px;">更新密碼</button></div><p style="font-size:13px; color:#7f8c8d; font-weight:600;">更改邀請碼可防堵非相關人士註冊。</p></div>
+                <div class="admin-panel"><div class="admin-title">🔑 邀請碼管理</div><div style="display: flex; gap: 10px; margin-bottom: 10px;"><input type="text" id="admin-invite-code" value="${systemInviteCode}" style="margin:0;"><button onclick="changeInviteCode()" style="margin:0; width:auto; white-space:nowrap; padding: 0 20px; box-shadow:none; background:rgba(255,255,255,0.8); color:#005086; border:1px solid rgba(0,0,0,0.1);">更新密碼</button></div><p style="font-size:13px; color:#7f8c8d; font-weight:600;">更改邀請碼可防堵非相關人士註冊。</p></div>
             `;
         } else { adminContainer.innerHTML = ''; }
+    }
+
+    // 🌟 新增：商家地圖資料庫處理
+    function addMapShop() {
+        const name = document.getElementById('map-shop-name').value.trim();
+        const link = document.getElementById('map-shop-link').value.trim();
+        const desc = document.getElementById('map-shop-desc').value.trim();
+        if(!name || !link) return alert("請輸入商家名稱與地圖連結！");
+        const newItem = { id: Date.now(), name, link, desc };
+        db.collection("taitung_v2_map_shops").doc(newItem.id.toString()).set(newItem);
+        document.getElementById('map-shop-name').value = '';
+        document.getElementById('map-shop-link').value = '';
+        document.getElementById('map-shop-desc').value = '';
+        showToast("商家地標已新增！");
+    }
+
+    function deleteMapShop(id) {
+        if(confirm("確定刪除此商家地標？")) {
+            db.collection("taitung_v2_map_shops").doc(id.toString()).delete();
+        }
+    }
+
+    function saveAnnoSettings(status) {
+        const textVal = document.getElementById('admin-anno-text-input').value.trim();
+        announcementText = textVal;
+        enableAnnouncement = status;
+        DB.saveSettings();
+        alert("✅ 公告欄設定已更新同步！");
+        renderAnnouncement();
     }
 
     function saveCardStyle() {
@@ -1988,7 +2064,7 @@
             const imgHtml = fb.image ? `<div style="position: relative; margin-top:10px;"><img src="${fb.image}" class="post-image"><a href="${fb.image}" download="${fb.caseNo}.jpg" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0, 80, 134, 0.85); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight:800; text-decoration: none;">⬇️ 儲存圖片</a></div>` : '';
             const replyBoxHtml = fb.status === 'open' 
                 ? `<div class="comment-input-group"><input type="text" id="comment-input-feedback-${fb.id}" placeholder="回覆案件..."><button onmousedown="addComment('feedback', ${fb.id}); event.preventDefault();">傳送</button></div>`
-                : `<div style="text-align:center; padding:12px; background:#e8f5e9; color:#2e7d32; border-radius:12px; font-weight:800;">🔒 案件已完成，雙方無法再進行回覆</div>`;
+                : `<div style="text-align:center; padding:12px; background:rgba(255,255,255,0.6); color:#2e7d32; border-radius:12px; font-weight:800; border:1px solid rgba(255,255,255,0.5);">🔒 案件已完成，雙方無法再進行回覆</div>`;
 
             html += `
                 <div class="card" style="border-left: 4px solid #8e44ad;">
@@ -2008,7 +2084,7 @@
                     </div>
                     <div id="details-feedback-${fb.id}" class="card-details hidden">
                         ${actionHtml}
-                        <div style="background:#fff9f0; padding:15px; border-radius:12px; border-left:4px solid #f39c12; margin-bottom:15px;">
+                        <div style="background:rgba(255,255,255,0.6); padding:15px; border-radius:12px; border-left:4px solid #f39c12; margin-bottom:15px; border:1px solid rgba(255,255,255,0.5);">
                             <div style="color:#d35400; font-weight:900; margin-bottom:5px; font-size:14px;">📝 投信內容：</div>
                             <div class="post-text" style="margin:0;">${fb.content}</div>
                         </div>
@@ -2169,7 +2245,7 @@
             actionHtml += `</div>`;
 
             html += `
-                <div class="card" style="border-left: 5px solid #00c6ff; background: #fff;">
+                <div class="card" style="border-left: 5px solid #00c6ff; background: rgba(255,255,255,0.6);">
                     <div class="card-summary" onclick="openHistoryLetter(${bottle.id})">
                         <div class="card-summary-left" style="pointer-events:none;">
                             <div class="text-avatar" style="background: ${color}; font-size:18px; box-shadow: 0 4px 10px rgba(0, 198, 255, 0.3);">${initial}</div>
@@ -2232,19 +2308,18 @@
         const validBottles = (bottlesData||[]).filter(b => b.creatorPhone !== currentUserPhone && (!b.pickups || !b.pickups.includes(currentUserPhone)) && (b.pickups || []).length < 5);
         if (validBottles.length === 0) { alert("哎呀！瓶子剛剛被海浪沖走了！"); closePickupAnimation(); renderDriftBeach(); return; }
         
-        allUsers[currentUserPhone].bottlePickups.push(Date.now());
+        let me = allUsers[currentUserPhone];
+        if(!me.bottlePickups) me.bottlePickups = [];
+        me.bottlePickups.push(Date.now());
         DB.saveUser(currentUserPhone);
 
         const b = validBottles[Math.floor(Math.random() * validBottles.length)];
-        currentBottleId = b.id; 
+        if(!b.pickups) b.pickups = [];
         b.pickups.push(currentUserPhone); 
         DB.saveBottle(b);
 
-        document.getElementById('letter-content').innerText = b.content;
-        document.getElementById('letter-date').innerText = new Date(b.id).toLocaleString();
-        document.getElementById('letter-image-container').innerHTML = b.image ? `<img src="${b.image}" class="letter-img">` : '';
-        renderBottleComments(b);
-        closePickupAnimation(); document.getElementById('letter-modal-overlay').classList.remove('hidden');
+        closePickupAnimation(); 
+        openHistoryLetter(b.id);
     }
 
     function openHistoryLetter(id) {
@@ -2252,14 +2327,28 @@
         document.getElementById('letter-content').innerText = b.content;
         document.getElementById('letter-date').innerText = new Date(b.id).toLocaleString();
         document.getElementById('letter-image-container').innerHTML = b.image ? `<img src="${b.image}" class="letter-img">` : '';
-        renderBottleComments(b); document.getElementById('letter-modal-overlay').classList.remove('hidden');
+        renderBottleComments(b);
+        
+        let actionBtns = '';
+        if (adminPhones.includes(currentUserPhone)) {
+            actionBtns += `<button onclick="deleteItem('bottle', ${b.id})" style="flex:1; background:linear-gradient(135deg, #d32f2f, #b71c1c);">🗑️ 強制打破</button>`;
+        } else if (b.creatorPhone === currentUserPhone) {
+            actionBtns += `<button onclick="deleteItem('bottle', ${b.id})" style="flex:1; background:linear-gradient(135deg, #d32f2f, #b71c1c);">🗑️ 打破刪除</button>`;
+        } else {
+            actionBtns += `<button onclick="collectBottle()" style="flex:1; background:linear-gradient(135deg, #f39c12, #ffb300); box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);">⭐ 收藏</button>`;
+            actionBtns += `<button onclick="throwBackBottle(${b.id})" class="secondary" style="flex:1; background:rgba(255,255,255,0.8);">🌊 丟回大海</button>`;
+            actionBtns += `<button onclick="reportBottle(${b.id})" style="flex:1; background:linear-gradient(135deg, #d32f2f, #b71c1c);">🚨 檢舉</button>`;
+        }
+        document.getElementById('letter-action-buttons').innerHTML = actionBtns;
+
+        document.getElementById('letter-modal-overlay').classList.remove('hidden');
     }
 
-    function closeLetter() { document.getElementById('letter-modal-overlay').classList.add('hidden'); currentBottleId = null; renderDriftBeach(); }
+    function closeLetter() { document.getElementById('letter-modal-overlay').classList.add('hidden'); currentBottleId = null; reRenderCurrentTab(); }
 
     function submitBottle() {
         const content = document.getElementById('bottle-content').value.trim(); const fileInput = document.getElementById('bottle-image');
-        if (!content && !fileInput.files[0]) return alert("請寫點文字或上傳一張照片放進瓶子裡！");
+        if (!content && (!fileInput || !fileInput.files[0])) return alert("請寫點文字或上傳一張照片放進瓶子裡！");
 
         const overlay = document.getElementById('throw-animation-overlay');
         const bottleAnim = document.getElementById('bottle-emoji-animate'), splashAnim = document.getElementById('splash-emoji-animate');
@@ -2276,24 +2365,26 @@
                 const newBottle = { id: now, content: content, image: imgBase64, creatorPhone: currentUserPhone, pickups: [], status: 'drifting', reported: false, date: new Date().toLocaleDateString('zh-TW') + ' ' + new Date().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}), comments: [] };
                 DB.saveBottle(newBottle);
                 document.getElementById('bottle-content').value = ''; if(fileInput) fileInput.value = '';
-                overlay.classList.add('hidden'); alert(`🌊 漂流瓶已成功丟向大海深處！`); switchTab('bottles');
+                overlay.classList.add('hidden'); showToast(`🌊 漂流瓶已成功丟向大海深處！`); switchTab('bottles');
             };
-            if (fileInput.files[0]) compressImage(fileInput.files[0], createData); else createData(null);
+            if (fileInput && fileInput.files[0]) compressImage(fileInput.files[0], createData); else createData(null);
         }, 2200); 
     }
 
-    function throwBackBottle() {
+    function throwBackBottle(id = null) {
         if(!confirm("確定要將這個瓶子丟回大海嗎？它將會重新釋出名額，讓其他人有機會撿到！")) return;
-        const b = bottlesData.find(x => x.id === currentBottleId);
-        if(b && b.pickups) { b.pickups = b.pickups.filter(p => p !== currentUserPhone); DB.saveBottle(b); alert("已將漂流瓶重新丟回大海！"); closeLetter(); }
+        const targetId = id || currentBottleId;
+        const b = bottlesData.find(x => x.id === targetId);
+        if(b && b.pickups) { b.pickups = b.pickups.filter(p => p !== currentUserPhone); DB.saveBottle(b); showToast("已將漂流瓶重新丟回大海！"); closeLetter(); }
     }
 
-    function collectBottle() { alert("⭐ 已成功收藏此漂流瓶，隨時可以在「丟出/收藏」中查看。"); closeLetter(); switchBottleTab('mine'); }
+    function collectBottle() { showToast("⭐ 已成功收藏此漂流瓶，隨時可以在「丟出/收藏」中查看。"); closeLetter(); switchBottleTab('mine'); }
 
-    function reportBottle(id) {
+    function reportBottle(id = null) {
         if(!confirm("確定要檢舉這個瓶子的內容嗎？管理員將會介入審核。")) return;
-        const b = bottlesData.find(x => x.id === id);
-        if(b) { b.reported = true; DB.saveBottle(b); renderDriftBeach(); alert("🚨 已檢舉此漂流瓶，管理員將盡快處理！"); }
+        const targetId = id || currentBottleId;
+        const b = bottlesData.find(x => x.id === targetId);
+        if(b) { b.reported = true; DB.saveBottle(b); showToast("🚨 已檢舉此漂流瓶，管理員將盡快處理！"); closeLetter(); }
     }
 
     function addComment(type, id) {
@@ -2348,6 +2439,7 @@
         } else if (type === 'bottle') {
             if(!confirm("確定要打破並刪除這個漂流瓶嗎？")) return;
             DB.delBottle(id);
+            closeLetter();
         } else {
             if(!confirm("確定要刪除這篇文章/活動嗎？\n(若為已截止的聚會或投票，刪除後大家已結算的積分將永久保留)")) return;
             if(type === 'event') { 
