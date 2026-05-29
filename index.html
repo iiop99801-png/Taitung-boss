@@ -19,6 +19,10 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         /* =========================================
             液態玻璃 (Liquid Glass) 基礎樣式與排版
@@ -101,7 +105,7 @@
         .member-info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.6); z-index: 2; position: relative; font-weight: 700;}
         .card-name-title { font-size: clamp(24px, 6vw, 32px); font-weight: 900; margin-bottom: 15px; z-index: 2; position: relative; line-height: 1.25; letter-spacing: 1px; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
         .glass-panel { margin-top: 15px; font-size: 15px; line-height: 1.6; background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); z-index: 2; position: relative; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(6px); font-weight: 600; }
-        .progress-container { width: 100%; height: 14px; background-color: rgba(255,255,255,0.3); border-radius: 10px; overflow: hidden; margin-top: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .progress-container { width: 100%; height: 14px; background: rgba(255,255,255,0.3); border-radius: 10px; overflow: hidden; margin-top: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #ffeb3b); border-radius: 10px; transition: width 0.5s ease-in-out; }
         @keyframes shimmer-sweep { 0% { transform: translateX(-100%) skewX(-15deg); } 100% { transform: translateX(200%) skewX(-15deg); } }
         .effect-shimmer::before { content: ''; position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%); transform: skewX(-15deg); animation: shimmer-sweep 3s infinite; pointer-events: none; z-index: 1; }
@@ -322,6 +326,20 @@
                         <span id="edit-notice-container"></span>
                     </div>
                     <div class="announcement-text" id="announcement-text-display">載入中...</div>
+                </div>
+
+                <div id="home-map-section" class="custom-style-panel hidden">
+                    <h3 style="margin-top:0; color:#005086; border-bottom:2px dashed rgba(0,0,0,0.1); padding-bottom:10px; font-weight: 900; font-size: 18px;">📍 台東聯盟實體地圖</h3>
+                    
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 12px; background:rgba(255,255,255,0.7); padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05);">
+                        <input type="text" id="map-search-input" placeholder="🔍 搜尋商家名稱..." onkeyup="renderMapShops()" style="margin:0; padding:10px; border-radius:8px; border:1px solid #cfdef3; font-size:14px; width:100%;">
+                        <label style="display:flex; align-items:center; cursor:pointer; font-weight:800; color:#d35400; font-size: 14px;">
+                            <input type="checkbox" id="filter-pet-friendly" onchange="renderMapShops()" style="width:18px; height:18px; margin-right:8px; margin-top:0; margin-bottom:0;">
+                            🐾 僅顯示寵物友善商家
+                        </label>
+                    </div>
+                    
+                    <div id="leaflet-map" style="height: 380px; width: 100%; border-radius: 12px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.1); position: relative; z-index: 1; margin-bottom:5px; border: 2px solid #cfdef3;"></div>
                 </div>
 
                 <div class="post-input-area" id="post-creation-area">
@@ -573,10 +591,14 @@
     // 您的核心 JavaScript 邏輯從此開始
     // ==========================================
     
-    // 🌟 全域變數定義 (已修復：確保絕無重複宣告)
+    // 🌟 全域變數定義
     let editingItemId = null;
     let editingItemType = null;
-    let maintenanceMode = false; // 🌟 系統維護狀態全域變數
+    let maintenanceMode = false;
+    
+    // 🌟 實體地圖專用變數
+    let leafletMap = null;
+    let markerGroup = null;
 
     const firebaseConfig = {
       apiKey: "AIzaSyBWQ6GAMAsPESR3vPe7tqkGPg3KzUtSdJQ",
@@ -591,7 +613,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let allUsers = {}, adminPhones = [], eventsData = [], pollsData = [], postsData = [], feedbacksData = [], bottlesData = [];
+    let allUsers = {}, adminPhones = [], eventsData = [], pollsData = [], postsData = [], feedbacksData = [], bottlesData = [], mapShopsData = [];
     let systemInviteCode = '8888', announcementText = '歡迎來到台東老闆專屬聚會！', enableAnnouncement = true;
     let ptsEventAttend = 5, ptsEventAbsent = 3, ptsEventNoResp = -3;
     let ptsPollSingleVote = 3, ptsPollMultiVote = 1, ptsPollNoVote = -3;
@@ -599,9 +621,9 @@
 
     let currentUserPhone = null, currentTab = 'home', currentBottleTab = 'received', currentSectionId = 'login-section'; 
     let isDataLoaded = false, expandedCards = [], activeInputs = {}, activePollVotes = {}, bottleCountdownInterval = null, currentBottleId = null; 
-    let loadedFlags = { users: false, events: false, polls: false, posts: false, feedbacks: false, bottles: false, settings: false };
+    let loadedFlags = { users: false, events: false, polls: false, posts: false, feedbacks: false, bottles: false, settings: false, mapShops: false };
 
-    // 🌟 流暢登出功能 (防卡死修復)
+    // 🌟 流暢登出功能
     function logout() { 
         localStorage.removeItem('taitung_current_phone'); 
         currentUserPhone = null;
@@ -612,20 +634,19 @@
         showToast("✅ 已安全登出！");
     }
 
-    // 🌟 修復發文與上傳邏輯
     function submitPost() {
         const text = document.getElementById('post-text-input').value.trim(); 
         const fileInput = document.getElementById('post-image-input');
         if (!text && (!fileInput || !fileInput.files[0])) { alert("請至少寫點文字或上傳一張照片喔！"); return; }
         
-        document.getElementById('loading-screen').style.display = 'flex'; // 上傳動畫開啟
+        document.getElementById('loading-screen').style.display = 'flex'; 
 
         const createPostData = (imgBase64) => { 
             const newPost = { id: Date.now(), type: 'post', text: text, image: imgBase64, creatorPhone: currentUserPhone, date: new Date().toLocaleDateString('zh-TW'), comments: [] }; 
             db.collection("taitung_v2_posts").doc(newPost.id.toString()).set(newPost).then(() => {
                 document.getElementById('post-text-input').value = ''; 
                 if(fileInput) fileInput.value = ''; 
-                document.getElementById('loading-screen').style.display = 'none'; // 上傳動畫關閉
+                document.getElementById('loading-screen').style.display = 'none'; 
                 showToast("✅ 動態發佈成功！");
             }).catch(err => {
                 document.getElementById('loading-screen').style.display = 'none';
@@ -652,6 +673,10 @@
         
         const canSeeScore = (phone === currentUserPhone || adminPhones.includes(currentUserPhone));
 
+        const threadsHtml = u.threadsUrl ? `<a href="${u.threadsUrl}" target="_blank" style="display:inline-block; margin-top:10px; margin-right:8px; color:#fff; background:rgba(0,0,0,0.6); padding:6px 12px; border-radius:15px; font-size:13px; text-decoration:none; backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2);">📱 Threads</a>` : '';
+        const mapHtml = u.mapUrl ? `<a href="${u.mapUrl}" target="_blank" style="display:inline-block; margin-top:10px; color:#fff; background:rgba(0,0,0,0.6); padding:6px 12px; border-radius:15px; font-size:13px; text-decoration:none; backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2);">📍 店家地圖</a>` : '';
+        const linksContainer = (u.threadsUrl || u.mapUrl) ? `<div style="margin-top:5px; z-index:2; position:relative;">${threadsHtml}${mapHtml}</div>` : '';
+
         return `
             <div class="membership-card ${cardEffectClass}" style="${cardStyle} ${cardBgStyle}">
                 <div class="member-tier-display">${stats.tier}</div>
@@ -661,6 +686,7 @@
                 <div class="glass-panel">
                     ${u.bio || '尚未設定自我介紹'}
                 </div>
+                ${linksContainer}
                 ${cardImageHtml}
             </div>
         `;
@@ -767,7 +793,6 @@
         }
     }
 
-    // 🌟 新增的維護模式切換函數 (剛剛漏掉的蟲蟲就是它)
     function toggleMaintenance() {
         maintenanceMode = !maintenanceMode;
         DB.saveSettings();
@@ -851,8 +876,13 @@
     }
 
     function reRenderCurrentTab() {
-        if(!currentUserPhone) return; // 防呆登出後報錯
-        if (currentTab === 'home') { renderScoreLog(); renderHome(); }
+        if(!currentUserPhone) return; // 防呆
+        if (currentTab === 'home') { 
+            renderScoreLog(); 
+            renderHome(); 
+            renderMapShops(); 
+            if(leafletMap) setTimeout(() => leafletMap.invalidateSize(), 300); // 確保地圖尺寸正確
+        }
         else if (currentTab === 'directory') renderDirectory();
         else if (currentTab === 'events') { renderEvents(); renderPolls(); }
         else if (currentTab === 'feedbacks') renderFeedbacks();
@@ -884,6 +914,16 @@
     db.collection("taitung_v2_bottles").onSnapshot(snap => {
         bottlesData = []; snap.forEach(doc => bottlesData.push(doc.data())); bottlesData.sort((a, b) => b.id - a.id);
         loadedFlags.bottles = true; checkAllLoaded();
+    });
+    db.collection("taitung_v2_map_shops").onSnapshot(snap => {
+        mapShopsData = []; 
+        snap.forEach(doc => {
+            let data = doc.data();
+            data.id = data.id || doc.id; // 防呆：確保一定有ID
+            mapShopsData.push(data);
+        }); 
+        mapShopsData.sort((a, b) => b.id - a.id);
+        loadedFlags.mapShops = true; checkAllLoaded();
     });
     db.collection("taitung_v2_settings").doc("config").onSnapshot(doc => {
         if (doc.exists) {
@@ -929,7 +969,7 @@
 
     function exportData() {
         const backup = {
-            users: allUsers, posts: postsData, events: eventsData, polls: pollsData, feedbacks: feedbacksData, bottles: bottlesData,
+            users: allUsers, posts: postsData, events: eventsData, polls: pollsData, feedbacks: feedbacksData, bottles: bottlesData, mapShops: mapShopsData,
             settings: { inviteCode: systemInviteCode, announcement: announcementText, ptsEventAttend, ptsEventAbsent, ptsEventNoResp, ptsPollSingleVote, ptsPollMultiVote, ptsPollNoVote, enableBottles, admins: adminPhones, enableAnnouncement: enableAnnouncement, maintenanceMode: maintenanceMode }
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
@@ -955,6 +995,7 @@
                     (data.polls || []).forEach(p => db.collection("taitung_v2_polls").doc(p.id.toString()).set(p));
                     (data.feedbacks || []).forEach(f => db.collection("taitung_v2_feedbacks").doc(f.id.toString()).set(f));
                     (data.bottles || []).forEach(b => db.collection("taitung_v2_bottles").doc(b.id.toString()).set(b));
+                    (data.mapShops || []).forEach(s => db.collection("taitung_v2_map_shops").doc(s.id.toString()).set(s));
                     setTimeout(() => { alert("✅ 系統還原指令已成功送出！畫面將自動重新載入。"); location.reload(); }, 3000);
                 }
             } catch(err) { alert("檔案格式錯誤！請選擇正確的 JSON 系統備份檔。"); }
@@ -1187,6 +1228,116 @@
                 if(el && icon) { el.classList.remove('hidden'); icon.innerText = '🔼 收起'; }
             }
         });
+    }
+
+    // 🌟 實體地圖邏輯核心
+    function renderMapShops() {
+        const section = document.getElementById('home-map-section');
+        if(!section) return;
+
+        if(mapShopsData.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+        
+        section.classList.remove('hidden');
+
+        const petFilterEl = document.getElementById('filter-pet-friendly');
+        const isPetFilter = petFilterEl ? petFilterEl.checked : false;
+
+        const searchInputEl = document.getElementById('map-search-input');
+        const searchKeyword = searchInputEl ? searchInputEl.value.trim().toLowerCase() : '';
+
+        // 初始化 Leaflet 地圖
+        if (!leafletMap) {
+            // 預設台東市中心坐標
+            leafletMap = L.map('leaflet-map').setView([22.7553, 121.1505], 13);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(leafletMap);
+            markerGroup = L.layerGroup().addTo(leafletMap);
+        }
+
+        // 清除舊標記
+        markerGroup.clearLayers();
+
+        let bounds = [];
+
+        mapShopsData.forEach(shop => {
+            // 過濾寵物友善
+            if (isPetFilter && !shop.petFriendly) return;
+            
+            // 過濾搜尋關鍵字
+            if (searchKeyword && !shop.name.toLowerCase().includes(searchKeyword)) return;
+
+            let petBadge = shop.petFriendly ? `<span style="background:#f39c12; color:white; font-size:12px; padding:2px 8px; border-radius:12px; margin-left:8px; vertical-align:middle;">🐾 寵物友善</span>` : '';
+            
+            // 地圖渲染 (如果有輸入緯度經度)
+            if (shop.lat && shop.lng) {
+                let lat = parseFloat(shop.lat);
+                let lng = parseFloat(shop.lng);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    let popupContent = `<div style="text-align:center;"><b style="font-size:15px; color:#005086;">${shop.name}</b><br>${petBadge}<br><a href="${shop.link}" target="_blank" style="display:inline-block; margin-top:8px; color:#d35400; text-decoration:underline; font-weight:bold;">導航前往</a></div>`;
+                    
+                    let marker = L.marker([lat, lng]).bindPopup(popupContent);
+                    markerGroup.addLayer(marker);
+                    bounds.push([lat, lng]);
+                }
+            }
+        });
+
+        // 調整地圖縮放以包含所有標記
+        if (bounds.length > 0) {
+            setTimeout(() => {
+                leafletMap.invalidateSize();
+                leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
+            }, 300);
+        } else {
+            setTimeout(() => leafletMap.invalidateSize(), 300);
+        }
+    }
+
+    // 🌟 新增實體地標邏輯
+    function addMapShop() {
+        const name = document.getElementById('map-shop-name').value.trim();
+        const link = document.getElementById('map-shop-link').value.trim();
+        const desc = document.getElementById('map-shop-desc').value.trim();
+        const lat = document.getElementById('map-shop-lat').value.trim();
+        const lng = document.getElementById('map-shop-lng').value.trim();
+        const petFriendly = document.getElementById('map-shop-pet').checked;
+
+        if(!name || !lat || !lng) return alert("老闆，請輸入商家名稱，並填寫真實的緯度與經度喔！");
+        
+        const newItem = { 
+            id: Date.now(), 
+            name, 
+            link, 
+            desc, 
+            lat: parseFloat(lat), 
+            lng: parseFloat(lng),
+            petFriendly 
+        };
+        db.collection("taitung_v2_map_shops").doc(newItem.id.toString()).set(newItem);
+        
+        document.getElementById('map-shop-name').value = '';
+        document.getElementById('map-shop-link').value = '';
+        document.getElementById('map-shop-desc').value = '';
+        document.getElementById('map-shop-lat').value = '';
+        document.getElementById('map-shop-lng').value = '';
+        document.getElementById('map-shop-pet').checked = false;
+        showToast("實體地標已成功新增！");
+    }
+
+    function deleteMapShop(id) {
+        if(confirm("確定刪除此商家地標？")) {
+            db.collection("taitung_v2_map_shops").doc(id.toString()).delete().then(() => {
+                showToast("地標已刪除！");
+            }).catch((err) => {
+                console.error(err);
+                alert("刪除失敗，請檢查權限或網路");
+            });
+        }
     }
 
     function renderAnnouncement() {
@@ -1724,11 +1875,41 @@
             const annoStatusColor = enableAnnouncement ? '#2E7D32' : '#d32f2f';
             const annoStatusText = enableAnnouncement ? '🟢 已顯示' : '🔴 已隱藏';
 
+            let adminMapListHtml = mapShopsData.map(s => {
+                let petBadge = s.petFriendly ? '🐾' : '';
+                return `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.7); padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid rgba(0,0,0,0.05);">
+                    <div><b style="color:#005086;">${s.name}</b> ${petBadge}<br><span style="font-size:11px; color:#888;">座標: ${s.lat||'無'}, ${s.lng||'無'}</span></div>
+                    <button class="action-btn delete" onclick="deleteMapShop('${s.id}')" style="margin:0;">刪除</button>
+                </div>
+                `;
+            }).join('');
+
             adminContainer.innerHTML = `
                 <div class="admin-panel">
                     <div class="admin-title">🛠️ 系統維護模式 (緊急開關)</div>
                     <p style="font-size:13px; color:#556068; margin-top:0; margin-bottom:12px;">目前狀態：<span style="font-weight:900; color:${maintenanceMode ? '#d32f2f' : '#2E7D32'};">${maintenanceMode ? '🔴 維護中 (阻擋一般用戶)' : '🟢 正常運作'}</span></p>
                     <button class="secondary" onclick="toggleMaintenance()" style="margin:0; width:auto; padding:8px 20px; font-size:14px; background:rgba(255,255,255,0.8); color:${maintenanceMode ? '#2E7D32' : '#d32f2f'}; border-color:${maintenanceMode ? '#A5D6A7' : '#ffcdd2'};">${maintenanceMode ? '關閉維護 (開放登入)' : '開啟維護模式'}</button>
+                </div>
+
+                <div class="admin-panel">
+                    <div class="admin-title">📍 首頁實體地圖管理</div>
+                    <p style="font-size:13px; color:#556068; margin-top:0; margin-bottom:12px;">輸入緯度與經度，讓地標真實出現在首頁地圖上！(電腦版 Google 地圖在該地點按右鍵即可複製坐標)</p>
+                    <input type="text" id="map-shop-name" placeholder="商家名稱 (例：小時候早午餐)" style="margin-bottom:8px;">
+                    <textarea id="map-shop-desc" placeholder="商家簡單介紹 (選填)" style="height:60px; margin-bottom:8px;"></textarea>
+                    <input type="text" id="map-shop-link" placeholder="Google 地圖分享連結" style="margin-bottom:8px;">
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" id="map-shop-lat" placeholder="緯度 (例: 22.755)" style="margin-bottom:8px;" step="any">
+                        <input type="number" id="map-shop-lng" placeholder="經度 (例: 121.150)" style="margin-bottom:8px;" step="any">
+                    </div>
+                    <label style="display:flex; align-items:center; margin-bottom:15px; font-weight:800; color:#d35400;">
+                        <input type="checkbox" id="map-shop-pet" style="width:20px; height:20px; margin-right:8px; transform:scale(1);"> 🐾 這是一間寵物友善商家
+                    </label>
+                    <button onclick="addMapShop()" style="margin-bottom:15px; box-shadow:0 4px 10px rgba(0,129,201,0.2);">＋ 新增地標到實體地圖</button>
+                    <div style="border-top:1px dashed rgba(0,0,0,0.1); padding-top:15px;">
+                        <div style="font-size:14px; font-weight:800; color:#556068; margin-bottom:10px;">目前已加入的商家：</div>
+                        ${adminMapListHtml || '<div style="color:#999; font-size:13px; text-align:center; padding:10px;">尚未加入任何地標</div>'}
+                    </div>
                 </div>
 
                 <div class="admin-panel">
