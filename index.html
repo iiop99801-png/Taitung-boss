@@ -236,6 +236,11 @@
         </div>
         <label style="font-size:14px; font-weight:800; margin-top:12px; display:block; color:#333;">加入日期 (系統資歷)：</label>
         <input type="date" id="edit-user-join-date" style="padding:10px; width:100%;">
+        
+        <!-- 管理員備註新增在這裡 -->
+        <label style="font-size:14px; font-weight:800; margin-top:12px; display:block; color:#333;">管理員專屬備註 (僅管理員可見)：</label>
+        <textarea id="edit-user-note" placeholder="例如：小時候早午餐熟客、不吃蔥..." style="padding:10px; width:100%; height:60px; font-family:inherit; border-radius:12px; border:1px solid rgba(255,255,255,0.5); background-color:rgba(255,255,255,0.7);"></textarea>
+
         <div style="display: flex; gap: 12px; margin-top: 20px;">
             <button onclick="saveUserEdit()" style="flex:1; margin:0; padding:12px; box-shadow:0 4px 10px rgba(0,122,255,0.2);">儲存</button>
             <button onclick="closeEditUserModal()" class="secondary" style="flex:1; margin:0; padding:12px; background:rgba(255,255,255,0.8);">取消</button>
@@ -1142,7 +1147,7 @@
         if (!name) { alert("請輸入稱呼！"); return; }
         if (adminPhones.length === 0) { adminPhones.push(phone); DB.saveSettings(); }
         
-        allUsers[phone] = { phone: phone, name: name, joinDate: Date.now(), customColor: '#005086', customEmoji: '✨', manualTier: null, closedDays: [], tempClosedDates: [], bio: '', mapUrl: '', threadsUrl: '', manualBonus: 0, manualAttendBonus: 0, notifications: [], cardEffect: 'none', cardBgImage: null, cardImage: null, isSuspended: false, bottleThrows: [], bottlePickups: [] };
+        allUsers[phone] = { phone: phone, name: name, joinDate: Date.now(), customColor: '#005086', customEmoji: '✨', manualTier: null, closedDays: [], tempClosedDates: [], bio: '', mapUrl: '', threadsUrl: '', manualBonus: 0, manualAttendBonus: 0, notifications: [], cardEffect: 'none', cardBgImage: null, cardImage: null, isSuspended: false, bottleThrows: [], bottlePickups: [], note: '' };
         currentUserPhone = phone; 
         DB.saveUser(phone); 
         showMain();
@@ -1866,7 +1871,8 @@
                     const suspendBtn = `<button class="${u.isSuspended ? 'promote-btn' : 'suspend-btn'}" style="margin:0 2px; padding:6px 12px; font-size:13px;" onclick="toggleSuspend('${p}')">${u.isSuspended ? '🔓 解除停權' : '🚫 停權'}</button>`;
                     actionsHtml = `<div class="admin-actions" style="margin-top:8px;">${unlockBtn}${editDataBtn}${adminToggleBtn}${promoteBtn}${suspendBtn}<button class="kick-btn" onclick="kickUser('${p}')">踢除</button></div>`;
                 }
-                usersListHtml += `<div class="admin-user-row"><div style="line-height:1.6;"><strong onclick="showUserCard('${p}')" style="cursor:pointer; color:#005086; text-decoration:none; font-size:16px;">${u.name} ${u.customEmoji || ''}</strong> <span style="color:#7f8c8d; font-size:13px;">${isMe}</span> ${adminBadge} ${lockedWarning}<br><span style="font-size:13px; color:#556068; font-weight:600;">${p} | ${uStats.tier} | 活躍度: <span style="color:#0081C9; font-weight:800;">${uScore}</span></span></div>${actionsHtml}</div>`;
+                const noteDisplay = u.note ? `<div style="font-size:13px; color:#d35400; font-weight:700; margin-top:4px; background:rgba(255,235,238,0.7); padding:4px 8px; border-radius:8px; display:inline-block; border:1px solid #ffcdd2;">📌 備註: ${u.note}</div>` : '';
+                usersListHtml += `<div class="admin-user-row"><div style="line-height:1.6; flex:1;"><strong onclick="showUserCard('${p}')" style="cursor:pointer; color:#005086; text-decoration:none; font-size:16px;">${u.name} ${u.customEmoji || ''}</strong> <span style="color:#7f8c8d; font-size:13px;">${isMe}</span> ${adminBadge} ${lockedWarning}<br><span style="font-size:13px; color:#556068; font-weight:600;">${p} | ${uStats.tier} | 活躍度: <span style="color:#0081C9; font-weight:800;">${uScore}</span></span><br>${noteDisplay}</div>${actionsHtml}</div>`;
             }
             
             const totalUsers = Object.keys(allUsers).length;
@@ -1913,7 +1919,10 @@
                 </div>
 
                 <div class="admin-panel">
-                    <div class="admin-title">🛡️ 團隊與權限管理 (目前共 ${totalUsers} 人)</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:10px; margin-bottom:15px;">
+                        <div class="admin-title" style="border:none; padding:0; margin:0;">🛡️ 團隊與權限管理 (目前共 ${totalUsers} 人)</div>
+                        <button class="secondary" onclick="exportUsersCSV()" style="width:auto; margin:0; padding:6px 12px; font-size:13px; background:#fff; border-color:#0081C9; color:#0081C9; box-shadow:0 2px 5px rgba(0,0,0,0.1);">📥 匯出 Excel</button>
+                    </div>
                     <p style="font-size:14px; color:#556068; margin-top:0; margin-bottom:10px; line-height:1.6;">若成員活躍度低於 60，可點擊「解鎖」為他補足分數。亦可「編輯資料」調整名稱、加入時間與參與數。</p>
                     <input type="text" id="admin-search-input" placeholder="🔍 搜尋名稱、電話或狀態..." onkeyup="filterAdminUsers()" style="border-radius: 20px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.7);">
                     <div id="admin-user-list-container">${usersListHtml}</div>
@@ -2041,6 +2050,9 @@
         document.getElementById('current-score-bonus').innerText = u.manualBonus || 0;
         const d = new Date(u.joinDate);
         document.getElementById('edit-user-join-date').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        
+        document.getElementById('edit-user-note').value = u.note || ''; // 載入備註
+
         document.getElementById('edit-user-modal').classList.remove('hidden');
     }
 
@@ -2064,6 +2076,8 @@
             const parsedDate = new Date(newDateStr);
             if (!isNaN(parsedDate.getTime())) u.joinDate = parsedDate.getTime();
         }
+
+        u.note = document.getElementById('edit-user-note').value.trim(); // 儲存備註
 
         DB.saveUser(phone); renderCardView(); closeEditUserModal(); alert("📝 會員資料已成功更新！");
     }
@@ -2588,6 +2602,41 @@
             if(type === 'event') DB.saveEvent(item);
             else if (type === 'post') DB.savePost(item);
         }
+    }
+
+    // 🌟 匯出會員資料為 Excel (CSV)
+    function exportUsersCSV() {
+        if(!confirm("確定要匯出所有會員資料嗎？")) return;
+        
+        // \uFEFF 是 BOM，確保 Excel 打開中文不會亂碼
+        let csvContent = "\uFEFF"; 
+        csvContent += "手機號碼,顯示名稱,系統階級,活躍分數,加入日期,管理員備註,Threads連結,GoogleMap地標\n";
+
+        for (let phone in allUsers) {
+            const u = allUsers[phone];
+            const stats = getUserStats(phone);
+            const score = calculateUserScore(phone);
+            
+            // 處理內容可能包含逗號或換行的情況
+            const safeName = `"${(u.name || '').replace(/"/g, '""')}"`;
+            const safeNote = `"${(u.note || '').replace(/"/g, '""')}"`;
+            const safeThreads = `"${(u.threadsUrl || '').replace(/"/g, '""')}"`;
+            const safeMap = `"${(u.mapUrl || '').replace(/"/g, '""')}"`;
+
+            csvContent += `${phone},${safeName},${stats.tier},${score},${stats.joinDateStr},${safeNote},${safeThreads},${safeMap}\n`;
+        }
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `台東聯盟_會員名單_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showToast("✅ 會員名單匯出成功！");
     }
 </script>
 </body>
